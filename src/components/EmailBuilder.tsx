@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { renderEmailBuilder } from 'email-builder-js';
+import { renderEmailBuilder } from '@usewaypoint/email-builder';
 import type { EmailDesign } from '../types/messages';
 
 interface EmailBuilderProps {
