@@ -13,7 +13,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'email-builder': ['@usewaypoint/email-builder'],
+          'email-builder': ['react-email-editor'],
         },
       },
     },

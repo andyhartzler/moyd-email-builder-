@@ -3,11 +3,10 @@ import EmailEditor from 'react-email-editor';
 import type { EmailDesign } from '../types/messages';
 
 interface EmailBuilderProps {
-  onDesignChange?: (design: EmailDesign) => void;
   onReady?: () => void;
 }
 
-export default function EmailBuilder({ onDesignChange, onReady }: EmailBuilderProps) {
+export default function EmailBuilder({ onReady }: EmailBuilderProps) {
   const emailEditorRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
 
