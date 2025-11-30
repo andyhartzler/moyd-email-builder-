@@ -12,7 +12,7 @@ Provide a drag-and-drop email editor that outputs HTML and design JSON to be sav
 - **Email Builder:** `email-builder-js` (v1.1.4)
 - **Styling:** Tailwind CSS
 - **Build Tool:** Vite
-- **Deployment:** Vercel
+- **Deployment:** Netlify
 - **Domain:** `mail.moyd.app`
 
 ## Project Structure
@@ -35,7 +35,7 @@ moyd-email-builder/
 ├── tsconfig.json
 ├── vite.config.ts
 ├── tailwind.config.js
-└── vercel.json
+└── netlify.toml
 ```
 
 ## Getting Started
@@ -183,35 +183,50 @@ Create a test HTML file:
 </html>
 ```
 
-## Deployment to Vercel
+## Deployment to Netlify
 
 ### Prerequisites
 
-- Vercel account
-- Vercel CLI installed: `npm install -g vercel`
+- Netlify account (https://netlify.com)
+- Netlify CLI installed: `npm install -g netlify-cli`
 
-### Deploy
+### Deploy via CLI
 
 ```bash
-# Login to Vercel
-vercel login
+# Login to Netlify
+netlify login
+
+# Initialize the site (first time only)
+netlify init
 
 # Deploy to production
-vercel --prod
+netlify deploy --prod
 ```
+
+### Deploy via Git (Recommended)
+
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Go to Netlify dashboard
+3. Click "Add new site" → "Import an existing project"
+4. Connect your repository
+5. Build settings will be auto-detected from `netlify.toml`
+6. Click "Deploy site"
 
 ### Configure Custom Domain
 
-1. Go to Vercel project settings
-2. Add custom domain: `mail.moyd.app`
-3. Add DNS records as instructed by Vercel
+1. Go to Netlify site settings → Domain management
+2. Click "Add custom domain"
+3. Enter `mail.moyd.app`
+4. Follow DNS configuration instructions
 
 **DNS Configuration (in your domain registrar):**
 ```
 Type: CNAME
 Name: mail
-Value: cname.vercel-dns.com
+Value: <your-site-name>.netlify.app
 ```
+
+Or use Netlify DNS for easier setup.
 
 ## Features
 
@@ -247,7 +262,7 @@ Modern browsers only:
 ### PostMessage Not Working
 - Verify iframe src matches deployed URL
 - Check browser security settings
-- Ensure CORS headers are configured in `vercel.json`
+- Ensure CORS headers are configured in `netlify.toml`
 
 ### Design Not Saving
 - Check console for export errors
@@ -259,7 +274,7 @@ Modern browsers only:
 - **email-builder-js Docs:** https://github.com/usewaypoint/email-builder-js
 - **React Docs:** https://react.dev
 - **Vite Docs:** https://vitejs.dev
-- **Vercel Docs:** https://vercel.com/docs
+- **Netlify Docs:** https://docs.netlify.com
 
 ## License
 
