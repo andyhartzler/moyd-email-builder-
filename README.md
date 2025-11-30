@@ -1,6 +1,6 @@
 # MOYD Email Campaign Builder
 
-A standalone email campaign builder using the open-source [email-builder-js](https://github.com/usewaypoint/email-builder-js) library. This application is deployed at `mail.moyd.app` and embedded via iframe in the main Flutter CRM application.
+A standalone email campaign builder using the open-source [@usewaypoint/email-builder](https://github.com/usewaypoint/email-builder) library. This application is deployed at `mail.moyd.app` and embedded via iframe in the main Flutter CRM application.
 
 ## Purpose
 
@@ -9,7 +9,7 @@ Provide a drag-and-drop email editor that outputs HTML and design JSON to be sav
 ## Technology Stack
 
 - **Framework:** Vite + React + TypeScript
-- **Email Builder:** `email-builder-js` (v1.1.4)
+- **Email Builder:** `@usewaypoint/email-builder` (v0.0.8)
 - **Styling:** Tailwind CSS
 - **Build Tool:** Vite
 - **Deployment:** Netlify
@@ -256,7 +256,7 @@ Modern browsers only:
 
 ### Builder Not Loading
 - Check browser console for errors
-- Verify `email-builder-js` package installed correctly
+- Verify `@usewaypoint/email-builder` package installed correctly
 - Ensure React 18+ is being used
 
 ### PostMessage Not Working
@@ -271,7 +271,7 @@ Modern browsers only:
 
 ## Support & Documentation
 
-- **email-builder-js Docs:** https://github.com/usewaypoint/email-builder-js
+- **@usewaypoint/email-builder Docs:** https://github.com/usewaypoint/email-builder
 - **React Docs:** https://react.dev
 - **Vite Docs:** https://vitejs.dev
 - **Netlify Docs:** https://docs.netlify.com
