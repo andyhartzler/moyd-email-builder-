@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { renderEmailBuilder } from '@usewaypoint/email-builder';
+import EmailEditor from 'react-email-editor';
 import type { EmailDesign } from '../types/messages';
 
 interface EmailBuilderProps {
@@ -8,107 +8,55 @@ interface EmailBuilderProps {
 }
 
 export default function EmailBuilder({ onDesignChange, onReady }: EmailBuilderProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const builderRef = useRef<any>(null);
+  const emailEditorRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    if (!containerRef.current || builderRef.current) return;
-
-    try {
-      // Initialize the email builder
-      builderRef.current = renderEmailBuilder({
-        container: containerRef.current,
-
-        // Configuration
-        appearance: {
-          theme: 'light',
-          panels: {
-            tools: {
-              dock: 'left',
-            },
-          },
-        },
-
-        // Callback when design changes
-        onDesignChange: (design) => {
-          if (onDesignChange) {
-            onDesignChange(design as EmailDesign);
-          }
-        },
-
-        // Custom tools configuration
-        options: {
-          features: {
-            textEditor: {
-              tables: true,
-              spellCheck: true,
-            },
-            imageEditor: true,
-          },
-        },
-      });
-
-      setIsReady(true);
-      if (onReady) {
-        onReady();
-      }
-
-      console.log('Email builder initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize email builder:', error);
-      postMessageToParent({
-        action: 'error',
-        error: 'Failed to initialize email builder',
-      });
+  const handleReady = () => {
+    setIsReady(true);
+    if (onReady) {
+      onReady();
     }
-
-    // Cleanup
-    return () => {
-      if (builderRef.current) {
-        builderRef.current = null;
-      }
-    };
-  }, [onDesignChange, onReady]);
+    console.log('Email builder is ready');
+  };
 
   // Export HTML from current design
   const exportHtml = async (): Promise<string> => {
-    if (!builderRef.current) {
-      throw new Error('Builder not initialized');
-    }
+    return new Promise((resolve, reject) => {
+      if (!emailEditorRef.current) {
+        reject(new Error('Editor not initialized'));
+        return;
+      }
 
-    try {
-      const html = await builderRef.current.exportHtml();
-      return html;
-    } catch (error) {
-      console.error('Failed to export HTML:', error);
-      throw error;
-    }
+      emailEditorRef.current.editor.exportHtml((data: any) => {
+        const { html } = data;
+        resolve(html);
+      });
+    });
   };
 
   // Get current design JSON
-  const getDesign = (): EmailDesign | null => {
-    if (!builderRef.current) {
-      return null;
-    }
+  const getDesign = (): Promise<EmailDesign> => {
+    return new Promise((resolve, reject) => {
+      if (!emailEditorRef.current) {
+        reject(new Error('Editor not initialized'));
+        return;
+      }
 
-    try {
-      return builderRef.current.getDesign();
-    } catch (error) {
-      console.error('Failed to get design:', error);
-      return null;
-    }
+      emailEditorRef.current.editor.saveDesign((design: EmailDesign) => {
+        resolve(design);
+      });
+    });
   };
 
   // Load a design into the builder
   const loadDesign = (design: EmailDesign) => {
-    if (!builderRef.current) {
-      console.error('Builder not initialized');
+    if (!emailEditorRef.current) {
+      console.error('Editor not initialized');
       return;
     }
 
     try {
-      builderRef.current.loadDesign(design);
+      emailEditorRef.current.editor.loadDesign(design);
       console.log('Design loaded successfully');
     } catch (error) {
       console.error('Failed to load design:', error);
@@ -121,17 +69,12 @@ export default function EmailBuilder({ onDesignChange, onReady }: EmailBuilderPr
 
   // Reset editor to blank state
   const resetEditor = () => {
-    if (!builderRef.current) {
+    if (!emailEditorRef.current) {
       return;
     }
 
     try {
-      builderRef.current.loadDesign({
-        body: {
-          rows: [],
-        },
-        schemaVersion: 4,
-      });
+      emailEditorRef.current.editor.loadDesign({});
       console.log('Editor reset');
     } catch (error) {
       console.error('Failed to reset editor:', error);
@@ -152,19 +95,25 @@ export default function EmailBuilder({ onDesignChange, onReady }: EmailBuilderPr
 
   return (
     <div className="w-full h-full">
-      <div
-        ref={containerRef}
-        className="w-full h-full"
-        style={{ minHeight: '100vh' }}
-      />
       {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading email builder...</p>
           </div>
         </div>
       )}
+      <EmailEditor
+        ref={emailEditorRef}
+        onReady={handleReady}
+        minHeight="100vh"
+        options={{
+          displayMode: 'email',
+          appearance: {
+            theme: 'light',
+          },
+        }}
+      />
     </div>
   );
 }
