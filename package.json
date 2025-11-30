@@ -10,9 +10,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@usewaypoint/email-builder": "^0.0.8",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-email-editor": "^1.7.11"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
