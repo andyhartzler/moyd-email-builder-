@@ -45,10 +45,10 @@ echo "🔍 Search path: ${DB_SCHEMA:-listmonk} ONLY"
 
 # Try to create schema (optional - Listmonk will create it during installation)
 echo "🔧 Attempting to create schema '${DB_SCHEMA:-listmonk}'..."
-if PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -c "CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};" 2>/dev/null; then
+if PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -c "CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};" 2>&1 | grep -qE "CREATE SCHEMA|already exists"; then
   echo "✅ Schema created/verified via psql"
 else
-  echo "⚠️  psql connection failed - Listmonk will create schema during installation"
+  echo "⚠️  psql pre-check skipped - Listmonk will create schema during installation"
 fi
 
 # Run installation (Listmonk will create schema if needed)
