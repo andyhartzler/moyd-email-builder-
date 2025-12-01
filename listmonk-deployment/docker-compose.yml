@@ -14,7 +14,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME:-postgres}
       - DB_SSL_MODE=${DB_SSL_MODE:-require}
-      - DB_PARAMS=${DB_PARAMS:-search_path=listmonk,public}
+      - DB_SCHEMA=${DB_SCHEMA:-listmonk}
+      - DB_PARAMS=${DB_PARAMS:-statement_cache_mode=disable}
     volumes:
       - listmonk_uploads:/listmonk/uploads
     restart: unless-stopped

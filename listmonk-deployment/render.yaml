@@ -16,7 +16,7 @@ services:
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: 6543
+        sync: false
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
@@ -25,5 +25,7 @@ services:
         value: postgres
       - key: DB_SSL_MODE
         value: require
+      - key: DB_SCHEMA
+        value: listmonk
       - key: DB_PARAMS
-        value: search_path=listmonk,public&statement_cache_mode=disable
+        value: statement_cache_mode=disable
