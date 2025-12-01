@@ -1,7 +1,7 @@
 FROM listmonk/listmonk:v3.0.0
 
-# Install wget for healthcheck
-RUN apk add --no-cache wget ca-certificates
+# Install wget for healthcheck and postgresql-client for schema creation
+RUN apk add --no-cache wget ca-certificates postgresql-client
 
 # Create necessary directories
 RUN mkdir -p /listmonk/uploads /listmonk/static && \

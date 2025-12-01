@@ -41,6 +41,18 @@ EOF
 echo "✅ Config file generated"
 echo "📊 Database: ${DB_HOST}:${DB_PORT:-5432}/${DB_NAME:-postgres}"
 
+# Create schema if it doesn't exist
+echo "🔧 Creating schema if needed..."
+PGPASSWORD="${DB_PASSWORD}" psql \
+  -h "${DB_HOST}" \
+  -p "${DB_PORT:-5432}" \
+  -U "${DB_USER}" \
+  -d "${DB_NAME}" \
+  -c "CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};" \
+  2>&1 | grep -v "already exists" || true
+
+echo "✅ Schema ready"
+
 # Run installation
 echo "🔧 Running Listmonk installation..."
 ./listmonk --install --yes --config /listmonk/config.toml
