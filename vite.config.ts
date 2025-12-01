@@ -10,12 +10,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'email-builder': ['react-email-editor'],
-        },
-      },
-    },
   },
 });
