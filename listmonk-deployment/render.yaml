@@ -3,7 +3,6 @@ services:
     name: moyd-listmonk
     env: docker
     dockerfilePath: ./listmonk-deployment/Dockerfile
-    dockerContext: ./listmonk-deployment
     region: oregon
     plan: starter
 
