@@ -10,7 +10,7 @@ RUN mkdir -p /listmonk/uploads /listmonk/static && \
 WORKDIR /listmonk
 
 # Copy entrypoint script
-COPY entrypoint.sh /listmonk/entrypoint.sh
+COPY listmonk-deployment/entrypoint.sh /listmonk/entrypoint.sh
 RUN chmod +x /listmonk/entrypoint.sh
 
 # Expose port
