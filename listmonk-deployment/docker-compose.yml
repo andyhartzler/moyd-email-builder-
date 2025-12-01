@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  listmonk:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      - LISTMONK_ROOT_URL=http://localhost:9000
+      - LISTMONK_ADMIN_USERNAME=admin
+      - LISTMONK_ADMIN_PASSWORD=admin123
+      - DB_HOST=${SUPABASE_DB_HOST}
+      - DB_USER=postgres
+      - DB_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - DB_NAME=postgres
+    volumes:
+      - listmonk_uploads:/listmonk/uploads
+    restart: unless-stopped
+
+volumes:
+  listmonk_uploads:
