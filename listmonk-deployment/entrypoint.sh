@@ -20,7 +20,7 @@ ssl_mode = "${DB_SSL_MODE:-require}"
 max_open = 25
 max_idle = 10
 max_lifetime = "300s"
-params = "${DB_PARAMS:-search_path=listmonk,public&statement_cache_mode=disable}"
+params = "${DB_PARAMS:-search_path=${DB_SCHEMA:-listmonk},public}"
 
 [privacy]
 individual_tracking = true
