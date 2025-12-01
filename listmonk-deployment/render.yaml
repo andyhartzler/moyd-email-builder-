@@ -12,15 +12,17 @@ services:
       - key: LISTMONK_ADMIN_USERNAME
         value: admin
       - key: LISTMONK_ADMIN_PASSWORD
-        generateValue: true
+        value: fucktrump67
+      - key: LISTMONK_ROOT_URL
+        value: https://mail.moyd.app/
       - key: DB_HOST
-        sync: false
+        value: db.faajpcarasilbfndzkmd.supabase.co
       - key: DB_PORT
-        sync: false
+        value: 5432
       - key: DB_USER
-        sync: false
+        value: postgres
       - key: DB_PASSWORD
-        sync: false
+        value: duFrit-7pyspe-kefryz
       - key: DB_NAME
         value: postgres
       - key: DB_SSL_MODE

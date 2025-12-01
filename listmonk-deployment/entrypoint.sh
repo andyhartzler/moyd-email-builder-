@@ -9,6 +9,7 @@ cat > /listmonk/config.toml <<EOF
 address = "0.0.0.0:9000"
 admin_username = "${LISTMONK_ADMIN_USERNAME:-admin}"
 admin_password = "${LISTMONK_ADMIN_PASSWORD:-listmonk}"
+root_url = "${LISTMONK_ROOT_URL:-http://localhost:9000}"
 
 [db]
 host = "${DB_HOST:-localhost}"
