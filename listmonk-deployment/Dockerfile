@@ -9,6 +9,10 @@ RUN mkdir -p /listmonk/uploads /listmonk/static && \
 
 WORKDIR /listmonk
 
+# Copy entrypoint script
+COPY entrypoint.sh /listmonk/entrypoint.sh
+RUN chmod +x /listmonk/entrypoint.sh
+
 # Expose port
 EXPOSE 9000
 
@@ -16,5 +20,5 @@ EXPOSE 9000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:9000/api/health || exit 1
 
-# Run installation then start
-CMD sh -c "./listmonk --install --yes && ./listmonk"
+# Run entrypoint script
+CMD ["/listmonk/entrypoint.sh"]

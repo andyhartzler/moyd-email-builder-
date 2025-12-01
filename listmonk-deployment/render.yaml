@@ -2,24 +2,29 @@ services:
   - type: web
     name: moyd-listmonk
     env: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./listmonk-deployment/Dockerfile
+    dockerContext: ./listmonk-deployment
     region: oregon
     plan: starter
 
     healthCheckPath: /api/health
 
     envVars:
-      - key: LISTMONK_ROOT_URL
-        sync: false
       - key: LISTMONK_ADMIN_USERNAME
         value: admin
       - key: LISTMONK_ADMIN_PASSWORD
         generateValue: true
       - key: DB_HOST
         sync: false
+      - key: DB_PORT
+        value: 5432
       - key: DB_USER
-        value: postgres
+        sync: false
       - key: DB_PASSWORD
         sync: false
       - key: DB_NAME
         value: postgres
+      - key: DB_SSL_MODE
+        value: require
+      - key: DB_PARAMS
+        value: search_path=listmonk,public
