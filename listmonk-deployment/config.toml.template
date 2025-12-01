@@ -1,0 +1,63 @@
+[app]
+address = "0.0.0.0:9000"
+
+# This will be set via environment variable after deployment
+root_url = "${LISTMONK_ROOT_URL}"
+
+# Admin credentials (set via environment variables)
+admin_username = "${LISTMONK_ADMIN_USERNAME}"
+admin_password = "${LISTMONK_ADMIN_PASSWORD}"
+
+# Performance settings
+concurrency = 10
+message_rate = 10
+batch_size = 1000
+max_send_errors = 1000
+
+# Allow iframe embedding from your Flutter app
+frame_options = "SAMEORIGIN"
+
+[db]
+host = "${DB_HOST}"
+port = 5432
+user = "${DB_USER}"
+password = "${DB_PASSWORD}"
+database = "${DB_NAME}"
+ssl_mode = "require"
+max_open = 25
+max_idle = 10
+max_lifetime = "300s"
+
+# Use listmonk schema instead of public
+params = "search_path=listmonk,public"
+
+[privacy]
+individual_tracking = true
+allow_blocklist = true
+allow_export = true
+allow_wipe = false
+exportable = ["profile", "subscriptions", "campaign_views", "link_clicks"]
+domain_blocklist = []
+
+[security]
+enable_captcha = false
+enable_cors = true
+cors_origins = ["https://moyd.app", "https://*.moyd.app", "http://localhost:*"]
+
+[upload]
+provider = "filesystem"
+filesystem_upload_path = "/listmonk/uploads"
+filesystem_upload_uri = "/uploads"
+max_file_size = 5
+extensions = [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"]
+
+[bounce]
+enabled = true
+webhooks_enabled = true
+soft_bounce_count = 2
+hard_bounce_action = "blocklist"
+complaint_action = "blocklist"
+
+[smtp]
+# SMTP will be configured via UI after deployment
+# Amazon SES settings will be added there
