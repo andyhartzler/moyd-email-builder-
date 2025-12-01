@@ -43,28 +43,15 @@ echo "📊 Database: ${DB_HOST}:${DB_PORT:-5432}/${DB_NAME:-postgres}"
 echo "🔒 Schema: ${DB_SCHEMA:-listmonk} (ISOLATED - no public schema access)"
 echo "🔍 Search path: ${DB_SCHEMA:-listmonk} ONLY"
 
-# Create schema if it doesn't exist
-echo "🔧 Creating schema '${DB_SCHEMA:-listmonk}' if needed..."
-PGPASSWORD="${DB_PASSWORD}" psql \
-  -h "${DB_HOST}" \
-  -p "${DB_PORT:-5432}" \
-  -U "${DB_USER}" \
-  -d "${DB_NAME}" \
-  -c "CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};" \
-  2>&1 | grep -v "already exists" || true
+# Try to create schema (optional - Listmonk will create it during installation)
+echo "🔧 Attempting to create schema '${DB_SCHEMA:-listmonk}'..."
+if PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -c "CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};" 2>/dev/null; then
+  echo "✅ Schema created/verified via psql"
+else
+  echo "⚠️  psql connection failed - Listmonk will create schema during installation"
+fi
 
-# Verify schema exists
-echo "✅ Verifying schema..."
-PGPASSWORD="${DB_PASSWORD}" psql \
-  -h "${DB_HOST}" \
-  -p "${DB_PORT:-5432}" \
-  -U "${DB_USER}" \
-  -d "${DB_NAME}" \
-  -t -c "SELECT 'Schema ${DB_SCHEMA:-listmonk} exists' FROM information_schema.schemata WHERE schema_name = '${DB_SCHEMA:-listmonk}';"
-
-echo "✅ Schema ready - ALL tables will be created in '${DB_SCHEMA:-listmonk}' schema"
-
-# Run installation
+# Run installation (Listmonk will create schema if needed)
 echo "🔧 Running Listmonk installation..."
 ./listmonk --install --yes --config /listmonk/config.toml
 
