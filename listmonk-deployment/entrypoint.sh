@@ -151,14 +151,10 @@ EOSQL
   PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
     SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
-    -- Update admin user password (v4.0+ stores in database)
-    UPDATE users
-    SET password = crypt('fucktrump67', gen_salt('bf'))
-    WHERE username = 'admin';
-
-    -- If no admin user exists, create one
-    INSERT INTO users (username, password, name, type, status)
-    VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled')
+    -- Upsert admin user (insert if not exists, update password if exists)
+    -- email is required field, using admin@localhost as default
+    INSERT INTO users (username, password, name, type, status, email)
+    VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled', 'admin@localhost')
     ON CONFLICT (username) DO UPDATE
     SET password = EXCLUDED.password;
 EOSQL
@@ -375,14 +371,10 @@ EOSQL
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
         SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
-        -- Update admin user password (v4.0+ stores in database)
-        UPDATE users
-        SET password = crypt('fucktrump67', gen_salt('bf'))
-        WHERE username = 'admin';
-
-        -- If no admin user exists, create one
-        INSERT INTO users (username, password, name, type, status)
-        VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled')
+        -- Upsert admin user (insert if not exists, update password if exists)
+        -- email is required field, using admin@localhost as default
+        INSERT INTO users (username, password, name, type, status, email)
+        VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled', 'admin@localhost')
         ON CONFLICT (username) DO UPDATE
         SET password = EXCLUDED.password;
 EOSQL
