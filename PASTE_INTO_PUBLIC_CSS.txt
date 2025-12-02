@@ -1,0 +1,89 @@
+/* MOYD Login Page Customization - v5.1.0 */
+
+/* ===== LOGIN PAGE LOGO ===== */
+/* Center the login container */
+.login .container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Login logo container - CENTERED */
+.login .container .logo {
+  min-height: 220px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 30px !important;
+}
+
+/* Hide default listmonk logo */
+.login .container .logo img,
+.login .container .logo svg {
+  display: none !important;
+}
+
+/* Add custom MOYD logo - centered properly */
+.login .container .logo::before {
+  content: "" !important;
+  display: block !important;
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto !important;
+  background-image: url("/uploads/MOYD01.png") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* ===== LOGIN PAGE COLORS - MOYD NAVY BLUE ===== */
+/* Login button - MOYD navy blue with white text */
+.login .button.is-primary {
+  background-color: #273351 !important;
+  border-color: #273351 !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.login .button.is-primary:hover {
+  background-color: #1a2438 !important;
+  border-color: #1a2438 !important;
+}
+
+/* Input focus states - MOYD navy blue */
+.login .input:focus,
+.login .input:active {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
+}
+
+/* Links - MOYD navy blue */
+.login a {
+  color: #273351 !important;
+}
+
+.login a:hover {
+  color: #1a2438 !important;
+}
+
+/* ===== HIDE "POWERED BY LISTMONK" FOOTER ===== */
+.login footer.footer,
+.login .footer,
+footer.footer {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* ===== LOGIN PAGE LAYOUT ===== */
+/* Center login form */
+.login .box {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+/* Login page title */
+.login .title {
+  color: #273351 !important;
+  text-align: center;
+  margin-bottom: 25px;
+}
