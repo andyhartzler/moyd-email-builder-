@@ -1,7 +1,10 @@
 FROM listmonk/listmonk:v3.0.0
 
 # Install wget for healthcheck and postgresql-client for schema creation
-RUN apk add --no-cache wget ca-certificates postgresql-client
+RUN apk add --no-cache wget ca-certificates postgresql-client curl
+
+# Download Listmonk schema.sql for manual installation
+RUN wget -O /listmonk/schema.sql https://raw.githubusercontent.com/knadh/listmonk/master/schema.sql
 
 # Create necessary directories
 RUN mkdir -p /listmonk/uploads /listmonk/static && \

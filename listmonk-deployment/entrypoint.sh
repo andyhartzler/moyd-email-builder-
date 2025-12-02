@@ -68,9 +68,30 @@ else
   echo "⚠️  Schema setup failed, continuing anyway..."
 fi
 
-# Run installation (Listmonk will create schema if needed)
-echo "🔧 Running Listmonk installation..."
-./listmonk --install --yes --config /listmonk/config.toml
+# Check if tables already exist
+echo "🔍 Checking if Listmonk tables exist..."
+TABLE_COUNT=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${DB_SCHEMA:-listmonk}' AND table_name = 'subscribers';")
+
+if [ "$TABLE_COUNT" -gt 0 ]; then
+  echo "✅ Listmonk tables already exist, skipping installation"
+else
+  echo "📦 Installing Listmonk schema manually..."
+  # Run schema.sql with explicit search_path set
+  PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+    -- Set search_path for this session
+    SET search_path TO ${DB_SCHEMA:-listmonk}, public;
+
+    -- Run the schema file
+    \i /listmonk/schema.sql
+EOSQL
+
+  if [ $? -eq 0 ]; then
+    echo "✅ Listmonk schema installed successfully"
+  else
+    echo "❌ Schema installation failed"
+    exit 1
+  fi
+fi
 
 # Start Listmonk
 echo "🎉 Starting Listmonk..."
