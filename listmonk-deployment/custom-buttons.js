@@ -1,0 +1,110 @@
+// MOYD Custom Buttons - Refresh and Report Problem
+(function() {
+  'use strict';
+
+  // Wait for DOM to load
+  function init() {
+    const menu = document.querySelector('.menu');
+    if (!menu) {
+      setTimeout(init, 500);
+      return;
+    }
+
+    // Create buttons container
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.id = 'moyd-custom-buttons';
+    buttonsContainer.style.cssText = 'position: fixed; top: 15px; left: 15px; z-index: 1000; display: flex; gap: 10px;';
+
+    // Create refresh button
+    const refreshBtn = document.createElement('button');
+    refreshBtn.innerHTML = '🔄';
+    refreshBtn.title = 'Refresh Page';
+    refreshBtn.style.cssText = 'width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 20px; cursor: pointer; transition: all 0.3s ease;';
+    refreshBtn.onmouseover = function() { this.style.transform = 'rotate(180deg)'; this.style.backgroundColor = '#1a2438'; };
+    refreshBtn.onmouseout = function() { this.style.transform = 'rotate(0deg)'; this.style.backgroundColor = '#273351'; };
+    refreshBtn.onclick = function() { location.reload(); };
+
+    // Create report problem button
+    const reportBtn = document.createElement('button');
+    reportBtn.innerHTML = '⚠️';
+    reportBtn.title = 'Report a Problem';
+    reportBtn.style.cssText = 'width: 40px; height: 40px; background-color: #f39c12; border: none; border-radius: 8px; color: white; font-size: 20px; cursor: pointer; transition: background-color 0.3s ease;';
+    reportBtn.onmouseover = function() { this.style.backgroundColor = '#e67e22'; };
+    reportBtn.onmouseout = function() { this.style.backgroundColor = '#f39c12'; };
+    reportBtn.onclick = showReportModal;
+
+    // Add buttons to container
+    buttonsContainer.appendChild(refreshBtn);
+    buttonsContainer.appendChild(reportBtn);
+    document.body.appendChild(buttonsContainer);
+
+    // Adjust menu margin
+    menu.style.marginTop = '80px';
+  }
+
+  // Create and show report modal
+  function showReportModal() {
+    // Remove existing modal if any
+    const existing = document.getElementById('moyd-report-modal');
+    if (existing) existing.remove();
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.id = 'moyd-report-modal';
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background: white; padding: 30px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+
+    // Modal HTML
+    modalContent.innerHTML = `
+      <h2 style="margin: 0 0 10px 0; color: #273351; font-size: 24px;">Report a Problem</h2>
+      <p style="margin: 0 0 25px 0; color: #666; font-size: 14px;">
+        Having an issue? Contact Andrew directly via text message or email.
+      </p>
+      <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <a href="sms:+18168983612&body=Hey%20Andrew%2C%20I%27m%20currently%20having%20a%20problem%20with%20the%20email%20campaign%20feature%20on%20moyd.app.%20"
+           style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s;"
+           onmouseover="this.style.backgroundColor='#1a2438'"
+           onmouseout="this.style.backgroundColor='#273351'">
+          <span style="font-size: 32px; margin-bottom: 10px;">💬</span>
+          <span style="font-size: 16px; font-weight: bold;">Send Text</span>
+          <span style="font-size: 12px; margin-top: 5px; opacity: 0.9;">816-898-3612</span>
+        </a>
+        <a href="mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue&body=Hey%20Andrew%2C%0A%0AI%27m%20currently%20having%20a%20problem%20with%20the%20email%20campaign%20feature%20on%20moyd.app.%0A%0ADetails%3A%0A"
+           style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s;"
+           onmouseover="this.style.backgroundColor='#1a2438'"
+           onmouseout="this.style.backgroundColor='#273351'">
+          <span style="font-size: 32px; margin-bottom: 10px;">✉️</span>
+          <span style="font-size: 16px; font-weight: bold;">Send Email</span>
+          <span style="font-size: 12px; margin-top: 5px; opacity: 0.9;">andrew@moyoungdemocrats.org</span>
+        </a>
+      </div>
+      <button onclick="document.getElementById('moyd-report-modal').remove();"
+              style="width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 8px; color: #333; font-size: 14px; cursor: pointer; transition: background 0.3s;"
+              onmouseover="this.style.backgroundColor='#d0d0d0'"
+              onmouseout="this.style.backgroundColor='#e0e0e0'">
+        Close
+      </button>
+    `;
+
+    modal.appendChild(modalContent);
+
+    // Close modal when clicking outside
+    modal.onclick = function(e) {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    };
+
+    document.body.appendChild(modal);
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
