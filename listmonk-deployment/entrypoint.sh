@@ -125,9 +125,9 @@ EOSQL
     PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
       SET search_path TO ${DB_SCHEMA:-listmonk};
 
-      -- Insert custom CSS to hide header bar, logo, and branding
+      -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin_custom_css', '/* Custom CSS for embedded Flutter app - Hide header and branding */
+      VALUES('appearance.admin_custom_css', to_jsonb('/* Custom CSS for embedded Flutter app - Hide header and branding */
 .header { display: none !important; }
 header { display: none !important; }
 .topbar { display: none !important; }
@@ -147,7 +147,7 @@ main { padding-top: 0 !important; margin-top: 0 !important; }
 /* Hide login page branding */
 .login-page .logo { display: none !important; }
 .login-page footer { display: none !important; }
-'::JSONB)
+'::text))
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
 
@@ -198,9 +198,9 @@ EOSQL
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
         SET search_path TO ${DB_SCHEMA:-listmonk};
 
-        -- Insert custom CSS to hide header bar, logo, and branding
+        -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
         INSERT INTO settings (key, value)
-        VALUES('appearance.admin_custom_css', '/* Custom CSS for embedded Flutter app - Hide header and branding */
+        VALUES('appearance.admin_custom_css', to_jsonb('/* Custom CSS for embedded Flutter app - Hide header and branding */
 .header { display: none !important; }
 header { display: none !important; }
 .topbar { display: none !important; }
@@ -220,7 +220,7 @@ main { padding-top: 0 !important; margin-top: 0 !important; }
 /* Hide login page branding */
 .login-page .logo { display: none !important; }
 .login-page footer { display: none !important; }
-'::JSONB)
+'::text))
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
 
