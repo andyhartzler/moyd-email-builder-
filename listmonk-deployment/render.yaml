@@ -16,11 +16,11 @@ services:
       - key: LISTMONK_ROOT_URL
         value: https://mail.moyd.app/
       - key: DB_HOST
-        value: db.faajpcarasilbfndzkmd.supabase.co
+        value: aws-0-us-east-1.pooler.supabase.com
       - key: DB_PORT
-        value: 5432
+        value: 6543
       - key: DB_USER
-        value: postgres
+        value: postgres.faajpcarasilbfndzkmd
       - key: DB_PASSWORD
         value: duFrit-7pyspe-kefryz
       - key: DB_NAME
