@@ -43,6 +43,10 @@ echo "✅ Config file generated"
 echo "📊 Database: ${DB_HOST}:${DB_PORT:-5432}/${DB_NAME:-postgres}"
 echo "🔒 Schema: ${DB_SCHEMA:-listmonk} (ISOLATED - no public schema access)"
 echo "🔍 Search path: ${DB_SCHEMA:-listmonk} ONLY"
+echo "🔧 DB Params: ${DB_PARAMS}"
+echo ""
+echo "Generated config.toml [db] section:"
+grep -A 10 "^\[db\]" /listmonk/config.toml
 
 # Create schema and set up proper permissions
 echo "🔧 Setting up schema '${DB_SCHEMA:-listmonk}'..."
@@ -90,6 +94,11 @@ EOSQL
 
   if [ $? -eq 0 ]; then
     echo "✅ Database marked as installed"
+
+    # Debug: Verify the migration record can be found
+    echo "🔍 Verifying migration record is accessible..."
+    MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
+    echo "   Migration value found: ${MIGRATION_CHECK}"
   else
     echo "⚠️  Failed to mark database as installed, but continuing..."
   fi
@@ -121,6 +130,11 @@ EOSQL
 
     if [ $? -eq 0 ]; then
       echo "✅ Database marked as installed"
+
+      # Debug: Verify the migration record can be found
+      echo "🔍 Verifying migration record is accessible..."
+      MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
+      echo "   Migration value found: ${MIGRATION_CHECK}"
     else
       echo "⚠️  Failed to mark database as installed, but continuing..."
     fi
@@ -129,6 +143,16 @@ EOSQL
     exit 1
   fi
 fi
+
+# Final verification before starting Listmonk
+echo "🔍 Final check: Verifying search_path and data accessibility..."
+echo "   Testing default search_path for postgres user..."
+CURRENT_SEARCH_PATH=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SHOW search_path;")
+echo "   Current search_path: ${CURRENT_SEARCH_PATH}"
+
+echo "   Testing if settings table is accessible without explicit search_path..."
+SETTINGS_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM settings;" 2>&1 || echo "FAILED")
+echo "   Settings table accessible: ${SETTINGS_CHECK}"
 
 # Start Listmonk
 echo "🎉 Starting Listmonk..."
