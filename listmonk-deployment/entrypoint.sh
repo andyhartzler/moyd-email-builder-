@@ -127,26 +127,161 @@ EOSQL
 
       -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin_custom_css', to_jsonb('/* Custom CSS for embedded Flutter app - Hide header and branding */
-.header { display: none !important; }
-header { display: none !important; }
-.topbar { display: none !important; }
-nav.navbar { display: none !important; }
-.app-header { display: none !important; }
-footer { display: none !important; }
-.footer { display: none !important; }
-.powered-by { display: none !important; }
-.branding { display: none !important; }
+      VALUES('appearance.admin_custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
-/* Adjust main content to use full height */
-.app-body { padding-top: 0 !important; }
-.content { padding-top: 0 !important; }
-main { padding-top: 0 !important; margin-top: 0 !important; }
-.page { padding-top: 0 !important; }
+/* ===== REMOVE ENTIRE HEADER BAR ===== */
+.navbar, nav.navbar, .app-header, .topbar, header, .header,
+nav, .nav, #navbar, #header, .main-header, .site-header,
+.navbar-brand, .navbar-menu, .navbar-end, .navbar-start {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
 
-/* Hide login page branding */
-.login-page .logo { display: none !important; }
-.login-page footer { display: none !important; }
+/* Remove logout button and all nav items */
+.navbar-item, .button.is-text, a.navbar-item {
+  display: none !important;
+}
+
+/* ===== REMOVE FOOTER BRANDING ===== */
+footer, .footer, .app-footer, .page-footer,
+.powered-by, .branding, .credits {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* ===== ADJUST LAYOUT FOR FULL HEIGHT ===== */
+.app-body, .app, .main, .content-wrapper,
+main, .page, .page-content, .container,
+.section, .content, body, html {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  height: 100vh !important;
+}
+
+/* Expand main content area */
+.content-area, .main-content {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* ===== LOGIN PAGE CUSTOMIZATION ===== */
+/* Hide default logo */
+.login-page .logo, .login .logo, .auth-page .logo,
+.login-page .branding, .login .branding {
+  display: none !important;
+}
+
+/* Hide login footer */
+.login-page footer, .login footer, .auth-page footer {
+  display: none !important;
+}
+
+/* Add custom MOYD logo to login page */
+.login-page::before, .login::before {
+  content: "" !important;
+  display: block !important;
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto 20px auto !important;
+  background-image: url("/uploads/MOYD01.png") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* ===== CHANGE ALL BLUE TO #273351 ===== */
+/* Primary color changes */
+.button.is-primary, .button.is-link,
+.button.is-info, a.button.is-primary,
+.has-background-primary, .tag.is-primary,
+.notification.is-primary, .message.is-primary,
+.hero.is-primary, .navbar.is-primary {
+  background-color: #273351 !important;
+  border-color: #273351 !important;
+}
+
+/* Link colors */
+a, a:hover, a:active, a:focus,
+.has-text-primary, .has-text-link, .has-text-info {
+  color: #273351 !important;
+}
+
+/* Tab and nav active states */
+.tabs a:hover, .tabs li.is-active a,
+.menu-list a.is-active, .menu-list a:hover {
+  border-bottom-color: #273351 !important;
+  color: #273351 !important;
+}
+
+/* Progress bars and loaders */
+.progress::-webkit-progress-value,
+.progress::-moz-progress-bar {
+  background-color: #273351 !important;
+}
+
+/* Inputs and selects focus */
+.input:focus, .textarea:focus, .select select:focus,
+.input:active, .textarea:active, .select select:active {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
+}
+
+/* Checkboxes and radios */
+.checkbox:hover, .radio:hover,
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  border-color: #273351 !important;
+  background-color: #273351 !important;
+}
+
+/* Pagination */
+.pagination-link.is-current,
+.pagination-previous:hover, .pagination-next:hover,
+.pagination-link:hover {
+  background-color: #273351 !important;
+  border-color: #273351 !important;
+}
+
+/* Tables */
+.table tr.is-selected {
+  background-color: #273351 !important;
+  color: white !important;
+}
+
+/* Tags and badges */
+.tag.is-info, .tag.is-link, .badge {
+  background-color: #273351 !important;
+}
+
+/* Switches and toggles */
+.switch input[type="checkbox"]:checked + .check {
+  background-color: #273351 !important;
+}
+
+/* Loading spinners */
+.loader, .spinner {
+  border-color: #273351 transparent transparent transparent !important;
+}
+
+/* Dropdown active items */
+.dropdown-item.is-active, .dropdown-item:hover {
+  background-color: #273351 !important;
+  color: white !important;
+}
+
+/* Modal and panel headers */
+.modal-card-head, .panel-heading {
+  background-color: #273351 !important;
+}
+
+/* Sidebar active items */
+.menu-list a.router-link-active,
+.menu-list a.is-active {
+  background-color: #273351 !important;
+  color: white !important;
+}
 '::text))
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
@@ -200,26 +335,161 @@ EOSQL
 
         -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
         INSERT INTO settings (key, value)
-        VALUES('appearance.admin_custom_css', to_jsonb('/* Custom CSS for embedded Flutter app - Hide header and branding */
-.header { display: none !important; }
-header { display: none !important; }
-.topbar { display: none !important; }
-nav.navbar { display: none !important; }
-.app-header { display: none !important; }
-footer { display: none !important; }
-.footer { display: none !important; }
-.powered-by { display: none !important; }
-.branding { display: none !important; }
+        VALUES('appearance.admin_custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
-/* Adjust main content to use full height */
-.app-body { padding-top: 0 !important; }
-.content { padding-top: 0 !important; }
-main { padding-top: 0 !important; margin-top: 0 !important; }
-.page { padding-top: 0 !important; }
+/* ===== REMOVE ENTIRE HEADER BAR ===== */
+.navbar, nav.navbar, .app-header, .topbar, header, .header,
+nav, .nav, #navbar, #header, .main-header, .site-header,
+.navbar-brand, .navbar-menu, .navbar-end, .navbar-start {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
 
-/* Hide login page branding */
-.login-page .logo { display: none !important; }
-.login-page footer { display: none !important; }
+/* Remove logout button and all nav items */
+.navbar-item, .button.is-text, a.navbar-item {
+  display: none !important;
+}
+
+/* ===== REMOVE FOOTER BRANDING ===== */
+footer, .footer, .app-footer, .page-footer,
+.powered-by, .branding, .credits {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* ===== ADJUST LAYOUT FOR FULL HEIGHT ===== */
+.app-body, .app, .main, .content-wrapper,
+main, .page, .page-content, .container,
+.section, .content, body, html {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  height: 100vh !important;
+}
+
+/* Expand main content area */
+.content-area, .main-content {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* ===== LOGIN PAGE CUSTOMIZATION ===== */
+/* Hide default logo */
+.login-page .logo, .login .logo, .auth-page .logo,
+.login-page .branding, .login .branding {
+  display: none !important;
+}
+
+/* Hide login footer */
+.login-page footer, .login footer, .auth-page footer {
+  display: none !important;
+}
+
+/* Add custom MOYD logo to login page */
+.login-page::before, .login::before {
+  content: "" !important;
+  display: block !important;
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto 20px auto !important;
+  background-image: url("/uploads/MOYD01.png") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* ===== CHANGE ALL BLUE TO #273351 ===== */
+/* Primary color changes */
+.button.is-primary, .button.is-link,
+.button.is-info, a.button.is-primary,
+.has-background-primary, .tag.is-primary,
+.notification.is-primary, .message.is-primary,
+.hero.is-primary, .navbar.is-primary {
+  background-color: #273351 !important;
+  border-color: #273351 !important;
+}
+
+/* Link colors */
+a, a:hover, a:active, a:focus,
+.has-text-primary, .has-text-link, .has-text-info {
+  color: #273351 !important;
+}
+
+/* Tab and nav active states */
+.tabs a:hover, .tabs li.is-active a,
+.menu-list a.is-active, .menu-list a:hover {
+  border-bottom-color: #273351 !important;
+  color: #273351 !important;
+}
+
+/* Progress bars and loaders */
+.progress::-webkit-progress-value,
+.progress::-moz-progress-bar {
+  background-color: #273351 !important;
+}
+
+/* Inputs and selects focus */
+.input:focus, .textarea:focus, .select select:focus,
+.input:active, .textarea:active, .select select:active {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
+}
+
+/* Checkboxes and radios */
+.checkbox:hover, .radio:hover,
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  border-color: #273351 !important;
+  background-color: #273351 !important;
+}
+
+/* Pagination */
+.pagination-link.is-current,
+.pagination-previous:hover, .pagination-next:hover,
+.pagination-link:hover {
+  background-color: #273351 !important;
+  border-color: #273351 !important;
+}
+
+/* Tables */
+.table tr.is-selected {
+  background-color: #273351 !important;
+  color: white !important;
+}
+
+/* Tags and badges */
+.tag.is-info, .tag.is-link, .badge {
+  background-color: #273351 !important;
+}
+
+/* Switches and toggles */
+.switch input[type="checkbox"]:checked + .check {
+  background-color: #273351 !important;
+}
+
+/* Loading spinners */
+.loader, .spinner {
+  border-color: #273351 transparent transparent transparent !important;
+}
+
+/* Dropdown active items */
+.dropdown-item.is-active, .dropdown-item:hover {
+  background-color: #273351 !important;
+  color: white !important;
+}
+
+/* Modal and panel headers */
+.modal-card-head, .panel-heading {
+  background-color: #273351 !important;
+}
+
+/* Sidebar active items */
+.menu-list a.router-link-active,
+.menu-list a.is-active {
+  background-color: #273351 !important;
+  color: white !important;
+}
 '::text))
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
