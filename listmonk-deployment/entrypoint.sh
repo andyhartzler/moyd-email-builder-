@@ -129,66 +129,62 @@ EOSQL
       INSERT INTO settings (key, value)
       VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
-/* ===== REMOVE ENTIRE HEADER BAR ===== */
-.navbar, nav.navbar, .app-header, .topbar, header, .header,
-nav, .nav, #navbar, #header, .main-header, .site-header,
-.navbar-brand, .navbar-menu, .navbar-end, .navbar-start {
+/* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */
+/* Target ONLY the fixed-top navbar, not all nav elements */
+nav.navbar.is-fixed-top {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
-  overflow: hidden !important;
 }
 
-/* Remove logout button and all nav items */
-.navbar-item, .button.is-text, a.navbar-item {
+/* Adjust body padding since navbar is removed */
+body.has-navbar-fixed-top {
+  padding-top: 0 !important;
+}
+
+/* ===== REMOVE PAGE FOOTER BRANDING (but KEEP modal footers!) ===== */
+/* Only hide main page footer, NOT modal footers */
+body > footer:not(.modal-card-foot),
+.app-footer:not(.modal-card-foot),
+.page-footer:not(.modal-card-foot) {
   display: none !important;
 }
 
-/* ===== REMOVE FOOTER BRANDING ===== */
-footer, .footer, .app-footer, .page-footer,
-.powered-by, .branding, .credits {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* ===== ADJUST LAYOUT FOR FULL HEIGHT ===== */
-.app-body, .app, .main, .content-wrapper,
-main, .page, .page-content, .container,
-.section, .content, body, html {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-  height: 100vh !important;
-}
-
-/* Expand main content area */
-.content-area, .main-content {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
+/* Ensure modal footers with buttons stay visible */
+.modal-card-foot,
+.modal-footer,
+.modal .modal-card-foot {
+  display: flex !important;
+  visibility: visible !important;
 }
 
 /* ===== LOGIN PAGE CUSTOMIZATION ===== */
-/* Hide default logo */
-.login-page .logo, .login .logo, .auth-page .logo,
-.login-page .branding, .login .branding {
-  display: none !important;
+/* Hide only the login page logo container content */
+.login .container .logo {
+  min-height: 200px;
 }
 
-/* Hide login footer */
-.login-page footer, .login footer, .auth-page footer {
+.login .container .logo img,
+.login .container .logo svg {
   display: none !important;
 }
 
 /* Add custom MOYD logo to login page */
-.login-page::before, .login::before {
+.login .container .logo::before {
   content: "" !important;
   display: block !important;
   width: 200px !important;
   height: 200px !important;
-  margin: 0 auto 20px auto !important;
+  margin: 0 auto !important;
   background-image: url("/uploads/MOYD01.png") !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+}
+
+/* Hide only login page footer (powered by text) */
+.login footer.footer {
+  display: none !important;
 }
 
 /* ===== CHANGE ALL BLUE TO #273351 ===== */
@@ -337,66 +333,62 @@ EOSQL
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
-/* ===== REMOVE ENTIRE HEADER BAR ===== */
-.navbar, nav.navbar, .app-header, .topbar, header, .header,
-nav, .nav, #navbar, #header, .main-header, .site-header,
-.navbar-brand, .navbar-menu, .navbar-end, .navbar-start {
+/* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */
+/* Target ONLY the fixed-top navbar, not all nav elements */
+nav.navbar.is-fixed-top {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
-  overflow: hidden !important;
 }
 
-/* Remove logout button and all nav items */
-.navbar-item, .button.is-text, a.navbar-item {
+/* Adjust body padding since navbar is removed */
+body.has-navbar-fixed-top {
+  padding-top: 0 !important;
+}
+
+/* ===== REMOVE PAGE FOOTER BRANDING (but KEEP modal footers!) ===== */
+/* Only hide main page footer, NOT modal footers */
+body > footer:not(.modal-card-foot),
+.app-footer:not(.modal-card-foot),
+.page-footer:not(.modal-card-foot) {
   display: none !important;
 }
 
-/* ===== REMOVE FOOTER BRANDING ===== */
-footer, .footer, .app-footer, .page-footer,
-.powered-by, .branding, .credits {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* ===== ADJUST LAYOUT FOR FULL HEIGHT ===== */
-.app-body, .app, .main, .content-wrapper,
-main, .page, .page-content, .container,
-.section, .content, body, html {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-  height: 100vh !important;
-}
-
-/* Expand main content area */
-.content-area, .main-content {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
+/* Ensure modal footers with buttons stay visible */
+.modal-card-foot,
+.modal-footer,
+.modal .modal-card-foot {
+  display: flex !important;
+  visibility: visible !important;
 }
 
 /* ===== LOGIN PAGE CUSTOMIZATION ===== */
-/* Hide default logo */
-.login-page .logo, .login .logo, .auth-page .logo,
-.login-page .branding, .login .branding {
-  display: none !important;
+/* Hide only the login page logo container content */
+.login .container .logo {
+  min-height: 200px;
 }
 
-/* Hide login footer */
-.login-page footer, .login footer, .auth-page footer {
+.login .container .logo img,
+.login .container .logo svg {
   display: none !important;
 }
 
 /* Add custom MOYD logo to login page */
-.login-page::before, .login::before {
+.login .container .logo::before {
   content: "" !important;
   display: block !important;
   width: 200px !important;
   height: 200px !important;
-  margin: 0 auto 20px auto !important;
+  margin: 0 auto !important;
   background-image: url("/uploads/MOYD01.png") !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+}
+
+/* Hide only login page footer (powered by text) */
+.login footer.footer {
+  display: none !important;
 }
 
 /* ===== CHANGE ALL BLUE TO #273351 ===== */
