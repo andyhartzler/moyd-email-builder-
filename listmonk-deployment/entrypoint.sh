@@ -58,8 +58,9 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON TABLES TO ${DB_USER};
   ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON SEQUENCES TO ${DB_USER};
 
-  -- Set search_path for the postgres user to ONLY listmonk schema (protect public schema!)
-  ALTER ROLE ${DB_USER} SET search_path TO ${DB_SCHEMA:-listmonk};
+  -- Set search_path at BOTH database and role level to ensure Listmonk can see tables
+  ALTER DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk};
+  ALTER ROLE ${DB_USER} IN DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk};
 EOSQL
 
 if [ $? -eq 0 ]; then
