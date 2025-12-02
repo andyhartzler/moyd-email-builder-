@@ -21,7 +21,7 @@ ssl_mode = "${DB_SSL_MODE:-require}"
 max_open = 25
 max_idle = 10
 max_lifetime = "300s"
-params = "${DB_PARAMS}"
+params = "options='-c search_path=${DB_SCHEMA:-listmonk},extensions,public'"
 
 [privacy]
 individual_tracking = true
@@ -61,9 +61,9 @@ EOF
 
 echo "✅ Config file generated"
 echo "📊 Database: ${DB_HOST}:${DB_PORT:-5432}/${DB_NAME:-postgres}"
-echo "🔒 Schema: ${DB_SCHEMA:-listmonk} (ISOLATED - no public schema access)"
-echo "🔍 Search path: ${DB_SCHEMA:-listmonk} ONLY"
-echo "🔧 DB Params: ${DB_PARAMS}"
+echo "🔒 Schema: ${DB_SCHEMA:-listmonk} (tables isolated in listmonk schema)"
+echo "🔍 Search path: ${DB_SCHEMA:-listmonk}, extensions, public"
+echo "🔧 Search path order: listmonk (tables) → extensions (Supabase extensions) → public (fallback)"
 echo ""
 echo "Generated config.toml [db] section:"
 grep -A 10 "^\[db\]" /listmonk/config.toml
@@ -89,9 +89,10 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON TABLES TO ${DB_USER};
   ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON SEQUENCES TO ${DB_USER};
 
-  -- Set search_path at BOTH database and role level to ensure Listmonk can see tables
-  ALTER DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk};
-  ALTER ROLE ${DB_USER} IN DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk};
+  -- Set search_path at BOTH database and role level to ensure Listmonk can see tables AND extensions
+  -- Order: listmonk (first, for tables), extensions (for Supabase extensions like pgcrypto), public (fallback)
+  ALTER DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+  ALTER ROLE ${DB_USER} IN DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 EOSQL
 
 if [ $? -eq 0 ]; then
