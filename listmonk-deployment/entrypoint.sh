@@ -343,10 +343,10 @@ EOSQL
     PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL2
       SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
-      -- Add custom HTML head content to load our JavaScript
+      -- Add custom HTML head content to load our JavaScript (FORCE UPDATE)
+      DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text))
-      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+      VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text));
 EOSQL2
 
     if [ $? -eq 0 ]; then
@@ -356,7 +356,8 @@ EOSQL2
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
         SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
-        -- Add custom CSS for public pages (login, subscription forms, etc.)
+        -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
+        DELETE FROM settings WHERE key = 'appearance.public.custom_css';
         INSERT INTO settings (key, value)
         VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page Customization - Missouri Young Democrats */
 
@@ -447,8 +448,7 @@ footer.footer {
   text-align: center;
   margin-bottom: 25px;
 }
-'::text))
-        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+'::text));
 EOSQL3
 
       if [ $? -eq 0 ]; then
@@ -693,10 +693,10 @@ EOSQL
         PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL2
           SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
-          -- Add custom HTML head content to load our JavaScript
+          -- Add custom HTML head content to load our JavaScript (FORCE UPDATE)
+          DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
           INSERT INTO settings (key, value)
-          VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text))
-          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+          VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text));
 EOSQL2
 
         if [ $? -eq 0 ]; then
@@ -706,7 +706,8 @@ EOSQL2
           PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
             SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
-            -- Add custom CSS for public pages (login, subscription forms, etc.)
+            -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
+            DELETE FROM settings WHERE key = 'appearance.public.custom_css';
             INSERT INTO settings (key, value)
             VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page Customization - Missouri Young Democrats */
 
@@ -797,8 +798,7 @@ footer.footer {
   text-align: center;
   margin-bottom: 25px;
 }
-'::text))
-            ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+'::text));
 EOSQL3
 
           if [ $? -eq 0 ]; then
