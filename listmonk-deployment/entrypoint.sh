@@ -74,8 +74,12 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   -- Create schema if it doesn't exist
   CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};
 
+  -- Set search_path before creating extension so it goes into listmonk schema
+  SET search_path TO ${DB_SCHEMA:-listmonk};
+
   -- Enable pgcrypto extension (required for gen_salt() function used in v4.0.0 migration)
-  CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA ${DB_SCHEMA:-listmonk};
+  -- Create without SCHEMA clause to use current search_path
+  CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
   -- Grant all permissions on schema
   GRANT ALL ON SCHEMA ${DB_SCHEMA:-listmonk} TO ${DB_USER};
