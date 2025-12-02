@@ -174,6 +174,78 @@ EOSQL
     INSERT INTO settings (key, value)
     VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
+/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
+/* Make template header text more visible */
+.template-header h1,
+.template-header .tag,
+.template-header small,
+.content h1, .content h2, .content h3,
+.title, .subtitle {
+  color: #2c3e50 !important;
+}
+
+/* Lighter text for IDs and metadata */
+.template-header .tag.is-light,
+small, .help-text {
+  color: #666 !important;
+}
+
+/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU ===== */
+/* Create space above the menu for custom buttons */
+.menu {
+  margin-top: 80px !important;
+}
+
+/* Add refresh button using ::before pseudo-element */
+.menu::before {
+  content: "";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #273351;
+  border-radius: 8px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=''http://www.w3.org/2000/svg'' fill=''white'' viewBox=''0 0 24 24''%3E%3Cpath d=''M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z''/%3E%3C/svg%3E");
+  background-size: 24px 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.menu::before:hover {
+  transform: rotate(180deg);
+  background-color: #1a2438;
+}
+
+/* Add report problem button using ::after pseudo-element */
+.menu::after {
+  content: "⚠";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 65px;
+  width: 40px;
+  height: 40px;
+  background-color: #f39c12;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 40px;
+  transition: background-color 0.3s ease;
+  z-index: 1000;
+}
+
+.menu::after:hover {
+  background-color: #e67e22;
+}
+
 /* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */
 /* Target ONLY the fixed-top navbar, not all nav elements */
 nav.navbar.is-fixed-top {
@@ -394,6 +466,78 @@ EOSQL
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
+/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
+/* Make template header text more visible */
+.template-header h1,
+.template-header .tag,
+.template-header small,
+.content h1, .content h2, .content h3,
+.title, .subtitle {
+  color: #2c3e50 !important;
+}
+
+/* Lighter text for IDs and metadata */
+.template-header .tag.is-light,
+small, .help-text {
+  color: #666 !important;
+}
+
+/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU ===== */
+/* Create space above the menu for custom buttons */
+.menu {
+  margin-top: 80px !important;
+}
+
+/* Add refresh button using ::before pseudo-element */
+.menu::before {
+  content: "";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #273351;
+  border-radius: 8px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=''http://www.w3.org/2000/svg'' fill=''white'' viewBox=''0 0 24 24''%3E%3Cpath d=''M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z''/%3E%3C/svg%3E");
+  background-size: 24px 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.menu::before:hover {
+  transform: rotate(180deg);
+  background-color: #1a2438;
+}
+
+/* Add report problem button using ::after pseudo-element */
+.menu::after {
+  content: "⚠";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 65px;
+  width: 40px;
+  height: 40px;
+  background-color: #f39c12;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 40px;
+  transition: background-color 0.3s ease;
+  z-index: 1000;
+}
+
+.menu::after:hover {
+  background-color: #e67e22;
+}
+
 /* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */
 /* Target ONLY the fixed-top navbar, not all nav elements */
 nav.navbar.is-fixed-top {
@@ -549,6 +693,22 @@ EOSQL
 
       if [ $? -eq 0 ]; then
         echo "✅ Custom CSS injected successfully"
+
+        # Also inject custom JavaScript for buttons
+        PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL2
+          SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+
+          -- Add custom HTML head content to load our JavaScript
+          INSERT INTO settings (key, value)
+          VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text))
+          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+EOSQL2
+
+        if [ $? -eq 0 ]; then
+          echo "✅ Custom JavaScript injection configured"
+        else
+          echo "⚠️  Failed to inject custom JavaScript, but continuing..."
+        fi
       else
         echo "⚠️  Failed to inject custom CSS, but continuing..."
       fi
@@ -570,6 +730,56 @@ echo "   Current search_path: ${CURRENT_SEARCH_PATH}"
 echo "   Testing if settings table is accessible without explicit search_path..."
 SETTINGS_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM settings;" 2>&1 || echo "FAILED")
 echo "   Settings table accessible: ${SETTINGS_CHECK}"
+
+# Inject custom JavaScript into admin interface
+echo "💻 Injecting custom JavaScript for buttons..."
+ADMIN_HTML="/listmonk/static/admin.html"
+
+# Check if admin.html exists, if not create a simple HTML file
+if [ ! -f "$ADMIN_HTML" ]; then
+  # Create a simple redirect that loads our custom JS
+  cat > "$ADMIN_HTML" <<'ADMINHTML'
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="/static/custom-buttons.js"></script>
+</head>
+<body>
+  <script>
+    // Inject custom buttons script into the main app
+    (function() {
+      var script = document.createElement('script');
+      script.src = '/static/custom-buttons.js';
+      document.head.appendChild(script);
+
+      // Also try injecting into the SPA when it loads
+      setTimeout(function() {
+        if (!document.getElementById('moyd-custom-buttons')) {
+          var scriptRetry = document.createElement('script');
+          scriptRetry.src = '/static/custom-buttons.js';
+          document.body.appendChild(scriptRetry);
+        }
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>
+ADMINHTML
+  echo "✅ Created admin.html with custom script injection"
+fi
+
+# Also inject into the settings database for persistent loading
+PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+  SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+
+  -- Add custom HTML head content to load our JavaScript
+  INSERT INTO settings (key, value)
+  VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text))
+  ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+EOSQL
+
+echo "✅ Custom JavaScript injection configured"
 
 # Start Listmonk
 echo "🎉 Starting Listmonk..."
