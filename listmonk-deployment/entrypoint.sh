@@ -98,36 +98,53 @@ echo "🔍 Checking if Listmonk tables exist..."
 TABLE_COUNT=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${DB_SCHEMA:-listmonk}' AND table_name = 'subscribers';")
 
 if [ "$TABLE_COUNT" -gt 0 ]; then
-  echo "✅ Listmonk tables already exist, skipping installation"
+  echo "✅ Listmonk tables already exist, checking if upgrade needed..."
 
-  # Ensure database is marked as installed
-  echo "📝 Ensuring database is marked as installed..."
+  # Check current migration version
+  echo "🔍 Checking current migration version..."
+  CURRENT_VERSION=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';" 2>/dev/null | tr -d ' \n')
+  echo "   Current version: ${CURRENT_VERSION}"
+
+  # If migration version exists but is not v5.1.0, run upgrade
+  if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" != '["v5.1.0"]' ]; then
+    echo "🔄 Database needs upgrade. Running migrations from ${CURRENT_VERSION} to v5.1.0..."
+    ./listmonk --upgrade --config /listmonk/config.toml --yes
+
+    if [ $? -eq 0 ]; then
+      echo "✅ Database upgraded successfully to v5.1.0"
+    else
+      echo "❌ Database upgrade failed"
+      exit 1
+    fi
+  else
+    echo "✅ Database is already at v5.1.0 or needs initialization"
+
+    # Only set migration version if it doesn't exist
+    if [ -z "$CURRENT_VERSION" ]; then
+      echo "📝 Marking database as installed..."
+      PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+        SET search_path TO ${DB_SCHEMA:-listmonk};
+        INSERT INTO settings (key, value)
+        VALUES('migrations', '["v5.1.0"]'::JSONB)
+        ON CONFLICT (key) DO UPDATE SET value = '["v5.1.0"]'::JSONB;
+EOSQL
+      echo "✅ Database marked as installed"
+    fi
+  fi
+
+  # Verify the migration record
+  echo "🔍 Verifying migration record is accessible..."
+  MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
+  echo "   Migration value found: ${MIGRATION_CHECK}"
+
+  # Inject custom CSS to hide header and branding for embedded Flutter app
+  echo "🎨 Injecting custom CSS to hide header and branding..."
   PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
-    -- Set search_path for this session
     SET search_path TO ${DB_SCHEMA:-listmonk};
 
-    -- Mark as installed (this is what --install does)
+    -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
     INSERT INTO settings (key, value)
-    VALUES('migrations', '["v5.1.0"]'::JSONB)
-    ON CONFLICT (key) DO UPDATE SET value = '["v5.1.0"]'::JSONB;
-EOSQL
-
-  if [ $? -eq 0 ]; then
-    echo "✅ Database marked as installed"
-
-    # Debug: Verify the migration record can be found
-    echo "🔍 Verifying migration record is accessible..."
-    MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
-    echo "   Migration value found: ${MIGRATION_CHECK}"
-
-    # Inject custom CSS to hide header and branding for embedded Flutter app
-    echo "🎨 Injecting custom CSS to hide header and branding..."
-    PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
-      SET search_path TO ${DB_SCHEMA:-listmonk};
-
-      -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
-      INSERT INTO settings (key, value)
-      VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
+    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
 /* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */
 /* Target ONLY the fixed-top navbar, not all nav elements */
@@ -282,13 +299,10 @@ input[type="radio"]:checked {
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
 
-    if [ $? -eq 0 ]; then
-      echo "✅ Custom CSS injected successfully"
-    else
-      echo "⚠️  Failed to inject custom CSS, but continuing..."
-    fi
+  if [ $? -eq 0 ]; then
+    echo "✅ Custom CSS injected successfully"
   else
-    echo "⚠️  Failed to mark database as installed, but continuing..."
+    echo "⚠️  Failed to inject custom CSS, but continuing..."
   fi
 else
   echo "📦 Installing Listmonk schema manually..."
