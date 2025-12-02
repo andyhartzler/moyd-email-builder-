@@ -44,12 +44,28 @@ echo "📊 Database: ${DB_HOST}:${DB_PORT:-5432}/${DB_NAME:-postgres}"
 echo "🔒 Schema: ${DB_SCHEMA:-listmonk} (ISOLATED - no public schema access)"
 echo "🔍 Search path: ${DB_SCHEMA:-listmonk} ONLY"
 
-# Try to create schema (optional - Listmonk will create it during installation)
-echo "🔧 Attempting to create schema '${DB_SCHEMA:-listmonk}'..."
-if PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -c "CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};" 2>&1 | grep -qE "CREATE SCHEMA|already exists"; then
-  echo "✅ Schema created/verified via psql"
+# Create schema and set up proper permissions
+echo "🔧 Setting up schema '${DB_SCHEMA:-listmonk}'..."
+PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-EOSQL
+  -- Create schema if it doesn't exist
+  CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};
+
+  -- Grant all permissions on schema
+  GRANT ALL ON SCHEMA ${DB_SCHEMA:-listmonk} TO ${DB_USER};
+  GRANT ALL ON SCHEMA ${DB_SCHEMA:-listmonk} TO postgres;
+
+  -- Set default privileges for future tables
+  ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON TABLES TO ${DB_USER};
+  ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON SEQUENCES TO ${DB_USER};
+
+  -- Set search_path for the user on this database
+  ALTER DATABASE ${DB_NAME} SET search_path TO ${DB_SCHEMA:-listmonk}, public;
+EOSQL
+
+if [ $? -eq 0 ]; then
+  echo "✅ Schema and permissions configured successfully"
 else
-  echo "⚠️  psql pre-check skipped - Listmonk will create schema during installation"
+  echo "⚠️  Schema setup failed, continuing anyway..."
 fi
 
 # Run installation (Listmonk will create schema if needed)
