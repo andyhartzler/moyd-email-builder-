@@ -258,7 +258,7 @@ a, a:hover, a:active, a:focus,
   margin-top: 70px !important;
 }
 
-/* Refresh button using ::before pseudo-element (fallback if JS doesn't load) */
+/* Refresh button using ::before pseudo-element (fallback if JS does not load) */
 .menu::before {
   content: "🔄";
   display: block;
@@ -279,7 +279,7 @@ a, a:hover, a:active, a:focus,
   pointer-events: none;
 }
 
-/* Report problem button using ::after pseudo-element (fallback if JS doesn't load) */
+/* Report problem button using ::after pseudo-element (fallback if JS does not load) */
 .menu::after {
   content: "?";
   display: block;
@@ -645,7 +645,7 @@ a, a:hover, a:active, a:focus,
   margin-top: 70px !important;
 }
 
-/* Refresh button using ::before pseudo-element (fallback if JS doesn't load) */
+/* Refresh button using ::before pseudo-element (fallback if JS does not load) */
 .menu::before {
   content: "🔄";
   display: block;
@@ -666,7 +666,7 @@ a, a:hover, a:active, a:focus,
   pointer-events: none;
 }
 
-/* Report problem button using ::after pseudo-element (fallback if JS doesn't load) */
+/* Report problem button using ::after pseudo-element (fallback if JS does not load) */
 .menu::after {
   content: "?";
   display: block;
