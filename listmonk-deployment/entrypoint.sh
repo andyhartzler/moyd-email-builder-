@@ -21,7 +21,7 @@ ssl_mode = "${DB_SSL_MODE:-require}"
 max_open = 25
 max_idle = 10
 max_lifetime = "300s"
-params = "${DB_PARAMS:-search_path=${DB_SCHEMA:-listmonk}}"
+params = "${DB_PARAMS}"
 
 [privacy]
 individual_tracking = true
