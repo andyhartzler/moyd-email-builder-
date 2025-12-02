@@ -252,16 +252,53 @@ a, a:hover, a:active, a:focus,
   border-bottom-color: #273351 !important;
 }
 
-/* List items and clickable elements - CRITICAL FIX for lists/forms pages */
-.list-item:hover,
-.list-item:hover a,
-.clickable:hover,
-.clickable:hover a,
-tr:hover a,
-.table tr:hover a,
-.table tbody tr:hover td a,
-.is-hoverable:hover a {
-  color: white !important;
+/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU (CSS FALLBACK) ===== */
+/* Create space above the menu for custom buttons */
+.menu {
+  margin-top: 70px !important;
+}
+
+/* Refresh button using ::before pseudo-element (fallback if JS doesn't load) */
+.menu::before {
+  content: "🔄";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #273351;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  line-height: 40px;
+  transition: background-color 0.3s ease;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Report problem button using ::after pseudo-element (fallback if JS doesn't load) */
+.menu::after {
+  content: "?";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 65px;
+  width: 40px;
+  height: 40px;
+  background-color: #273351;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 40px;
+  transition: background-color 0.3s ease;
+  z-index: 999;
+  pointer-events: none;
 }
 
 /* Progress bars and loaders */
@@ -602,16 +639,53 @@ a, a:hover, a:active, a:focus,
   border-bottom-color: #273351 !important;
 }
 
-/* List items and clickable elements - CRITICAL FIX for lists/forms pages */
-.list-item:hover,
-.list-item:hover a,
-.clickable:hover,
-.clickable:hover a,
-tr:hover a,
-.table tr:hover a,
-.table tbody tr:hover td a,
-.is-hoverable:hover a {
-  color: white !important;
+/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU (CSS FALLBACK) ===== */
+/* Create space above the menu for custom buttons */
+.menu {
+  margin-top: 70px !important;
+}
+
+/* Refresh button using ::before pseudo-element (fallback if JS doesn't load) */
+.menu::before {
+  content: "🔄";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #273351;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  line-height: 40px;
+  transition: background-color 0.3s ease;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Report problem button using ::after pseudo-element (fallback if JS doesn't load) */
+.menu::after {
+  content: "?";
+  display: block;
+  position: fixed;
+  top: 15px;
+  left: 65px;
+  width: 40px;
+  height: 40px;
+  background-color: #273351;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 40px;
+  transition: background-color 0.3s ease;
+  z-index: 999;
+  pointer-events: none;
 }
 
 /* Progress bars and loaders */
