@@ -74,6 +74,9 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   -- Create schema if it doesn't exist
   CREATE SCHEMA IF NOT EXISTS ${DB_SCHEMA:-listmonk};
 
+  -- Enable pgcrypto extension (required for gen_salt() function used in v4.0.0 migration)
+  CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA ${DB_SCHEMA:-listmonk};
+
   -- Grant all permissions on schema
   GRANT ALL ON SCHEMA ${DB_SCHEMA:-listmonk} TO ${DB_USER};
   GRANT ALL ON SCHEMA ${DB_SCHEMA:-listmonk} TO postgres;
@@ -102,7 +105,7 @@ if [ "$TABLE_COUNT" -gt 0 ]; then
 
   # Check current migration version
   echo "🔍 Checking current migration version..."
-  CURRENT_VERSION=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';" 2>/dev/null | tr -d ' \n')
+  CURRENT_VERSION=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT value FROM ${DB_SCHEMA:-listmonk}.settings WHERE key = 'migrations';" 2>/dev/null | tr -d ' \n')
   echo "   Current version: ${CURRENT_VERSION}"
 
   # If migration version exists but is not v5.1.0, run upgrade
