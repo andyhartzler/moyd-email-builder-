@@ -16,6 +16,9 @@ WORKDIR /listmonk
 COPY listmonk-deployment/entrypoint.sh /listmonk/entrypoint.sh
 RUN chmod +x /listmonk/entrypoint.sh
 
+# Copy MOYD logo to uploads directory for login page
+COPY MOYD01.png /listmonk/uploads/MOYD01.png
+
 # Expose port
 EXPOSE 9000
 
