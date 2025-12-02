@@ -7,9 +7,10 @@ echo "🚀 Starting Listmonk setup..."
 cat > /listmonk/config.toml <<EOF
 [app]
 address = "0.0.0.0:9000"
-admin_username = "${LISTMONK_ADMIN_USERNAME:-admin}"
-admin_password = "${LISTMONK_ADMIN_PASSWORD:-listmonk}"
 root_url = "${LISTMONK_ROOT_URL:-http://localhost:9000}"
+
+# NOTE: admin_username and admin_password removed - v4.0+ stores credentials in database
+# Admin user is created during migration or updated below
 
 [db]
 host = "${DB_HOST:-localhost}"
@@ -144,6 +145,29 @@ EOSQL
   echo "🔍 Verifying migration record is accessible..."
   MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
   echo "   Migration value found: ${MIGRATION_CHECK}"
+
+  # Update admin password (v4.0+ stores credentials in database, not config)
+  echo "🔐 Setting admin user credentials..."
+  PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+    SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+
+    -- Update admin user password (v4.0+ stores in database)
+    UPDATE users
+    SET password = crypt('fucktrump67', gen_salt('bf'))
+    WHERE username = 'admin';
+
+    -- If no admin user exists, create one
+    INSERT INTO users (username, password, name, type, status)
+    VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled')
+    ON CONFLICT (username) DO UPDATE
+    SET password = EXCLUDED.password;
+EOSQL
+
+  if [ $? -eq 0 ]; then
+    echo "✅ Admin credentials set (username: admin, password: fucktrump67)"
+  else
+    echo "⚠️  Failed to set admin credentials, but continuing..."
+  fi
 
   # Inject custom CSS to hide header and branding for embedded Flutter app
   echo "🎨 Injecting custom CSS to hide header and branding..."
@@ -345,6 +369,29 @@ EOSQL
       echo "🔍 Verifying migration record is accessible..."
       MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
       echo "   Migration value found: ${MIGRATION_CHECK}"
+
+      # Update admin password (v4.0+ stores credentials in database, not config)
+      echo "🔐 Setting admin user credentials..."
+      PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+        SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+
+        -- Update admin user password (v4.0+ stores in database)
+        UPDATE users
+        SET password = crypt('fucktrump67', gen_salt('bf'))
+        WHERE username = 'admin';
+
+        -- If no admin user exists, create one
+        INSERT INTO users (username, password, name, type, status)
+        VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled')
+        ON CONFLICT (username) DO UPDATE
+        SET password = EXCLUDED.password;
+EOSQL
+
+      if [ $? -eq 0 ]; then
+        echo "✅ Admin credentials set (username: admin, password: fucktrump67)"
+      else
+        echo "⚠️  Failed to set admin credentials, but continuing..."
+      fi
 
       # Inject custom CSS to hide header and branding for embedded Flutter app
       echo "🎨 Injecting custom CSS to hide header and branding..."
