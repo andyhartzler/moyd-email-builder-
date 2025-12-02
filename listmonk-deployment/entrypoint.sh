@@ -152,9 +152,9 @@ EOSQL
     SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
     -- Upsert admin user (insert if not exists, update password if exists)
-    -- email is required field, using admin@localhost as default
-    INSERT INTO users (username, password, name, type, status, email)
-    VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled', 'admin@localhost')
+    -- user_role_id = 1 is the "Super Admin" role created by v4.0.0 migration
+    INSERT INTO users (username, password, name, type, status, email, user_role_id)
+    VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled', 'admin@localhost', 1)
     ON CONFLICT (username) DO UPDATE
     SET password = EXCLUDED.password;
 EOSQL
@@ -372,9 +372,9 @@ EOSQL
         SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
 
         -- Upsert admin user (insert if not exists, update password if exists)
-        -- email is required field, using admin@localhost as default
-        INSERT INTO users (username, password, name, type, status, email)
-        VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled', 'admin@localhost')
+        -- user_role_id = 1 is the "Super Admin" role created by v4.0.0 migration
+        INSERT INTO users (username, password, name, type, status, email, user_role_id)
+        VALUES ('admin', crypt('fucktrump67', gen_salt('bf')), 'Admin', 'user', 'enabled', 'admin@localhost', 1)
         ON CONFLICT (username) DO UPDATE
         SET password = EXCLUDED.password;
 EOSQL
