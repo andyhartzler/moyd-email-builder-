@@ -75,6 +75,24 @@ TABLE_COUNT=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" ps
 
 if [ "$TABLE_COUNT" -gt 0 ]; then
   echo "✅ Listmonk tables already exist, skipping installation"
+
+  # Ensure database is marked as installed
+  echo "📝 Ensuring database is marked as installed..."
+  PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+    -- Set search_path for this session
+    SET search_path TO ${DB_SCHEMA:-listmonk};
+
+    -- Mark as installed (this is what --install does)
+    INSERT INTO settings (key, value)
+    VALUES('migrations', '["v3.0.0"]'::JSONB)
+    ON CONFLICT (key) DO UPDATE SET value = '["v3.0.0"]'::JSONB;
+EOSQL
+
+  if [ $? -eq 0 ]; then
+    echo "✅ Database marked as installed"
+  else
+    echo "⚠️  Failed to mark database as installed, but continuing..."
+  fi
 else
   echo "📦 Installing Listmonk schema manually..."
   # Run schema.sql with explicit search_path set to ONLY listmonk (not public!)
@@ -88,6 +106,24 @@ EOSQL
 
   if [ $? -eq 0 ]; then
     echo "✅ Listmonk schema installed successfully"
+
+    # Mark database as installed by adding migration version to settings table
+    echo "📝 Marking database as installed..."
+    PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+      -- Set search_path for this session
+      SET search_path TO ${DB_SCHEMA:-listmonk};
+
+      -- Mark as installed (this is what --install does)
+      INSERT INTO settings (key, value)
+      VALUES('migrations', '["v3.0.0"]'::JSONB)
+      ON CONFLICT (key) DO UPDATE SET value = '["v3.0.0"]'::JSONB;
+EOSQL
+
+    if [ $? -eq 0 ]; then
+      echo "✅ Database marked as installed"
+    else
+      echo "⚠️  Failed to mark database as installed, but continuing..."
+    fi
   else
     echo "❌ Schema installation failed"
     exit 1
