@@ -127,7 +127,7 @@ EOSQL
 
       -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin_custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
+      VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
 /* ===== REMOVE ENTIRE HEADER BAR ===== */
 .navbar, nav.navbar, .app-header, .topbar, header, .header,
@@ -335,7 +335,7 @@ EOSQL
 
         -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
         INSERT INTO settings (key, value)
-        VALUES('appearance.admin_custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
+        VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
 
 /* ===== REMOVE ENTIRE HEADER BAR ===== */
 .navbar, nav.navbar, .app-header, .topbar, header, .header,
