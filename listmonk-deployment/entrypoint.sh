@@ -276,7 +276,7 @@ a, a:hover, a:active, a:focus,
   line-height: 40px;
   transition: background-color 0.3s ease;
   z-index: 999;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* Report problem button using ::after pseudo-element (fallback if JS does not load) */
@@ -298,7 +298,7 @@ a, a:hover, a:active, a:focus,
   line-height: 40px;
   transition: background-color 0.3s ease;
   z-index: 999;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* Progress bars and loaders */
@@ -663,7 +663,7 @@ a, a:hover, a:active, a:focus,
   line-height: 40px;
   transition: background-color 0.3s ease;
   z-index: 999;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* Report problem button using ::after pseudo-element (fallback if JS does not load) */
@@ -685,7 +685,7 @@ a, a:hover, a:active, a:focus,
   line-height: 40px;
   transition: background-color 0.3s ease;
   z-index: 999;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 /* Progress bars and loaders */
