@@ -190,62 +190,6 @@ small, .help-text {
   color: #666 !important;
 }
 
-/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU ===== */
-/* Create space above the menu for custom buttons */
-.menu {
-  margin-top: 80px !important;
-}
-
-/* Add refresh button using ::before pseudo-element */
-.menu::before {
-  content: "";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 40px;
-  height: 40px;
-  background-color: #273351;
-  border-radius: 8px;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns=''http://www.w3.org/2000/svg'' fill=''white'' viewBox=''0 0 24 24''%3E%3Cpath d=''M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z''/%3E%3C/svg%3E");
-  background-size: 24px 24px;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: transform 0.3s ease;
-  z-index: 1000;
-}
-
-.menu::before:hover {
-  transform: rotate(180deg);
-  background-color: #1a2438;
-}
-
-/* Add report problem button using ::after pseudo-element */
-.menu::after {
-  content: "⚠";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 65px;
-  width: 40px;
-  height: 40px;
-  background-color: #f39c12;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 40px;
-  transition: background-color 0.3s ease;
-  z-index: 1000;
-}
-
-.menu::after:hover {
-  background-color: #e67e22;
-}
-
 /* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */
 /* Target ONLY the fixed-top navbar, not all nav elements */
 nav.navbar.is-fixed-top {
@@ -394,6 +338,127 @@ EOSQL
 
   if [ $? -eq 0 ]; then
     echo "✅ Custom CSS injected successfully"
+
+    # Also inject custom JavaScript for buttons
+    PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL2
+      SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+
+      -- Add custom HTML head content to load our JavaScript
+      INSERT INTO settings (key, value)
+      VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text))
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+EOSQL2
+
+    if [ $? -eq 0 ]; then
+      echo "✅ Custom JavaScript injection configured"
+
+      # Also inject public CSS for login page
+      PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
+        SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+
+        -- Add custom CSS for public pages (login, subscription forms, etc.)
+        INSERT INTO settings (key, value)
+        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page Customization - Missouri Young Democrats */
+
+/* ===== LOGIN PAGE LOGO ===== */
+/* Center the login container */
+.login .container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Login logo container */
+.login .container .logo {
+  min-height: 220px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 30px !important;
+}
+
+/* Hide default listmonk logo */
+.login .container .logo img,
+.login .container .logo svg {
+  display: none !important;
+}
+
+/* Add custom MOYD logo - centered properly */
+.login .container .logo::before {
+  content: "" !important;
+  display: block !important;
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto !important;
+  background-image: url("/uploads/MOYD01.png") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* ===== LOGIN PAGE COLORS - MOYD NAVY BLUE ===== */
+/* Login button - MOYD navy blue with white text */
+.login .button.is-primary {
+  background-color: #273351 !important;
+  border-color: #273351 !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.login .button.is-primary:hover {
+  background-color: #1a2438 !important;
+  border-color: #1a2438 !important;
+}
+
+/* Input focus states - MOYD navy blue */
+.login .input:focus,
+.login .input:active {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
+}
+
+/* Links - MOYD navy blue */
+.login a {
+  color: #273351 !important;
+}
+
+.login a:hover {
+  color: #1a2438 !important;
+}
+
+/* ===== HIDE "POWERED BY LISTMONK" FOOTER ===== */
+.login footer.footer,
+.login .footer,
+footer.footer {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* ===== LOGIN PAGE LAYOUT ===== */
+/* Center login form */
+.login .box {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+/* Login page title */
+.login .title {
+  color: #273351 !important;
+  text-align: center;
+  margin-bottom: 25px;
+}
+'::text))
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+EOSQL3
+
+      if [ $? -eq 0 ]; then
+        echo "✅ Public CSS (login page) injected successfully"
+      else
+        echo "⚠️  Failed to inject public CSS, but continuing..."
+      fi
+    else
+      echo "⚠️  Failed to inject custom JavaScript, but continuing..."
+    fi
   else
     echo "⚠️  Failed to inject custom CSS, but continuing..."
   fi
@@ -473,62 +538,6 @@ EOSQL
 .template-header .tag.is-light,
 small, .help-text {
   color: #666 !important;
-}
-
-/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU ===== */
-/* Create space above the menu for custom buttons */
-.menu {
-  margin-top: 80px !important;
-}
-
-/* Add refresh button using ::before pseudo-element */
-.menu::before {
-  content: "";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 40px;
-  height: 40px;
-  background-color: #273351;
-  border-radius: 8px;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns=''http://www.w3.org/2000/svg'' fill=''white'' viewBox=''0 0 24 24''%3E%3Cpath d=''M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z''/%3E%3C/svg%3E");
-  background-size: 24px 24px;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: transform 0.3s ease;
-  z-index: 1000;
-}
-
-.menu::before:hover {
-  transform: rotate(180deg);
-  background-color: #1a2438;
-}
-
-/* Add report problem button using ::after pseudo-element */
-.menu::after {
-  content: "⚠";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 65px;
-  width: 40px;
-  height: 40px;
-  background-color: #f39c12;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 40px;
-  transition: background-color 0.3s ease;
-  z-index: 1000;
-}
-
-.menu::after:hover {
-  background-color: #e67e22;
 }
 
 /* ===== REMOVE ONLY THE TOP NAVBAR (keep modals and dialogs working!) ===== */

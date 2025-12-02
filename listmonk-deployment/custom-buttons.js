@@ -26,11 +26,11 @@
 
     // Create report problem button
     const reportBtn = document.createElement('button');
-    reportBtn.innerHTML = '⚠️';
+    reportBtn.innerHTML = '?';
     reportBtn.title = 'Report a Problem';
-    reportBtn.style.cssText = 'width: 40px; height: 40px; background-color: #f39c12; border: none; border-radius: 8px; color: white; font-size: 20px; cursor: pointer; transition: background-color 0.3s ease;';
-    reportBtn.onmouseover = function() { this.style.backgroundColor = '#e67e22'; };
-    reportBtn.onmouseout = function() { this.style.backgroundColor = '#f39c12'; };
+    reportBtn.style.cssText = 'width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease;';
+    reportBtn.onmouseover = function() { this.style.backgroundColor = '#1a2438'; };
+    reportBtn.onmouseout = function() { this.style.backgroundColor = '#273351'; };
     reportBtn.onclick = showReportModal;
 
     // Add buttons to container
@@ -38,8 +38,8 @@
     buttonsContainer.appendChild(reportBtn);
     document.body.appendChild(buttonsContainer);
 
-    // Adjust menu margin
-    menu.style.marginTop = '80px';
+    // Adjust menu margin (reduced to 20px - 75% less than original 80px)
+    menu.style.marginTop = '20px';
   }
 
   // Create and show report modal
