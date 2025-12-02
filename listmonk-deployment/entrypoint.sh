@@ -252,53 +252,16 @@ a, a:hover, a:active, a:focus,
   border-bottom-color: #273351 !important;
 }
 
-/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU (CSS FALLBACK) ===== */
+/* ===== CUSTOM BUTTONS SPACE ===== */
 /* Create space above the menu for custom buttons */
 .menu {
   margin-top: 70px !important;
 }
 
-/* Refresh button using ::before pseudo-element (fallback if JS does not load) */
-.menu::before {
-  content: "🔄";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 40px;
-  height: 40px;
-  background-color: #273351;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 20px;
-  text-align: center;
-  line-height: 40px;
-  transition: background-color 0.3s ease;
-  z-index: 999;
-  pointer-events: auto;
-}
-
-/* Report problem button using ::after pseudo-element (fallback if JS does not load) */
+/* Hide CSS pseudo-element buttons (JavaScript will create real clickable buttons) */
+.menu::before,
 .menu::after {
-  content: "?";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 65px;
-  width: 40px;
-  height: 40px;
-  background-color: #273351;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 40px;
-  transition: background-color 0.3s ease;
-  z-index: 999;
-  pointer-events: auto;
+  display: none !important;
 }
 
 /* Progress bars and loaders */
@@ -376,18 +339,88 @@ EOSQL
   if [ $? -eq 0 ]; then
     echo "✅ Custom CSS injected successfully"
 
-    # Also inject custom JavaScript for buttons
-    PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL2
-      SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+    # Also inject custom JavaScript for buttons (INLINE CODE)
+    # NOTE: Using appearance.admin.custom_js (NOT custom_head!)
+    # The custom_js field expects JavaScript code, not HTML
+    echo "💻 Injecting custom JavaScript for buttons..."
+    PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL2'
+      SET search_path TO listmonk, extensions, public;
 
-      -- Add custom HTML head content to load our JavaScript (FORCE UPDATE)
+      DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
+
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text));
+      VALUES('appearance.admin.custom_js', $js$
+(function() {
+  "use strict";
+
+  function init() {
+    const menu = document.querySelector(".menu");
+    if (!menu) {
+      setTimeout(init, 500);
+      return;
+    }
+
+    const existing = document.getElementById("moyd-custom-buttons");
+    if (existing) existing.remove();
+
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.id = "moyd-custom-buttons";
+    buttonsContainer.style.cssText = "position: fixed; top: 15px; left: 15px; z-index: 1000; display: flex; gap: 10px;";
+
+    const refreshBtn = document.createElement("button");
+    refreshBtn.innerHTML = "🔄";
+    refreshBtn.title = "Refresh Page";
+    refreshBtn.style.cssText = "width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 20px; cursor: pointer; transition: all 0.3s ease;";
+    refreshBtn.onmouseover = function() { this.style.transform = "rotate(180deg)"; this.style.backgroundColor = "#1a2438"; };
+    refreshBtn.onmouseout = function() { this.style.transform = "rotate(0deg)"; this.style.backgroundColor = "#273351"; };
+    refreshBtn.onclick = function() { location.reload(); };
+
+    const reportBtn = document.createElement("button");
+    reportBtn.innerHTML = "?";
+    reportBtn.title = "Report a Problem";
+    reportBtn.style.cssText = "width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease;";
+    reportBtn.onmouseover = function() { this.style.backgroundColor = "#1a2438"; };
+    reportBtn.onmouseout = function() { this.style.backgroundColor = "#273351"; };
+    reportBtn.onclick = showReportModal;
+
+    buttonsContainer.appendChild(refreshBtn);
+    buttonsContainer.appendChild(reportBtn);
+    document.body.appendChild(buttonsContainer);
+    menu.style.marginTop = "20px";
+  }
+
+  function showReportModal() {
+    const existing = document.getElementById("moyd-report-modal");
+    if (existing) existing.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "moyd-report-modal";
+    modal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;";
+
+    const modalContent = document.createElement("div");
+    modalContent.style.cssText = "background: white; padding: 30px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);";
+    modalContent.innerHTML = '<h2 style="margin: 0 0 10px 0; color: #273351; font-size: 24px;">Report a Problem</h2><p style="margin: 0 0 25px 0; color: #666; font-size: 14px;">Having an issue? Contact Andrew directly via text message or email.</p><div style="display: flex; gap: 15px; margin-bottom: 20px;"><a href="sms:+18168983612&body=Hey%20Andrew%2C%20I%27m%20currently%20having%20a%20problem%20with%20the%20email%20campaign%20feature%20on%20moyd.app.%20" style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.backgroundColor=\'#1a2438\'" onmouseout="this.style.backgroundColor=\'#273351\'"><span style="font-size: 32px; margin-bottom: 10px;">💬</span><span style="font-size: 16px; font-weight: bold;">Send Text</span><span style="font-size: 12px; margin-top: 5px; opacity: 0.9;">816-898-3612</span></a><a href="mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue&body=Hey%20Andrew%2C%0A%0AI%27m%20currently%20having%20a%20problem%20with%20the%20email%20campaign%20feature%20on%20moyd.app.%0A%0ADetails%3A%0A" style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.backgroundColor=\'#1a2438\'" onmouseout="this.style.backgroundColor=\'#273351\'"><span style="font-size: 32px; margin-bottom: 10px;">✉️</span><span style="font-size: 16px; font-weight: bold;">Send Email</span><span style="font-size: 12px; margin-top: 5px; opacity: 0.9;">andrew@moyoungdemocrats.org</span></a></div><button onclick="document.getElementById(\'moyd-report-modal\').remove();" style="width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 8px; color: #333; font-size: 14px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.backgroundColor=\'#d0d0d0\'" onmouseout="this.style.backgroundColor=\'#e0e0e0\'">Close</button>';
+
+    modal.appendChild(modalContent);
+    modal.onclick = function(e) {
+      if (e.target === modal) modal.remove();
+    };
+
+    document.body.appendChild(modal);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+$js$::jsonb);
 EOSQL2
 
     if [ $? -eq 0 ]; then
-      echo "✅ Custom JavaScript injection configured"
+      echo "✅ Custom JavaScript injection configured (inline code)"
 
       # Also inject public CSS for login page
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
@@ -639,53 +672,16 @@ a, a:hover, a:active, a:focus,
   border-bottom-color: #273351 !important;
 }
 
-/* ===== CUSTOM BUTTONS ABOVE SIDEBAR MENU (CSS FALLBACK) ===== */
+/* ===== CUSTOM BUTTONS SPACE ===== */
 /* Create space above the menu for custom buttons */
 .menu {
   margin-top: 70px !important;
 }
 
-/* Refresh button using ::before pseudo-element (fallback if JS does not load) */
-.menu::before {
-  content: "🔄";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 40px;
-  height: 40px;
-  background-color: #273351;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 20px;
-  text-align: center;
-  line-height: 40px;
-  transition: background-color 0.3s ease;
-  z-index: 999;
-  pointer-events: auto;
-}
-
-/* Report problem button using ::after pseudo-element (fallback if JS does not load) */
+/* Hide CSS pseudo-element buttons (JavaScript will create real clickable buttons) */
+.menu::before,
 .menu::after {
-  content: "?";
-  display: block;
-  position: fixed;
-  top: 15px;
-  left: 65px;
-  width: 40px;
-  height: 40px;
-  background-color: #273351;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 40px;
-  transition: background-color 0.3s ease;
-  z-index: 999;
-  pointer-events: auto;
+  display: none !important;
 }
 
 /* Progress bars and loaders */
@@ -904,56 +900,6 @@ echo "   Current search_path: ${CURRENT_SEARCH_PATH}"
 echo "   Testing if settings table is accessible without explicit search_path..."
 SETTINGS_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM settings;" 2>&1 || echo "FAILED")
 echo "   Settings table accessible: ${SETTINGS_CHECK}"
-
-# Inject custom JavaScript into admin interface
-echo "💻 Injecting custom JavaScript for buttons..."
-ADMIN_HTML="/listmonk/static/admin.html"
-
-# Check if admin.html exists, if not create a simple HTML file
-if [ ! -f "$ADMIN_HTML" ]; then
-  # Create a simple redirect that loads our custom JS
-  cat > "$ADMIN_HTML" <<'ADMINHTML'
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <script src="/static/custom-buttons.js"></script>
-</head>
-<body>
-  <script>
-    // Inject custom buttons script into the main app
-    (function() {
-      var script = document.createElement('script');
-      script.src = '/static/custom-buttons.js';
-      document.head.appendChild(script);
-
-      // Also try injecting into the SPA when it loads
-      setTimeout(function() {
-        if (!document.getElementById('moyd-custom-buttons')) {
-          var scriptRetry = document.createElement('script');
-          scriptRetry.src = '/static/custom-buttons.js';
-          document.body.appendChild(scriptRetry);
-        }
-      }, 2000);
-    })();
-  </script>
-</body>
-</html>
-ADMINHTML
-  echo "✅ Created admin.html with custom script injection"
-fi
-
-# Also inject into the settings database for persistent loading
-PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
-  SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
-
-  -- Add custom HTML head content to load our JavaScript
-  INSERT INTO settings (key, value)
-  VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text))
-  ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
-EOSQL
-
-echo "✅ Custom JavaScript injection configured"
 
 # Start Listmonk
 echo "🎉 Starting Listmonk..."
