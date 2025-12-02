@@ -58,8 +58,8 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON TABLES TO ${DB_USER};
   ALTER DEFAULT PRIVILEGES IN SCHEMA ${DB_SCHEMA:-listmonk} GRANT ALL ON SEQUENCES TO ${DB_USER};
 
-  -- Set search_path for the postgres user (more reliable than ALTER DATABASE)
-  ALTER ROLE ${DB_USER} SET search_path TO ${DB_SCHEMA:-listmonk}, public;
+  -- Set search_path for the postgres user to ONLY listmonk schema (protect public schema!)
+  ALTER ROLE ${DB_USER} SET search_path TO ${DB_SCHEMA:-listmonk};
 EOSQL
 
 if [ $? -eq 0 ]; then
@@ -76,10 +76,10 @@ if [ "$TABLE_COUNT" -gt 0 ]; then
   echo "✅ Listmonk tables already exist, skipping installation"
 else
   echo "📦 Installing Listmonk schema manually..."
-  # Run schema.sql with explicit search_path set
+  # Run schema.sql with explicit search_path set to ONLY listmonk (not public!)
   PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
-    -- Set search_path for this session
-    SET search_path TO ${DB_SCHEMA:-listmonk}, public;
+    -- Set search_path to ONLY listmonk schema (exclude public to protect existing tables!)
+    SET search_path TO ${DB_SCHEMA:-listmonk};
 
     -- Run the schema file
     \i /listmonk/schema.sql
