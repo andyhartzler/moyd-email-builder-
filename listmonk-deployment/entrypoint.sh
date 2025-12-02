@@ -108,8 +108,8 @@ if [ "$TABLE_COUNT" -gt 0 ]; then
 
     -- Mark as installed (this is what --install does)
     INSERT INTO settings (key, value)
-    VALUES('migrations', '["v3.0.0"]'::JSONB)
-    ON CONFLICT (key) DO UPDATE SET value = '["v3.0.0"]'::JSONB;
+    VALUES('migrations', '["v5.1.0"]'::JSONB)
+    ON CONFLICT (key) DO UPDATE SET value = '["v5.1.0"]'::JSONB;
 EOSQL
 
   if [ $? -eq 0 ]; then
@@ -312,8 +312,8 @@ EOSQL
 
       -- Mark as installed (this is what --install does)
       INSERT INTO settings (key, value)
-      VALUES('migrations', '["v3.0.0"]'::JSONB)
-      ON CONFLICT (key) DO UPDATE SET value = '["v3.0.0"]'::JSONB;
+      VALUES('migrations', '["v5.1.0"]'::JSONB)
+      ON CONFLICT (key) DO UPDATE SET value = '["v5.1.0"]'::JSONB;
 EOSQL
 
     if [ $? -eq 0 ]; then
