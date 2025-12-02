@@ -1,10 +1,10 @@
-FROM listmonk/listmonk:v3.0.0
+FROM listmonk/listmonk:v5.1.0
 
 # Install wget for healthcheck and postgresql-client for schema creation
 RUN apk add --no-cache wget ca-certificates postgresql-client curl
 
-# Download Listmonk schema.sql for manual installation (use v3.0.0 tag to match Docker image version)
-RUN wget -O /listmonk/schema.sql https://raw.githubusercontent.com/knadh/listmonk/v3.0.0/schema.sql
+# Download Listmonk schema.sql for manual installation (use v5.1.0 tag to match Docker image version)
+RUN wget -O /listmonk/schema.sql https://raw.githubusercontent.com/knadh/listmonk/v5.1.0/schema.sql
 
 # Create necessary directories
 RUN mkdir -p /listmonk/uploads /listmonk/static && \
