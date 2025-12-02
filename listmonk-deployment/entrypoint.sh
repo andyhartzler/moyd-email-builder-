@@ -37,6 +37,26 @@ upload_uri = "/uploads"
 
 [security]
 enable_captcha = false
+
+# AMAZON SES SMTP CONFIGURATION (HARDCODED - DO NOT MODIFY)
+# Successfully tested: December 1, 2025
+# Test email sent to: hartzlerandrew@gmail.com
+[smtp]
+  [[smtp.0]]
+    enabled = true
+    host = "email-smtp.us-east-2.amazonaws.com"
+    port = 2587
+    auth_protocol = "login"
+    username = "AKIA3XRYIEHT3PLRTQWY"
+    password = "BFOsxwg+srSHJYx4zbPX24dc4HEB28CHlhRCmxlrATac"
+    hello_hostname = ""
+    tls_enabled = true
+    tls_skip_verify = false
+    max_conns = 10
+    max_msg_retries = 2
+    idle_timeout = "15s"
+    wait_timeout = "5s"
+    email_headers = []
 EOF
 
 echo "✅ Config file generated"
@@ -99,6 +119,43 @@ EOSQL
     echo "🔍 Verifying migration record is accessible..."
     MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
     echo "   Migration value found: ${MIGRATION_CHECK}"
+
+    # Inject custom CSS to hide header and branding for embedded Flutter app
+    echo "🎨 Injecting custom CSS to hide header and branding..."
+    PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+      SET search_path TO ${DB_SCHEMA:-listmonk};
+
+      -- Insert custom CSS to hide header bar, logo, and branding
+      INSERT INTO settings (key, value)
+      VALUES('appearance.admin_custom_css', '/* Custom CSS for embedded Flutter app - Hide header and branding */
+.header { display: none !important; }
+header { display: none !important; }
+.topbar { display: none !important; }
+nav.navbar { display: none !important; }
+.app-header { display: none !important; }
+footer { display: none !important; }
+.footer { display: none !important; }
+.powered-by { display: none !important; }
+.branding { display: none !important; }
+
+/* Adjust main content to use full height */
+.app-body { padding-top: 0 !important; }
+.content { padding-top: 0 !important; }
+main { padding-top: 0 !important; margin-top: 0 !important; }
+.page { padding-top: 0 !important; }
+
+/* Hide login page branding */
+.login-page .logo { display: none !important; }
+.login-page footer { display: none !important; }
+'::JSONB)
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+EOSQL
+
+    if [ $? -eq 0 ]; then
+      echo "✅ Custom CSS injected successfully"
+    else
+      echo "⚠️  Failed to inject custom CSS, but continuing..."
+    fi
   else
     echo "⚠️  Failed to mark database as installed, but continuing..."
   fi
@@ -135,6 +192,43 @@ EOSQL
       echo "🔍 Verifying migration record is accessible..."
       MIGRATION_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SET search_path TO ${DB_SCHEMA:-listmonk}; SELECT value FROM settings WHERE key = 'migrations';")
       echo "   Migration value found: ${MIGRATION_CHECK}"
+
+      # Inject custom CSS to hide header and branding for embedded Flutter app
+      echo "🎨 Injecting custom CSS to hide header and branding..."
+      PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
+        SET search_path TO ${DB_SCHEMA:-listmonk};
+
+        -- Insert custom CSS to hide header bar, logo, and branding
+        INSERT INTO settings (key, value)
+        VALUES('appearance.admin_custom_css', '/* Custom CSS for embedded Flutter app - Hide header and branding */
+.header { display: none !important; }
+header { display: none !important; }
+.topbar { display: none !important; }
+nav.navbar { display: none !important; }
+.app-header { display: none !important; }
+footer { display: none !important; }
+.footer { display: none !important; }
+.powered-by { display: none !important; }
+.branding { display: none !important; }
+
+/* Adjust main content to use full height */
+.app-body { padding-top: 0 !important; }
+.content { padding-top: 0 !important; }
+main { padding-top: 0 !important; margin-top: 0 !important; }
+.page { padding-top: 0 !important; }
+
+/* Hide login page branding */
+.login-page .logo { display: none !important; }
+.login-page footer { display: none !important; }
+'::JSONB)
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+EOSQL
+
+      if [ $? -eq 0 ]; then
+        echo "✅ Custom CSS injected successfully"
+      else
+        echo "⚠️  Failed to inject custom CSS, but continuing..."
+      fi
     else
       echo "⚠️  Failed to mark database as installed, but continuing..."
     fi
