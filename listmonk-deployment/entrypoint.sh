@@ -37,6 +37,26 @@ upload_uri = "/uploads"
 
 [security]
 enable_captcha = false
+
+# AMAZON SES SMTP CONFIGURATION (HARDCODED - DO NOT MODIFY)
+# Successfully tested: December 1, 2025
+# Test email sent to: hartzlerandrew@gmail.com
+[smtp]
+  [[smtp.0]]
+    enabled = true
+    host = "email-smtp.us-east-2.amazonaws.com"
+    port = 2587
+    auth_protocol = "login"
+    username = "AKIA3XRYIEHT3PLRTQWY"
+    password = "BFOsxwg+srSHJYx4zbPX24dc4HEB28CHlhRCmxlrATac"
+    hello_hostname = ""
+    tls_enabled = true
+    tls_skip_verify = false
+    max_conns = 10
+    max_msg_retries = 2
+    idle_timeout = "15s"
+    wait_timeout = "5s"
+    email_headers = []
 EOF
 
 echo "✅ Config file generated"
