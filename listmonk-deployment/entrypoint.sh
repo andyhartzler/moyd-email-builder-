@@ -19,9 +19,9 @@ user = "${DB_USER:-listmonk}"
 password = "${DB_PASSWORD}"
 database = "${DB_NAME:-postgres}"
 ssl_mode = "${DB_SSL_MODE:-require}"
-max_open = 25
-max_idle = 10
-max_lifetime = "300s"
+max_open = ${DB_MAX_OPEN:-5}
+max_idle = ${DB_MAX_IDLE:-2}
+max_lifetime = "${DB_MAX_LIFETIME:-60s}"
 params = "options='-c search_path=${DB_SCHEMA:-listmonk},extensions,public'"
 
 [privacy]
@@ -67,11 +67,12 @@ cors_allow_credentials = true
     email_headers = []
 EOF
 
-echo "✅ Config file generated"
+echo "✅ Config file generated with connection pool settings"
 echo "📊 Database: ${DB_HOST}:${DB_PORT:-5432}/${DB_NAME:-postgres}"
 echo "🔒 Schema: ${DB_SCHEMA:-listmonk} (tables isolated in listmonk schema)"
 echo "🔍 Search path: ${DB_SCHEMA:-listmonk}, extensions, public"
 echo "🔧 Search path order: listmonk (tables) → extensions (Supabase extensions) → public (fallback)"
+echo "🔄 Connection pool: max_open=${DB_MAX_OPEN:-5}, max_idle=${DB_MAX_IDLE:-2}, max_lifetime=${DB_MAX_LIFETIME:-60s}"
 echo ""
 echo "Generated config.toml [db] section:"
 grep -A 10 "^\[db\]" /listmonk/config.toml
