@@ -533,6 +533,104 @@ EOSQL3
       else
         echo "⚠️  Failed to inject public CSS, but continuing..."
       fi
+
+      # ========================================
+      # INJECT LOGIN FORM ENHANCEMENT JAVASCRIPT
+      # For CRM auto-authentication support
+      # ========================================
+      echo "📝 Injecting login form enhancement JavaScript..."
+      PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_LOGIN_JS'
+        SET search_path TO listmonk, extensions, public;
+
+        -- Delete existing public JS to avoid duplicates
+        DELETE FROM settings WHERE key = 'appearance.public.custom_js';
+
+        -- Insert login form enhancement for CRM auto-authentication
+        -- This adds predictable IDs and attributes to form elements
+        -- so the Flutter CRM can reliably auto-fill the login form
+        INSERT INTO settings (key, value)
+        VALUES('appearance.public.custom_js', to_jsonb('(function() {
+  "use strict";
+
+  // Only run on admin pages (login page)
+  if (!window.location.pathname.includes("/admin")) return;
+
+  function enhanceForm() {
+    // Find all input elements
+    var inputs = document.querySelectorAll("input");
+
+    inputs.forEach(function(input) {
+      var type = input.type.toLowerCase();
+
+      // Enhance username/email field
+      if (type === "text" || type === "email") {
+        input.setAttribute("name", "username");
+        input.setAttribute("id", "moyd-username");
+        input.setAttribute("data-testid", "username-input");
+        input.setAttribute("autocomplete", "username");
+      }
+
+      // Enhance password field
+      if (type === "password") {
+        input.setAttribute("name", "password");
+        input.setAttribute("id", "moyd-password");
+        input.setAttribute("data-testid", "password-input");
+        input.setAttribute("autocomplete", "current-password");
+      }
+    });
+
+    // Enhance submit button
+    var button = document.querySelector("button[type=\"submit\"], form button");
+    if (button) {
+      button.setAttribute("id", "moyd-submit");
+      button.setAttribute("data-testid", "submit-button");
+    }
+
+    // Enhance form element
+    var form = document.querySelector("form");
+    if (form) {
+      form.setAttribute("id", "moyd-login-form");
+      form.setAttribute("data-testid", "login-form");
+    }
+
+    console.log("[MOYD] Login form attributes added for CRM auto-auth");
+  }
+
+  // Run immediately
+  enhanceForm();
+
+  // Also run after delays to catch dynamically loaded content
+  setTimeout(enhanceForm, 100);
+  setTimeout(enhanceForm, 500);
+  setTimeout(enhanceForm, 1000);
+  setTimeout(enhanceForm, 2000);
+
+  // Observe for dynamic changes (Vue.js/React may re-render)
+  if (typeof MutationObserver !== "undefined") {
+    var observer = new MutationObserver(function(mutations) {
+      enhanceForm();
+    });
+
+    if (document.body) {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    // Stop observing after 10 seconds to prevent performance issues
+    setTimeout(function() {
+      observer.disconnect();
+    }, 10000);
+  }
+})();'::text));
+EOSQL_LOGIN_JS
+
+      if [ $? -eq 0 ]; then
+        echo "✅ Login form enhancement JavaScript injected successfully"
+      else
+        echo "⚠️ Failed to inject login form enhancement JavaScript"
+      fi
     else
       echo "⚠️  Failed to inject custom JavaScript, but continuing..."
     fi
@@ -882,6 +980,104 @@ EOSQL3
             echo "✅ Public CSS (login page) injected successfully"
           else
             echo "⚠️  Failed to inject public CSS, but continuing..."
+          fi
+
+          # ========================================
+          # INJECT LOGIN FORM ENHANCEMENT JAVASCRIPT
+          # For CRM auto-authentication support
+          # ========================================
+          echo "📝 Injecting login form enhancement JavaScript..."
+          PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_LOGIN_JS2'
+            SET search_path TO listmonk, extensions, public;
+
+            -- Delete existing public JS to avoid duplicates
+            DELETE FROM settings WHERE key = 'appearance.public.custom_js';
+
+            -- Insert login form enhancement for CRM auto-authentication
+            -- This adds predictable IDs and attributes to form elements
+            -- so the Flutter CRM can reliably auto-fill the login form
+            INSERT INTO settings (key, value)
+            VALUES('appearance.public.custom_js', to_jsonb('(function() {
+  "use strict";
+
+  // Only run on admin pages (login page)
+  if (!window.location.pathname.includes("/admin")) return;
+
+  function enhanceForm() {
+    // Find all input elements
+    var inputs = document.querySelectorAll("input");
+
+    inputs.forEach(function(input) {
+      var type = input.type.toLowerCase();
+
+      // Enhance username/email field
+      if (type === "text" || type === "email") {
+        input.setAttribute("name", "username");
+        input.setAttribute("id", "moyd-username");
+        input.setAttribute("data-testid", "username-input");
+        input.setAttribute("autocomplete", "username");
+      }
+
+      // Enhance password field
+      if (type === "password") {
+        input.setAttribute("name", "password");
+        input.setAttribute("id", "moyd-password");
+        input.setAttribute("data-testid", "password-input");
+        input.setAttribute("autocomplete", "current-password");
+      }
+    });
+
+    // Enhance submit button
+    var button = document.querySelector("button[type=\"submit\"], form button");
+    if (button) {
+      button.setAttribute("id", "moyd-submit");
+      button.setAttribute("data-testid", "submit-button");
+    }
+
+    // Enhance form element
+    var form = document.querySelector("form");
+    if (form) {
+      form.setAttribute("id", "moyd-login-form");
+      form.setAttribute("data-testid", "login-form");
+    }
+
+    console.log("[MOYD] Login form attributes added for CRM auto-auth");
+  }
+
+  // Run immediately
+  enhanceForm();
+
+  // Also run after delays to catch dynamically loaded content
+  setTimeout(enhanceForm, 100);
+  setTimeout(enhanceForm, 500);
+  setTimeout(enhanceForm, 1000);
+  setTimeout(enhanceForm, 2000);
+
+  // Observe for dynamic changes (Vue.js/React may re-render)
+  if (typeof MutationObserver !== "undefined") {
+    var observer = new MutationObserver(function(mutations) {
+      enhanceForm();
+    });
+
+    if (document.body) {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    // Stop observing after 10 seconds to prevent performance issues
+    setTimeout(function() {
+      observer.disconnect();
+    }, 10000);
+  }
+})();'::text));
+EOSQL_LOGIN_JS2
+
+          if [ $? -eq 0 ]; then
+            echo "✅ Login form enhancement JavaScript injected successfully"
+          else
+            echo "⚠️ Failed to inject login form enhancement JavaScript"
           fi
         else
           echo "⚠️  Failed to inject custom JavaScript, but continuing..."
