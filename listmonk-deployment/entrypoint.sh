@@ -358,25 +358,24 @@ EOSQL
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin.custom_js', $js$
-(function() {
+      VALUES('appearance.admin.custom_js', to_jsonb('(function() {
   "use strict";
 
   function init() {
-    const menu = document.querySelector(".menu");
+    var menu = document.querySelector(".menu");
     if (!menu) {
       setTimeout(init, 500);
       return;
     }
 
-    const existing = document.getElementById("moyd-custom-buttons");
+    var existing = document.getElementById("moyd-custom-buttons");
     if (existing) existing.remove();
 
-    const buttonsContainer = document.createElement("div");
+    var buttonsContainer = document.createElement("div");
     buttonsContainer.id = "moyd-custom-buttons";
     buttonsContainer.style.cssText = "position: fixed; top: 15px; left: 15px; z-index: 1000; display: flex; gap: 10px;";
 
-    const refreshBtn = document.createElement("button");
+    var refreshBtn = document.createElement("button");
     refreshBtn.innerHTML = "🔄";
     refreshBtn.title = "Refresh Page";
     refreshBtn.style.cssText = "width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 20px; cursor: pointer; transition: all 0.3s ease;";
@@ -384,7 +383,7 @@ EOSQL
     refreshBtn.onmouseout = function() { this.style.transform = "rotate(0deg)"; this.style.backgroundColor = "#273351"; };
     refreshBtn.onclick = function() { location.reload(); };
 
-    const reportBtn = document.createElement("button");
+    var reportBtn = document.createElement("button");
     reportBtn.innerHTML = "?";
     reportBtn.title = "Report a Problem";
     reportBtn.style.cssText = "width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease;";
@@ -396,19 +395,20 @@ EOSQL
     buttonsContainer.appendChild(reportBtn);
     document.body.appendChild(buttonsContainer);
     menu.style.marginTop = "20px";
+    console.log("[MOYD] Admin buttons loaded");
   }
 
   function showReportModal() {
-    const existing = document.getElementById("moyd-report-modal");
+    var existing = document.getElementById("moyd-report-modal");
     if (existing) existing.remove();
 
-    const modal = document.createElement("div");
+    var modal = document.createElement("div");
     modal.id = "moyd-report-modal";
     modal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;";
 
-    const modalContent = document.createElement("div");
+    var modalContent = document.createElement("div");
     modalContent.style.cssText = "background: white; padding: 30px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);";
-    modalContent.innerHTML = '<h2 style="margin: 0 0 10px 0; color: #273351; font-size: 24px;">Report a Problem</h2><p style="margin: 0 0 25px 0; color: #666; font-size: 14px;">Having an issue? Contact Andrew directly via text message or email.</p><div style="display: flex; gap: 15px; margin-bottom: 20px;"><a href="sms:+18168983612&body=Hey%20Andrew%2C%20I%27m%20currently%20having%20a%20problem%20with%20the%20email%20campaign%20feature%20on%20moyd.app.%20" style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.backgroundColor=\'#1a2438\'" onmouseout="this.style.backgroundColor=\'#273351\'"><span style="font-size: 32px; margin-bottom: 10px;">💬</span><span style="font-size: 16px; font-weight: bold;">Send Text</span><span style="font-size: 12px; margin-top: 5px; opacity: 0.9;">816-898-3612</span></a><a href="mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue&body=Hey%20Andrew%2C%0A%0AI%27m%20currently%20having%20a%20problem%20with%20the%20email%20campaign%20feature%20on%20moyd.app.%0A%0ADetails%3A%0A" style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.backgroundColor=\'#1a2438\'" onmouseout="this.style.backgroundColor=\'#273351\'"><span style="font-size: 32px; margin-bottom: 10px;">✉️</span><span style="font-size: 16px; font-weight: bold;">Send Email</span><span style="font-size: 12px; margin-top: 5px; opacity: 0.9;">andrew@moyoungdemocrats.org</span></a></div><button onclick="document.getElementById(\'moyd-report-modal\').remove();" style="width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 8px; color: #333; font-size: 14px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.backgroundColor=\'#d0d0d0\'" onmouseout="this.style.backgroundColor=\'#e0e0e0\'">Close</button>';
+    modalContent.innerHTML = "<h2 style=\"margin: 0 0 10px 0; color: #273351; font-size: 24px;\">Report a Problem</h2><p style=\"margin: 0 0 25px 0; color: #666; font-size: 14px;\">Having an issue? Contact Andrew directly via text message or email.</p><div style=\"display: flex; gap: 15px; margin-bottom: 20px;\"><a href=\"sms:+18168983612\" style=\"flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px;\"><span style=\"font-size: 32px; margin-bottom: 10px;\">💬</span><span style=\"font-size: 16px; font-weight: bold;\">Send Text</span><span style=\"font-size: 12px; margin-top: 5px; opacity: 0.9;\">816-898-3612</span></a><a href=\"mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue\" style=\"flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px;\"><span style=\"font-size: 32px; margin-bottom: 10px;\">✉️</span><span style=\"font-size: 16px; font-weight: bold;\">Send Email</span><span style=\"font-size: 12px; margin-top: 5px; opacity: 0.9;\">andrew@moyoungdemocrats.org</span></a></div><button onclick=\"document.getElementById(\\\"moyd-report-modal\\\").remove();\" style=\"width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 8px; color: #333; font-size: 14px; cursor: pointer;\">Close</button>";
 
     modal.appendChild(modalContent);
     modal.onclick = function(e) {
@@ -423,8 +423,7 @@ EOSQL
   } else {
     init();
   }
-})();
-$js$::jsonb);
+})();'::text));
 EOSQL2
 
     if [ $? -eq 0 ]; then
@@ -1108,49 +1107,49 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
 
   -- Insert login form enhancement JavaScript
   INSERT INTO settings (key, value)
-  VALUES('appearance.public.custom_js', $js$
-(function() {
-  'use strict';
+  VALUES('appearance.public.custom_js', to_jsonb('(function() {
+  "use strict";
 
   // Only run on login page
-  if (!window.location.pathname.includes('/admin')) return;
+  if (window.location.pathname.indexOf("/admin") === -1) return;
 
   function enhanceForm() {
     // Add predictable attributes to form elements
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
-      const type = input.type.toLowerCase();
-      if (type === 'text' || type === 'email') {
-        input.setAttribute('name', 'username');
-        input.setAttribute('id', 'moyd-username');
-        input.setAttribute('data-testid', 'username-input');
-        input.setAttribute('autocomplete', 'username');
-        input.setAttribute('data-moyd-field', 'username');
+    var inputs = document.querySelectorAll("input");
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      var type = (input.type || "").toLowerCase();
+      if (type === "text" || type === "email") {
+        input.setAttribute("name", "username");
+        input.setAttribute("id", "moyd-username");
+        input.setAttribute("data-testid", "username-input");
+        input.setAttribute("autocomplete", "username");
+        input.setAttribute("data-moyd-field", "username");
       }
-      if (type === 'password') {
-        input.setAttribute('name', 'password');
-        input.setAttribute('id', 'moyd-password');
-        input.setAttribute('data-testid', 'password-input');
-        input.setAttribute('autocomplete', 'current-password');
-        input.setAttribute('data-moyd-field', 'password');
+      if (type === "password") {
+        input.setAttribute("name", "password");
+        input.setAttribute("id", "moyd-password");
+        input.setAttribute("data-testid", "password-input");
+        input.setAttribute("autocomplete", "current-password");
+        input.setAttribute("data-moyd-field", "password");
       }
-    });
+    }
 
-    const button = document.querySelector('button[type="submit"], form button');
+    var button = document.querySelector("button[type=\"submit\"]") || document.querySelector("form button");
     if (button) {
-      button.setAttribute('id', 'moyd-submit');
-      button.setAttribute('data-testid', 'submit-button');
-      button.setAttribute('data-moyd-field', 'submit');
+      button.setAttribute("id", "moyd-submit");
+      button.setAttribute("data-testid", "submit-button");
+      button.setAttribute("data-moyd-field", "submit");
     }
 
     // Add form ID
-    const form = document.querySelector('form');
+    var form = document.querySelector("form");
     if (form) {
-      form.setAttribute('id', 'moyd-login-form');
-      form.setAttribute('data-testid', 'login-form');
+      form.setAttribute("id", "moyd-login-form");
+      form.setAttribute("data-testid", "login-form");
     }
 
-    console.log('[MOYD] Login form attributes added');
+    console.log("[MOYD] Login form attributes added");
   }
 
   // Run immediately and after delays
@@ -1158,15 +1157,18 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   setTimeout(enhanceForm, 100);
   setTimeout(enhanceForm, 500);
   setTimeout(enhanceForm, 1000);
+  setTimeout(enhanceForm, 2000);
 
   // Also observe for dynamic changes
-  const observer = new MutationObserver(enhanceForm);
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // Stop observing after 5 seconds
-  setTimeout(() => observer.disconnect(), 5000);
-})();
-$js$::jsonb);
+  if (typeof MutationObserver !== "undefined") {
+    var observer = new MutationObserver(enhanceForm);
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+    // Stop observing after 10 seconds
+    setTimeout(function() { observer.disconnect(); }, 10000);
+  }
+})();'::text));
 
 EOSQL_CRM_AUTH
 
