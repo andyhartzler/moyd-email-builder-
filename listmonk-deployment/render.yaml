@@ -31,3 +31,6 @@ services:
         value: listmonk
       - key: DB_PARAMS
         value: "options='-c search_path=listmonk'"
+      # CORS settings for CRM auto-authentication
+      - key: LISTMONK_CORS_ORIGINS
+        value: "https://moyd.app,https://www.moyd.app"

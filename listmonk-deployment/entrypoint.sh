@@ -39,6 +39,13 @@ upload_uri = "/uploads"
 [security]
 enable_captcha = false
 
+# CORS configuration - Allow CRM domain (moyd.app) for auto-authentication
+# This allows the Flutter CRM to make API requests to Listmonk
+cors_allowed_origins = ["https://moyd.app", "https://www.moyd.app", "https://*.moyd.app", "http://localhost:*"]
+cors_allowed_headers = ["Content-Type", "Authorization", "Cookie", "X-Requested-With"]
+cors_allowed_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+cors_allow_credentials = true
+
 # AMAZON SES SMTP CONFIGURATION (HARDCODED - DO NOT MODIFY)
 # Successfully tested: December 1, 2025
 # Test email sent to: hartzlerandrew@gmail.com
@@ -889,6 +896,107 @@ EOSQL3
     echo "❌ Schema installation failed"
     exit 1
   fi
+fi
+
+# ========================================
+# STEP: ENHANCE LOGIN FORM FOR CRM AUTO-AUTH
+# ========================================
+echo "🔐 Configuring login form for CRM auto-authentication..."
+
+PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_CRM_AUTH'
+  SET search_path TO listmonk, extensions, public;
+
+  -- Delete any existing public JS
+  DELETE FROM settings WHERE key = 'appearance.public.custom_js';
+
+  -- Insert login form enhancement JavaScript
+  INSERT INTO settings (key, value)
+  VALUES('appearance.public.custom_js', $js$
+(function() {
+  'use strict';
+
+  // Only run on login page
+  if (!window.location.pathname.includes('/admin')) return;
+
+  function enhanceForm() {
+    // Add predictable attributes to form elements
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      const type = input.type.toLowerCase();
+      if (type === 'text' || type === 'email') {
+        input.setAttribute('name', 'username');
+        input.setAttribute('id', 'moyd-username');
+        input.setAttribute('data-testid', 'username-input');
+        input.setAttribute('autocomplete', 'username');
+        input.setAttribute('data-moyd-field', 'username');
+      }
+      if (type === 'password') {
+        input.setAttribute('name', 'password');
+        input.setAttribute('id', 'moyd-password');
+        input.setAttribute('data-testid', 'password-input');
+        input.setAttribute('autocomplete', 'current-password');
+        input.setAttribute('data-moyd-field', 'password');
+      }
+    });
+
+    const button = document.querySelector('button[type="submit"], form button');
+    if (button) {
+      button.setAttribute('id', 'moyd-submit');
+      button.setAttribute('data-testid', 'submit-button');
+      button.setAttribute('data-moyd-field', 'submit');
+    }
+
+    // Add form ID
+    const form = document.querySelector('form');
+    if (form) {
+      form.setAttribute('id', 'moyd-login-form');
+      form.setAttribute('data-testid', 'login-form');
+    }
+
+    console.log('[MOYD] Login form attributes added');
+  }
+
+  // Run immediately and after delays
+  enhanceForm();
+  setTimeout(enhanceForm, 100);
+  setTimeout(enhanceForm, 500);
+  setTimeout(enhanceForm, 1000);
+
+  // Also observe for dynamic changes
+  const observer = new MutationObserver(enhanceForm);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Stop observing after 5 seconds
+  setTimeout(() => observer.disconnect(), 5000);
+})();
+$js$::jsonb);
+
+EOSQL_CRM_AUTH
+
+if [ $? -eq 0 ]; then
+  echo "✅ Login form enhancement configured"
+else
+  echo "⚠️ Failed to configure login form enhancement"
+fi
+
+# ========================================
+# STEP: SET UP CRM INTEGRATION SETTING
+# ========================================
+echo "🔗 Setting up CRM integration indicator..."
+
+PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_CRM_SETTING'
+  SET search_path TO listmonk, extensions, public;
+
+  -- Add a setting to indicate CRM integration is enabled
+  INSERT INTO settings (key, value)
+  VALUES('app.crm_integration_enabled', 'true'::jsonb)
+  ON CONFLICT (key) DO UPDATE SET value = 'true'::jsonb;
+EOSQL_CRM_SETTING
+
+if [ $? -eq 0 ]; then
+  echo "✅ CRM integration indicator set"
+else
+  echo "⚠️ Failed to set CRM integration indicator"
 fi
 
 # Final verification before starting Listmonk
