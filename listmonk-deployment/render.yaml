@@ -31,6 +31,13 @@ services:
         value: listmonk
       - key: DB_PARAMS
         value: "options='-c search_path=listmonk'"
+      # Database connection pool settings (prevents "sql: database is closed" errors with Supabase)
+      - key: DB_MAX_OPEN
+        value: "5"
+      - key: DB_MAX_IDLE
+        value: "2"
+      - key: DB_MAX_LIFETIME
+        value: "60s"
       # CORS settings for CRM auto-authentication
       - key: LISTMONK_CORS_ORIGINS
         value: "https://moyd.app,https://www.moyd.app"
