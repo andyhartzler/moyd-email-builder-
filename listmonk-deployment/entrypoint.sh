@@ -1095,87 +1095,195 @@ EOSQL_LOGIN_JS2
 fi
 
 # ========================================
-# STEP: ENHANCE LOGIN FORM FOR CRM AUTO-AUTH
+# INJECT LOGIN AUTO-FILL WITH POSTMESSAGE
 # ========================================
-echo "🔐 Configuring login form for CRM auto-authentication..."
+echo "📝 Injecting login form postMessage handler..."
 
-PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_CRM_AUTH'
+PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_POSTMSG'
   SET search_path TO listmonk, extensions, public;
 
-  -- Delete any existing public JS
   DELETE FROM settings WHERE key = 'appearance.public.custom_js';
-
-  -- Insert login form enhancement JavaScript
   INSERT INTO settings (key, value)
   VALUES('appearance.public.custom_js', to_jsonb('(function() {
   "use strict";
 
-  // Only run on login page
-  if (window.location.pathname.indexOf("/admin") === -1) return;
+  var PARENT_ORIGINS = [
+    "https://moyd.app",
+    "https://www.moyd.app",
+    "http://localhost:3000",
+    "http://localhost:8080"
+  ];
 
-  function enhanceForm() {
-    // Add predictable attributes to form elements
+  console.log("[MOYD] Listmonk postMessage handler initializing...");
+
+  function isLoginPage() {
+    return window.location.pathname.indexOf("/admin/login") !== -1 ||
+           (window.location.pathname.indexOf("/admin") !== -1 &&
+            document.querySelector("input[type=password]") !== null);
+  }
+
+  function fillAndSubmitForm(username, password) {
+    console.log("[MOYD] Attempting to fill login form...");
+
+    var usernameField = document.querySelector("input#moyd-username") ||
+                        document.querySelector("input[type=text]") ||
+                        document.querySelector("input[type=email]") ||
+                        document.querySelector("input[name=username]");
+
+    var passwordField = document.querySelector("input#moyd-password") ||
+                        document.querySelector("input[type=password]") ||
+                        document.querySelector("input[name=password]");
+
+    var submitBtn = document.querySelector("button#moyd-submit") ||
+                    document.querySelector("button[type=submit]") ||
+                    document.querySelector("form button");
+
+    if (!usernameField || !passwordField) {
+      console.log("[MOYD] Login form fields not found, retrying...");
+      return false;
+    }
+
+    function setNativeValue(element, value) {
+      var valueSetter = Object.getOwnPropertyDescriptor(element, "value").set;
+      var prototype = Object.getPrototypeOf(element);
+      var prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value").set;
+
+      if (valueSetter && valueSetter !== prototypeValueSetter) {
+        prototypeValueSetter.call(element, value);
+      } else {
+        valueSetter.call(element, value);
+      }
+
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    try {
+      setNativeValue(usernameField, username);
+      setNativeValue(passwordField, password);
+
+      console.log("[MOYD] Credentials filled, submitting form...");
+
+      setTimeout(function() {
+        if (submitBtn) {
+          submitBtn.click();
+        } else {
+          var form = document.querySelector("form");
+          if (form) {
+            form.submit();
+          }
+        }
+      }, 100);
+
+      return true;
+    } catch (e) {
+      console.error("[MOYD] Error filling form:", e);
+      return false;
+    }
+  }
+
+  function handleMessage(event) {
+    var isAllowedOrigin = PARENT_ORIGINS.some(function(origin) {
+      return event.origin === origin || event.origin.indexOf(origin) !== -1;
+    });
+
+    if (!isAllowedOrigin) {
+      console.log("[MOYD] Ignoring message from unauthorized origin:", event.origin);
+      return;
+    }
+
+    var data = event.data;
+
+    if (!data || data.type !== "MOYD_LOGIN_CREDENTIALS") {
+      return;
+    }
+
+    console.log("[MOYD] Received login credentials from CRM");
+
+    if (!isLoginPage()) {
+      console.log("[MOYD] Not on login page, ignoring credentials");
+      event.source.postMessage({ type: "MOYD_LOGIN_RESULT", success: true, reason: "already_logged_in" }, event.origin);
+      return;
+    }
+
+    var attempts = 0;
+    var maxAttempts = 10;
+
+    function tryFill() {
+      attempts++;
+      var success = fillAndSubmitForm(data.username, data.password);
+
+      if (success) {
+        console.log("[MOYD] Login form submitted successfully");
+        event.source.postMessage({ type: "MOYD_LOGIN_RESULT", success: true }, event.origin);
+      } else if (attempts < maxAttempts) {
+        console.log("[MOYD] Retrying fill, attempt " + attempts + "/" + maxAttempts);
+        setTimeout(tryFill, 200);
+      } else {
+        console.log("[MOYD] Failed to fill form after " + maxAttempts + " attempts");
+        event.source.postMessage({ type: "MOYD_LOGIN_RESULT", success: false, reason: "form_not_found" }, event.origin);
+      }
+    }
+
+    tryFill();
+  }
+
+  window.addEventListener("message", handleMessage, false);
+
+  function enhanceLoginForm() {
     var inputs = document.querySelectorAll("input");
+
     for (var i = 0; i < inputs.length; i++) {
       var input = inputs[i];
       var type = (input.type || "").toLowerCase();
+
       if (type === "text" || type === "email") {
-        input.setAttribute("name", "username");
         input.setAttribute("id", "moyd-username");
-        input.setAttribute("data-testid", "username-input");
+        input.setAttribute("name", "username");
         input.setAttribute("autocomplete", "username");
-        input.setAttribute("data-moyd-field", "username");
       }
+
       if (type === "password") {
-        input.setAttribute("name", "password");
         input.setAttribute("id", "moyd-password");
-        input.setAttribute("data-testid", "password-input");
+        input.setAttribute("name", "password");
         input.setAttribute("autocomplete", "current-password");
-        input.setAttribute("data-moyd-field", "password");
       }
     }
 
-    var button = document.querySelector("button[type=\"submit\"]") || document.querySelector("form button");
+    var button = document.querySelector("button[type=submit]") || document.querySelector("form button");
     if (button) {
       button.setAttribute("id", "moyd-submit");
-      button.setAttribute("data-testid", "submit-button");
-      button.setAttribute("data-moyd-field", "submit");
     }
 
-    // Add form ID
     var form = document.querySelector("form");
     if (form) {
       form.setAttribute("id", "moyd-login-form");
-      form.setAttribute("data-testid", "login-form");
     }
-
-    console.log("[MOYD] Login form attributes added");
   }
 
-  // Run immediately and after delays
-  enhanceForm();
-  setTimeout(enhanceForm, 100);
-  setTimeout(enhanceForm, 500);
-  setTimeout(enhanceForm, 1000);
-  setTimeout(enhanceForm, 2000);
+  if (isLoginPage()) {
+    enhanceLoginForm();
+    setTimeout(enhanceLoginForm, 100);
+    setTimeout(enhanceLoginForm, 500);
 
-  // Also observe for dynamic changes
-  if (typeof MutationObserver !== "undefined") {
-    var observer = new MutationObserver(enhanceForm);
-    if (document.body) {
-      observer.observe(document.body, { childList: true, subtree: true });
+    if (window.parent && window.parent !== window) {
+      console.log("[MOYD] On login page, notifying parent frame...");
+      try {
+        window.parent.postMessage({ type: "MOYD_LOGIN_PAGE_READY" }, "*");
+      } catch (e) {
+        console.log("[MOYD] Could not notify parent:", e);
+      }
     }
-    // Stop observing after 10 seconds
-    setTimeout(function() { observer.disconnect(); }, 10000);
   }
+
+  console.log("[MOYD] postMessage handler ready, listening for credentials...");
 })();'::text));
-
-EOSQL_CRM_AUTH
+EOSQL_POSTMSG
 
 if [ $? -eq 0 ]; then
-  echo "✅ Login form enhancement configured"
+  echo "✅ Login postMessage handler injected successfully"
 else
-  echo "⚠️ Failed to configure login form enhancement"
+  echo "⚠️ Failed to inject login postMessage handler"
 fi
 
 # ========================================
