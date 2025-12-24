@@ -210,8 +210,7 @@ a.navbar-item[href="/admin/"] {
   display: none !important;
 }
 
-/* ===== HIDE PROFILE DROPDOWN ONLY (not entire navbar-end) ===== */
-/* Target the profile/user dropdown specifically */
+/* ===== HIDE PROFILE DROPDOWN AND LOGOUT ===== */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -221,13 +220,21 @@ a.navbar-item[href="/admin/"] {
 .navbar-end .dropdown,
 .navbar-end .navbar-item .dropdown-trigger,
 .navbar-end .navbar-item .dropdown-menu,
-/* Hide user avatar/icon */
 .navbar-end .navbar-item > figure,
 .navbar-end .navbar-item > .image,
 .navbar-end .navbar-item img.is-rounded,
-/* Hide the actual profile dropdown container */
 .navbar-item.profile-dropdown,
 .navbar-end > .navbar-item:last-child {
+  display: none !important;
+}
+
+/* Hide Logout from mobile menu */
+a[href="/admin/logout"],
+a[href*="logout"],
+.navbar-item[href="/admin/logout"],
+.navbar-item[href*="logout"],
+.navbar-menu a[href*="logout"],
+.navbar-end a[href*="logout"] {
   display: none !important;
 }
 
@@ -475,189 +482,186 @@ EOSQL2
         -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
         DELETE FROM settings WHERE key = 'appearance.public.custom_css';
         INSERT INTO settings (key, value)
-        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page - Missouri Young Democrats */
+        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Public Pages - Missouri Young Democrats */
 
-/* ===== CENTER EVERYTHING ===== */
-body.login, .login {
+/* ===== GLOBAL RESET FOR LOGIN PAGES ===== */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ===== LOGIN PAGE LAYOUT ===== */
+body, .login, body.login {
+  min-height: 100vh !important;
   display: flex !important;
   flex-direction: column !important;
-  min-height: 100vh !important;
   justify-content: center !important;
   align-items: center !important;
   background: #f5f5f5 !important;
-}
-
-.login .wrap {
-  width: 100% !important;
-  max-width: 400px !important;
   padding: 20px !important;
   box-sizing: border-box !important;
 }
 
-/* ===== LOGO CONTAINER ===== */
-.login .wrap .logo,
-.login .logo {
+/* ===== MAIN WRAPPER ===== */
+.wrap, .login .wrap, main.wrap {
+  width: 100% !important;
+  max-width: 380px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* ===== LOGO - CENTERED ===== */
+.logo, .wrap .logo, .login .logo {
+  width: 100% !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  margin-bottom: 20px !important;
-  min-height: 80px !important;
-  height: auto !important;
-}
-
-/* Hide default logo */
-.login .wrap .logo img,
-.login .logo img,
-.login .wrap .logo svg,
-.login .logo svg {
-  display: none !important;
-}
-
-/* Custom MOYD logo */
-.login .wrap .logo::before,
-.login .logo::before {
-  content: "" !important;
-  display: block !important;
-  width: 180px !important;
-  height: 70px !important;
-  background-image: url("/uploads/MOYD01.png") !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-}
-
-/* ===== LOGIN BOX - COMPACT HEIGHT ===== */
-.login .box,
-.login .wrap .box {
-  background: white !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  padding: 24px !important;
+  margin-bottom: 24px !important;
+  padding: 0 !important;
   min-height: auto !important;
   height: auto !important;
 }
 
-/* Remove any extra spacing inside box */
-.login .box > *:first-child {
-  margin-top: 0 !important;
+/* Center the logo link and image */
+.logo a, .wrap .logo a {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
 }
 
-.login .box > *:last-child {
+.logo img, .logo a img, .wrap .logo img {
+  max-width: 200px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+/* ===== LOGIN BOX - COMPACT ===== */
+.box, .wrap .box, .login .box {
+  width: 100% !important;
+  max-width: 380px !important;
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+  padding: 24px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* Remove extra spacing in box */
+.box > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.box > *:last-child {
   margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* ===== LOGIN TITLE ===== */
+.box h1, .box h2, .box .title {
+  font-size: 20px !important;
+  margin: 0 0 20px 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  color: #273351 !important;
+}
+
+/* ===== FORM FIELDS ===== */
+.field, .control {
+  margin-bottom: 16px !important;
+}
+
+label, .label {
+  font-size: 14px !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+  color: #333 !important;
 }
 
 /* ===== FORM INPUTS ===== */
-.login .input,
-.login input[type="text"],
-.login input[type="password"] {
-  border-radius: 8px !important;
-  border: 1px solid #ddd !important;
-  padding: 12px 14px !important;
-  font-size: 16px !important;
-  min-height: 44px !important;
+input, .input, input[type="text"], input[type="password"], input[type="email"] {
+  width: 100% !important;
   height: 44px !important;
-  margin-bottom: 12px !important;
-}
-
-.login .input:focus,
-.login input:focus {
-  border-color: #273351 !important;
-  box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding: 10px 14px !important;
+  font-size: 16px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
   outline: none !important;
 }
 
-/* ===== FIELD LABELS ===== */
-.login .field,
-.login .control {
-  margin-bottom: 12px !important;
-}
-
-.login label {
-  margin-bottom: 4px !important;
-  font-size: 14px !important;
+input:focus, .input:focus {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
 }
 
 /* ===== LOGIN BUTTON - NAVY BLUE ===== */
-.login .button,
-.login button,
-.login button[type="submit"],
-.login .button.is-primary,
-.login input[type="submit"],
-.wrap .box .button,
-.wrap .box button,
-form button,
-form .button {
-  background-color: #273351 !important;
-  border-color: #273351 !important;
-  color: white !important;
-  font-weight: 600 !important;
-  font-size: 16px !important;
-  padding: 12px 20px !important;
-  min-height: 44px !important;
-  height: 44px !important;
-  border-radius: 8px !important;
+button, .button, input[type="submit"], button[type="submit"], .btn, .button.is-primary,
+form button, form .button, .box button, .box .button {
   width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background-color: #273351 !important;
+  background: #273351 !important;
+  border: none !important;
+  border-color: #273351 !important;
+  border-radius: 8px !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
   margin-top: 8px !important;
+  transition: background-color 0.2s ease !important;
 }
 
-.login .button:hover,
-.login button:hover,
-.login button[type="submit"]:hover,
-.wrap .box .button:hover,
-.wrap .box button:hover,
-form button:hover {
+button:hover, .button:hover, input[type="submit"]:hover {
   background-color: #1a2438 !important;
-  border-color: #1a2438 !important;
+  background: #1a2438 !important;
 }
 
-/* ===== HIDE "POWERED BY LISTMONK" ===== */
-.login footer,
-.login .footer,
-footer.footer,
-.login + footer,
-body.login > footer,
-footer,
-.powered-by,
-[class*="powered"],
-.login ~ footer {
+/* ===== HIDE FOOTER/BRANDING ===== */
+footer, .footer, .powered-by, [class*="powered"], .wrap > hr, hr {
   display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
 }
 
-/* Hide any extra elements outside the box */
-.login .wrap > *:not(.logo):not(.box) {
+/* Hide anything outside logo and box */
+.wrap > *:not(.logo):not(.box):not(form) {
   display: none !important;
 }
 
 /* ===== LINKS ===== */
-.login a {
+a {
   color: #273351 !important;
 }
 
-.login a:hover {
+a:hover {
   color: #1a2438 !important;
-  text-decoration: underline !important;
 }
 
-/* ===== MOBILE RESPONSIVE ===== */
+/* ===== MOBILE ===== */
 @media screen and (max-width: 480px) {
-  .login .wrap {
+  body, .login {
     padding: 16px !important;
+  }
+
+  .wrap {
     max-width: 100% !important;
   }
 
-  .login .wrap .logo::before,
-  .login .logo::before {
-    width: 150px !important;
-    height: 60px !important;
+  .logo::before {
+    width: 160px !important;
+    height: 64px !important;
   }
 
-  .login .box {
+  .box {
     padding: 20px !important;
   }
 }
@@ -767,6 +771,28 @@ EOSQL_LOGIN_JS
       else
         echo "⚠️ Failed to inject login form enhancement JavaScript"
       fi
+
+      # Set site name and favicon
+      echo "🏷️ Setting site name and favicon..."
+      PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_BRANDING'
+        SET search_path TO listmonk, extensions, public;
+
+        -- Set site name to MOYD (appears in browser tab)
+        INSERT INTO settings (key, value)
+        VALUES ('app.site_name', '"MOYD"'::jsonb)
+        ON CONFLICT (key) DO UPDATE SET value = '"MOYD"'::jsonb;
+
+        -- Set custom favicon URL
+        INSERT INTO settings (key, value)
+        VALUES ('app.favicon_url', '"/uploads/favicon.png"'::jsonb)
+        ON CONFLICT (key) DO UPDATE SET value = '"/uploads/favicon.png"'::jsonb;
+EOSQL_BRANDING
+
+      if [ $? -eq 0 ]; then
+        echo "✅ Site name and favicon configured"
+      else
+        echo "⚠️ Failed to set site name/favicon"
+      fi
     else
       echo "⚠️  Failed to inject custom JavaScript, but continuing..."
     fi
@@ -862,8 +888,7 @@ a.navbar-item[href="/admin/"] {
   display: none !important;
 }
 
-/* ===== HIDE PROFILE DROPDOWN ONLY (not entire navbar-end) ===== */
-/* Target the profile/user dropdown specifically */
+/* ===== HIDE PROFILE DROPDOWN AND LOGOUT ===== */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -873,13 +898,21 @@ a.navbar-item[href="/admin/"] {
 .navbar-end .dropdown,
 .navbar-end .navbar-item .dropdown-trigger,
 .navbar-end .navbar-item .dropdown-menu,
-/* Hide user avatar/icon */
 .navbar-end .navbar-item > figure,
 .navbar-end .navbar-item > .image,
 .navbar-end .navbar-item img.is-rounded,
-/* Hide the actual profile dropdown container */
 .navbar-item.profile-dropdown,
 .navbar-end > .navbar-item:last-child {
+  display: none !important;
+}
+
+/* Hide Logout from mobile menu */
+a[href="/admin/logout"],
+a[href*="logout"],
+.navbar-item[href="/admin/logout"],
+.navbar-item[href*="logout"],
+.navbar-menu a[href*="logout"],
+.navbar-end a[href*="logout"] {
   display: none !important;
 }
 
@@ -1418,6 +1451,28 @@ EOSQL_LOGIN_JS2
             echo "✅ Login form enhancement JavaScript injected successfully"
           else
             echo "⚠️ Failed to inject login form enhancement JavaScript"
+          fi
+
+          # Set site name and favicon
+          echo "🏷️ Setting site name and favicon..."
+          PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_BRANDING2'
+            SET search_path TO listmonk, extensions, public;
+
+            -- Set site name to MOYD (appears in browser tab)
+            INSERT INTO settings (key, value)
+            VALUES ('app.site_name', '"MOYD"'::jsonb)
+            ON CONFLICT (key) DO UPDATE SET value = '"MOYD"'::jsonb;
+
+            -- Set custom favicon URL
+            INSERT INTO settings (key, value)
+            VALUES ('app.favicon_url', '"/uploads/favicon.png"'::jsonb)
+            ON CONFLICT (key) DO UPDATE SET value = '"/uploads/favicon.png"'::jsonb;
+EOSQL_BRANDING2
+
+          if [ $? -eq 0 ]; then
+            echo "✅ Site name and favicon configured"
+          else
+            echo "⚠️ Failed to set site name/favicon"
           fi
         else
           echo "⚠️  Failed to inject custom JavaScript, but continuing..."
@@ -2092,6 +2147,17 @@ if [ -n "${LISTMONK_JWT_SECRET}" ]; then
 else
     echo "⚠️ LISTMONK_JWT_SECRET not set - SSO authentication disabled"
     echo "   To enable SSO, set the LISTMONK_JWT_SECRET environment variable"
+fi
+
+# ========================================
+# COPY FAVICON TO UPLOADS
+# ========================================
+echo "🎨 Setting up custom favicon..."
+if [ -f /listmonk/static/favicon.png ]; then
+  cp /listmonk/static/favicon.png /listmonk/uploads/favicon.png
+  echo "✅ Favicon copied to uploads"
+else
+  echo "⚠️ Favicon not found at /listmonk/static/favicon.png"
 fi
 
 # Start Listmonk in background (runs on port 9001)
