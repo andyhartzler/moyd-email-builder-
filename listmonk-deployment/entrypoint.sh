@@ -1975,6 +1975,27 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
   }
 
   console.log("[MOYD] postMessage handler ready, listening for credentials...");
+
+  function notifyDashboardLoaded() {
+    if (!isLoginPage() && window.location.pathname.indexOf("/admin") !== -1) {
+      console.log("[MOYD] Dashboard loaded, notifying parent frame...");
+      if (window.parent && window.parent !== window) {
+        try {
+          window.parent.postMessage({ type: "MOYD_DASHBOARD_READY" }, "*");
+        } catch (e) {
+          console.log("[MOYD] Could not notify parent:", e);
+        }
+      }
+    }
+  }
+
+  if (document.readyState === "complete") {
+    notifyDashboardLoaded();
+  } else {
+    window.addEventListener("load", notifyDashboardLoaded);
+  }
+
+  setTimeout(notifyDashboardLoaded, 1000);
 })();'::text));
 EOSQL_POSTMSG
 
