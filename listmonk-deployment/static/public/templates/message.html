@@ -1,20 +1,30 @@
+{{ define "message" }}
 {{ template "header" . }}
 
-<div class="card message-card">
-  {{ if eq .Data.Type "success" }}
-  <div class="icon success">✓</div>
-  {{ else if eq .Data.Type "error" }}
-  <div class="icon error">✕</div>
-  {{ else }}
-  <div class="icon info">i</div>
-  {{ end }}
+<section class="message-section">
+    <h2>{{ .Data.Title }}</h2>
+    <div class="message-body">
+        {{ .Data.Message }}
+    </div>
 
-  <h1>{{ .Data.Title }}</h1>
-  <p>{{ .Data.Message }}</p>
+    <p class="message-actions">
+        <a href="" class="button button-outline" id="btn-back">{{ L.T "globals.buttons.back" }}</a>
+    </p>
 
-  {{ if .Data.Link }}
-  <a href="{{ .Data.Link }}" class="btn btn-primary">{{ .Data.LinkText }}</a>
-  {{ end }}
-</div>
+    <script>
+        (function() {
+            // Show back button if there's browser history
+            if (history && history.length >= 3) {
+                var btn = document.getElementById("btn-back");
+                btn.style.display = 'inline-block';
+                btn.onclick = function(e) {
+                    history.go(history.length > 2 ? -2 : -1);
+                    e.preventDefault();
+                };
+            }
+        })();
+    </script>
+</section>
 
 {{ template "footer" . }}
+{{ end }}

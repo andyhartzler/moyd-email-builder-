@@ -1,20 +1,34 @@
-{{ define "content" }}
-<h2>Import Complete</h2>
+{{ define "import-status" }}
+{{ template "header" . }}
 
-<p>Your subscriber import has finished processing.</p>
+<h2>{{ L.Ts "email.status.importTitle" }}</h2>
 
-<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-  <p style="margin: 0 0 8px 0;"><strong>Total Records:</strong> {{ .Import.Total }}</p>
-  <p style="margin: 0 0 8px 0;"><strong>Successfully Imported:</strong> {{ .Import.Imported }}</p>
-  {{ if .Import.Skipped }}<p style="margin: 0;"><strong>Skipped:</strong> {{ .Import.Skipped }}</p>{{ end }}
-</div>
+<table width="100%" style="border-collapse: collapse; margin: 20px 0; font-size: 15px;">
+    <tr>
+        <td width="35%" style="padding: 14px 16px; border-bottom: 1px solid #e4e8ed; font-weight: 600; color: #273351;">
+            {{ L.Ts "email.status.importFile" }}
+        </td>
+        <td style="padding: 14px 16px; border-bottom: 1px solid #e4e8ed;">
+            <a href="{{ RootURL }}/admin/subscribers/import">{{ .Name }}</a>
+        </td>
+    </tr>
+    <tr>
+        <td width="35%" style="padding: 14px 16px; border-bottom: 1px solid #e4e8ed; font-weight: 600; color: #273351;">
+            {{ L.Ts "email.status.status" }}
+        </td>
+        <td style="padding: 14px 16px; border-bottom: 1px solid #e4e8ed;">
+            {{ .Status }}
+        </td>
+    </tr>
+    <tr>
+        <td width="35%" style="padding: 14px 16px; font-weight: 600; color: #273351;">
+            {{ L.Ts "email.status.importRecords" }}
+        </td>
+        <td style="padding: 14px 16px;">
+            {{ .Imported }} / {{ .Total }}
+        </td>
+    </tr>
+</table>
 
-{{ if .Import.Logs }}
-<p><strong>Import Log:</strong></p>
-<pre style="background: #273351; color: #fff; padding: 16px; border-radius: 8px; font-size: 12px; overflow-x: auto;">{{ .Import.Logs }}</pre>
-{{ end }}
-
-<p>
-  <a href="{{ RootURL }}/admin/subscribers" class="btn">View Subscribers</a>
-</p>
+{{ template "footer" }}
 {{ end }}

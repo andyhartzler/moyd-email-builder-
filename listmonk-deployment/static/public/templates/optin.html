@@ -1,18 +1,29 @@
+{{ define "optin" }}
 {{ template "header" . }}
 
-<div class="card optin-card">
-  {{ if .Data.Confirmed }}
-  <div class="icon success">✓</div>
-  <h1>You're Subscribed!</h1>
-  <p>Thank you for confirming your subscription to Missouri Young Democrats. You'll now receive our updates and newsletters.</p>
-  <p class="cta">Together, we're building a Missouri that works for everyone.</p>
-  <a href="https://moyoungdemocrats.org" class="btn btn-primary">Visit Our Website</a>
-  {{ else }}
-  <div class="icon error">✕</div>
-  <h1>Confirmation Failed</h1>
-  <p>{{ .Data.Message }}</p>
-  <p>If you continue to have issues, please contact <a href="mailto:info@moyoungdemocrats.org">info@moyoungdemocrats.org</a>.</p>
-  {{ end }}
-</div>
+<section class="optin-section">
+    <h2>{{ L.T "public.confirmSubTitle" }}</h2>
+    <p>{{ L.T "public.confirmSubInfo" }}</p>
+
+    <form method="post" class="optin-form">
+        <ul class="lists">
+            {{ range $i, $l := .Data.Lists }}
+                <input type="hidden" name="l" value="{{ $l.UUID }}" />
+                {{ if eq $l.Type "public" }}
+                    <li>{{ $l.Name }}</li>
+                {{ else }}
+                    <li>{{ L.Ts "public.subPrivateList" }}</li>
+                {{ end }}
+            {{ end }}
+        </ul>
+        <p class="form-actions">
+            <input type="hidden" name="confirm" value="true" />
+            <button type="submit" class="button" id="btn-confirm">
+                {{ L.Ts "public.confirmSub" }}
+            </button>
+        </p>
+    </form>
+</section>
 
 {{ template "footer" . }}
+{{ end }}

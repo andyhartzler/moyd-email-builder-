@@ -1,22 +1,31 @@
-{{ define "content" }}
-<h2>Welcome to Missouri Young Democrats!</h2>
+{{ define "subscriber-optin" }}
+{{ template "header" . }}
 
-<p>Hey{{ if .Subscriber.FirstName }} {{ .Subscriber.FirstName }}{{ end }},</p>
+<h2>{{ L.Ts "email.optin.confirmSubTitle" }}</h2>
 
-<p>Thanks for signing up to receive updates from Missouri Young Democrats. We're excited to have you join our movement of young progressives working to build a future that represents all Missourians.</p>
+<p>{{ L.Ts "email.optin.confirmSubWelcome" }} {{ .Subscriber.FirstName }}!</p>
 
-<p>Please confirm your subscription by clicking the button below:</p>
+<p>{{ L.Ts "email.optin.confirmSubInfo" }}</p>
 
-<p style="text-align: center;">
-  <a href="{{ .OptinURL }}" class="btn btn-primary">Confirm My Subscription</a>
+<ul>
+    {{ range $i, $l := .Lists }}
+        {{ if eq .Type "public" }}
+            <li>{{ .Name }}</li>
+        {{ else }}
+            <li>{{ L.Ts "email.optin.privateList" }}</li>
+        {{ end }}
+    {{ end }}
+</ul>
+
+<p>{{ L.Ts "email.optin.confirmSubHelp" }}</p>
+
+<p style="text-align: center; margin: 28px 0;">
+    <a href="{{ .OptinURL }}" class="button">{{ L.Ts "email.optin.confirmSub" }}</a>
 </p>
 
-<p style="font-size: 14px; color: #6c757d;">
-  If you didn't sign up for this list, you can safely ignore this email.
+<p style="text-align: center; font-size: 14px; color: #5a6578;">
+    <a href="{{ .UnsubURL }}?manage=true">{{ L.T "email.unsub" }}</a>
 </p>
 
-<p style="font-size: 13px; color: #999; margin-top: 24px;">
-  Or copy and paste this link: <br>
-  <a href="{{ .OptinURL }}" style="word-break: break-all;">{{ .OptinURL }}</a>
-</p>
+{{ template "footer" }}
 {{ end }}

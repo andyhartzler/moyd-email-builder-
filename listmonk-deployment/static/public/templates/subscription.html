@@ -1,54 +1,138 @@
+{{ define "subscription" }}
 {{ template "header" . }}
 
-<div class="card subscription-card">
-  <h1>Manage Your Subscription</h1>
+<section class="section">
+    {{ if not .Data.ShowManage }}
+        <!-- Unsubscribe View -->
+        <h2>{{ L.T "public.unsubTitle" }}</h2>
+        <form method="post" class="unsub-form">
+            <div>
+                {{ if .Data.AllowBlocklist }}
+                    <p>{{ L.T "public.unsubHelp" }}</p>
+                    <p class="checkbox-row">
+                        <input id="privacy-blocklist" type="checkbox" name="blocklist" value="true" />
+                        <label for="privacy-blocklist">{{ L.T "public.unsubFull" }}</label>
+                    </p>
+                {{ end }}
 
-  {{ if .Data.Subscriber }}
-  <p class="email-display">{{ .Data.Subscriber.Email }}</p>
+                <p class="form-actions">
+                    <button type="submit" class="button" id="btn-unsub">{{ L.T "public.unsub" }}</button>
+                </p>
 
-  <form method="post" action="{{ RootURL }}/subscription/{{ .Data.Subscriber.UUID }}">
-    <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
-
-    <h2>Your Subscriptions</h2>
-
-    {{ if .Data.Lists }}
-    <div class="list-options">
-      {{ range .Data.Lists }}
-      <label class="list-item">
-        <input type="checkbox" name="l" value="{{ .UUID }}" {{ if .Subscribed }}checked{{ end }}>
-        <span class="list-name">{{ .Name }}</span>
-        {{ if .Description }}<span class="list-desc">{{ .Description }}</span>{{ end }}
-      </label>
-      {{ end }}
-    </div>
+                {{ if .Data.AllowPreferences }}
+                    <p class="secondary-action">
+                        <a href="?manage=true">{{ L.T "public.managePrefs" }}</a>
+                    </p>
+                {{ end }}
+            </div>
+        </form>
     {{ else }}
-    <p class="no-lists">No subscription lists available.</p>
+        <!-- Manage Preferences View -->
+        <form method="post" class="manage-form">
+            <div>
+                <input type="hidden" name="manage" value="true" />
+
+                <h2>{{ L.T "public.managePrefs" }}</h2>
+
+                <div class="form-group">
+                    <label for="name">{{ L.T "globals.fields.name" }}</label>
+                    <input type="text" id="name" name="name" value="{{ .Data.Subscriber.Name }}" maxlength="256" required />
+                </div>
+
+                {{ if .Data.Subscriptions }}
+                    <div class="form-group">
+                        <h3>{{ L.T "public.managePrefsUnsub" }}</h3>
+                        <ul class="lists">
+                            {{ range $i, $l := .Data.Subscriptions }}
+                                {{ if ne $l.SubscriptionStatus.Value "unsubscribed" }}
+                                    <li>
+                                        <input id="l-{{ $l.UUID }}" type="checkbox" name="l" value="{{ $l.UUID }}" checked />
+                                        <label for="l-{{ $l.UUID }}">{{ $l.Name }}</label>
+                                    </li>
+                                {{ end }}
+                            {{ end }}
+                        </ul>
+                    </div>
+                {{ end }}
+
+                {{ if .Data.AllowBlocklist }}
+                    <p class="checkbox-row blocklist-row">
+                        <input id="privacy-blocklist" type="checkbox" name="blocklist" value="true" onchange="unsubAll(event)" />
+                        <label for="privacy-blocklist">{{ L.T "public.unsubFull" }}</label>
+                    </p>
+                {{ end }}
+
+                <p class="form-actions">
+                    <button type="submit" class="button" id="btn-save">{{ L.T "globals.buttons.save" }}</button>
+                </p>
+            </div>
+        </form>
     {{ end }}
+</section>
 
-    <div class="actions">
-      <button type="submit" name="action" value="update" class="btn btn-primary">Update Preferences</button>
-      <button type="submit" name="action" value="unsubscribe-all" class="btn btn-danger">Unsubscribe from All</button>
-    </div>
-  </form>
+{{ if or .Data.AllowExport .Data.AllowWipe }}
+<form id="data-form" class="data-form" method="post" action="" onsubmit="return handleData()">
+    <section class="privacy-section">
+        <h2>{{ L.T "public.privacyTitle" }}</h2>
 
-  <hr>
+        {{ if .Data.AllowExport }}
+        <div class="row">
+            <input id="privacy-export" type="radio" name="data-action" value="export" required />
+            <label for="privacy-export"><strong>{{ L.T "public.privacyExport" }}</strong></label>
+            <br />
+            <span class="description">{{ L.T "public.privacyExportHelp" }}</span>
+        </div>
+        {{ end }}
 
-  <div class="data-actions">
-    <h2>Your Data</h2>
-    <p>Missouri Young Democrats respects your privacy.</p>
-    <form method="post" action="{{ RootURL }}/subscription/{{ .Data.Subscriber.UUID }}/export">
-      <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
-      <button type="submit" class="btn btn-secondary">Export My Data</button>
-    </form>
-    <form method="post" action="{{ RootURL }}/subscription/{{ .Data.Subscriber.UUID }}/wipe"
-          onsubmit="return confirm('Are you sure? This will permanently delete all your data.');">
-      <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
-      <button type="submit" class="btn btn-danger-outline">Delete My Data</button>
-    </form>
-  </div>
-  {{ else }}
-  <p>Subscriber not found.</p>
-  {{ end }}
-</div>
+        {{ if .Data.AllowWipe }}
+        <div class="row">
+            <input id="privacy-wipe" type="radio" name="data-action" value="wipe" required />
+            <label for="privacy-wipe"><strong>{{ L.T "public.privacyWipe" }}</strong></label>
+            <br />
+            <span class="description">{{ L.T "public.privacyWipeHelp" }}</span>
+        </div>
+        {{ end }}
+
+        <p class="form-actions">
+            <input type="submit" value="{{ L.T "globals.buttons.continue" }}" class="button button-outline" />
+        </p>
+    </section>
+</form>
+
+<script>
+    function handleData() {
+        var a = document.querySelector('input[name="data-action"]:checked').value,
+            f = document.querySelector("#data-form");
+        if (a == "export") {
+            f.action = "/subscription/export/{{ .Data.SubUUID }}";
+            return true;
+        } else if (confirm("{{ L.T "public.privacyConfirmWipe" }}")) {
+            f.action = "/subscription/wipe/{{ .Data.SubUUID }}";
+            return true;
+        }
+        return false;
+    }
+
+    function unsubAll(e) {
+        var nameInput = document.querySelector("input[name=name]");
+        if (nameInput) {
+            if (e.target.checked) {
+                nameInput.disabled = "disabled";
+            } else {
+                nameInput.removeAttribute("disabled");
+            }
+        }
+
+        document.querySelectorAll('input[type=checkbox][name=l]').forEach(function(l) {
+            if (e.target.checked) {
+                l.disabled = "disabled";
+            } else {
+                l.removeAttribute("disabled");
+            }
+        });
+    }
+</script>
+{{ end }}
 
 {{ template "footer" . }}
+{{ end }}

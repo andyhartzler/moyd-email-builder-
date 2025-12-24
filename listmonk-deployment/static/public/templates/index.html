@@ -1,45 +1,72 @@
 {{ define "header" }}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <title>{{ L.T "public.title" }} - Missouri Young Democrats</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{ .Data.Title }} - {{ .SiteName }}</title>
+    <meta name="description" content="{{ .Data.Description }}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-  <link rel="icon" type="image/png" href="/public/static/favicon.png">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="/public/static/style.css">
-  <link rel="stylesheet" href="/public/custom.css">
+    {{ if .EnablePublicArchive }}
+        <link rel="alternate" type="application/rss+xml" title="{{ L.T "public.archiveTitle" }} - {{ .SiteName }}"
+            href="{{ .RootURL }}/archive.xml" />
+    {{ end }}
+
+    <!-- Google Fonts: Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link href="/public/static/style.css?v={{ .AssetVersion }}" rel="stylesheet" type="text/css" />
+    <link href="/public/custom.css?v={{ .AssetVersion }}" rel="stylesheet" type="text/css">
+    <script src="/public/custom.js?v={{ .AssetVersion }}" async defer></script>
+
+    <!-- Favicon -->
+    {{ if ne .FaviconURL "" }}
+        <link rel="icon" href="{{ .FaviconURL }}" type="image/x-icon" />
+    {{ else }}
+        <link rel="icon" href="/public/static/favicon.png?v={{ .AssetVersion }}" type="image/png" />
+    {{ end }}
 </head>
 <body>
-  <div class="page-wrapper">
-    <header class="site-header">
-      <a href="{{ RootURL }}" class="logo">
-        <img src="/public/static/logo.png" alt="Missouri Young Democrats">
-      </a>
-    </header>
+    <div class="page-wrapper">
+        <!-- Site Header -->
+        <header class="site-header">
+            <div class="header-content">
+                <a href="{{ if .EnablePublicSubPage }}{{ .RootURL }}/subscription/form{{ else }}{{ .RootURL }}{{ end }}" class="logo-link">
+                    {{ if ne .LogoURL "" }}
+                        <img src="{{ .LogoURL }}" alt="{{ .SiteName }}" class="logo" />
+                    {{ else }}
+                        <img src="/public/static/logo.png?v={{ .AssetVersion }}" alt="{{ .SiteName }}" class="logo" />
+                    {{ end }}
+                </a>
+            </div>
+        </header>
 
-    <main class="content">
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container wrap">
 {{ end }}
 
 {{ define "footer" }}
-    </main>
+            </div>
+        </main>
 
-    <footer class="site-footer">
-      <p><strong>Missouri Young Democrats</strong></p>
-      <p class="tagline">Building a Missouri that works for everyone.</p>
-      <p class="links">
-        <a href="https://moyoungdemocrats.org">Website</a> ·
-        <a href="https://instagram.com/moyoungdems">Instagram</a> ·
-        <a href="https://twitter.com/moyoungdems">Twitter</a>
-      </p>
-      <p class="legal">Paid for by Missouri Young Democrats, Dustin Bax, Treasurer</p>
-    </footer>
-  </div>
-
-  <script src="/public/static/script.js"></script>
-  <script src="/public/custom.js"></script>
+        <!-- Site Footer -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p class="org-name">Missouri Young Democrats</p>
+                <p class="tagline">Building a Missouri that works for everyone.</p>
+                <nav class="footer-links">
+                    <a href="https://moyoungdemocrats.org" target="_blank" rel="noopener">Website</a>
+                    <span class="divider">·</span>
+                    <a href="https://instagram.com/moyoungdems" target="_blank" rel="noopener">Instagram</a>
+                    <span class="divider">·</span>
+                    <a href="https://twitter.com/moyoungdems" target="_blank" rel="noopener">Twitter</a>
+                </nav>
+                <p class="legal">Paid for by Missouri Young Democrats, Dustin Bax, Treasurer</p>
+            </div>
+        </footer>
+    </div>
 </body>
 </html>
 {{ end }}
