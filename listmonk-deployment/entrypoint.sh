@@ -186,39 +186,68 @@ EOSQL
     INSERT INTO settings (key, value)
     VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* ===== AGGRESSIVELY HIDE ALL LISTMONK BRANDING ===== */
-.navbar-brand > *:not(.navbar-burger),
-.navbar-brand > a,
-.navbar-brand > a:first-child,
+/* ===== HIDE ONLY THE LOGO LINK, NOT HAMBURGER ===== */
+.navbar-brand > a.navbar-item,
 .navbar-brand > .navbar-item:first-child,
-.navbar-brand a.navbar-item,
-.navbar-brand > a[href="/admin"],
-.navbar-brand > a[href="/admin/"],
 a.navbar-item[href="/admin"],
 a.navbar-item[href="/admin/"],
-.navbar-brand .logo,
-.navbar-brand img,
-.navbar-brand svg,
-.navbar-brand span:not(.icon) {
+.navbar-brand > a[href="/admin"],
+.navbar-brand > a[href="/admin/"] {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
   height: 0 !important;
   overflow: hidden !important;
-  opacity: 0 !important;
-  font-size: 0 !important;
-  color: transparent !important;
   position: absolute !important;
   left: -9999px !important;
 }
 
-/* Extra: hide any text in navbar-brand */
-.navbar-brand {
-  font-size: 0 !important;
+/* ===== ENSURE HAMBURGER MENU IS VISIBLE ===== */
+.navbar-burger,
+.navbar-brand > .navbar-burger,
+a.navbar-burger,
+button.navbar-burger {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  left: auto !important;
+  width: 52px !important;
+  height: 52px !important;
+  font-size: 1rem !important;
+  color: #273351 !important;
+  margin-left: auto !important;
 }
 
-.navbar-burger {
-  font-size: 1rem !important;
+.navbar-burger span {
+  display: block !important;
+  visibility: visible !important;
+  background-color: #273351 !important;
+  height: 2px !important;
+  width: 16px !important;
+  position: absolute !important;
+  left: calc(50% - 8px) !important;
+}
+
+/* ===== MOBILE MENU ===== */
+.navbar-menu {
+  background-color: #ffffff !important;
+}
+
+.navbar-menu.is-active {
+  display: block !important;
+  visibility: visible !important;
+}
+
+.navbar-menu .navbar-item {
+  display: block !important;
+  visibility: visible !important;
+  color: #273351 !important;
+  padding: 12px 16px !important;
+}
+
+.navbar-menu .navbar-item:hover {
+  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 /* Hide profile dropdown */
@@ -761,39 +790,68 @@ EOSQL
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* ===== AGGRESSIVELY HIDE ALL LISTMONK BRANDING ===== */
-.navbar-brand > *:not(.navbar-burger),
-.navbar-brand > a,
-.navbar-brand > a:first-child,
+/* ===== HIDE ONLY THE LOGO LINK, NOT HAMBURGER ===== */
+.navbar-brand > a.navbar-item,
 .navbar-brand > .navbar-item:first-child,
-.navbar-brand a.navbar-item,
-.navbar-brand > a[href="/admin"],
-.navbar-brand > a[href="/admin/"],
 a.navbar-item[href="/admin"],
 a.navbar-item[href="/admin/"],
-.navbar-brand .logo,
-.navbar-brand img,
-.navbar-brand svg,
-.navbar-brand span:not(.icon) {
+.navbar-brand > a[href="/admin"],
+.navbar-brand > a[href="/admin/"] {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
   height: 0 !important;
   overflow: hidden !important;
-  opacity: 0 !important;
-  font-size: 0 !important;
-  color: transparent !important;
   position: absolute !important;
   left: -9999px !important;
 }
 
-/* Extra: hide any text in navbar-brand */
-.navbar-brand {
-  font-size: 0 !important;
+/* ===== ENSURE HAMBURGER MENU IS VISIBLE ===== */
+.navbar-burger,
+.navbar-brand > .navbar-burger,
+a.navbar-burger,
+button.navbar-burger {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  left: auto !important;
+  width: 52px !important;
+  height: 52px !important;
+  font-size: 1rem !important;
+  color: #273351 !important;
+  margin-left: auto !important;
 }
 
-.navbar-burger {
-  font-size: 1rem !important;
+.navbar-burger span {
+  display: block !important;
+  visibility: visible !important;
+  background-color: #273351 !important;
+  height: 2px !important;
+  width: 16px !important;
+  position: absolute !important;
+  left: calc(50% - 8px) !important;
+}
+
+/* ===== MOBILE MENU ===== */
+.navbar-menu {
+  background-color: #ffffff !important;
+}
+
+.navbar-menu.is-active {
+  display: block !important;
+  visibility: visible !important;
+}
+
+.navbar-menu .navbar-item {
+  display: block !important;
+  visibility: visible !important;
+  color: #273351 !important;
+  padding: 12px 16px !important;
+}
+
+.navbar-menu .navbar-item:hover {
+  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 /* Hide profile dropdown */
