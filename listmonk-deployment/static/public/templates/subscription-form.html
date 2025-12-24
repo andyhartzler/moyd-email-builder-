@@ -1,0 +1,51 @@
+{{ template "header" . }}
+
+<div class="card form-card">
+  <h1>Subscribe to Our Updates</h1>
+  <p class="subtitle">Stay informed about Missouri Young Democrats news, events, and action alerts.</p>
+
+  <form method="post" action="{{ RootURL }}/subscription/form" class="subscribe-form">
+    <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
+
+    <div class="form-group">
+      <label for="email">Email Address *</label>
+      <input type="email" id="email" name="email" required placeholder="you@example.com">
+    </div>
+
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Your name">
+    </div>
+
+    {{ if gt (len .Data.Lists) 1 }}
+    <div class="form-group">
+      <label>Select Lists</label>
+      <div class="list-options">
+        {{ range .Data.Lists }}
+        <label class="list-item">
+          <input type="checkbox" name="l" value="{{ .UUID }}" checked>
+          <span class="list-name">{{ .Name }}</span>
+        </label>
+        {{ end }}
+      </div>
+    </div>
+    {{ else }}
+    {{ range .Data.Lists }}
+    <input type="hidden" name="l" value="{{ .UUID }}">
+    {{ end }}
+    {{ end }}
+
+    {{ if .Data.EnableCaptcha }}
+    <div class="h-captcha" data-sitekey="{{ .Data.CaptchaSiteKey }}"></div>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    {{ end }}
+
+    <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+
+    <p class="privacy-note">
+      We respect your privacy. Unsubscribe anytime.
+    </p>
+  </form>
+</div>
+
+{{ template "footer" . }}

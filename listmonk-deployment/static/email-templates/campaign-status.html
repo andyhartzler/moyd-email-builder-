@@ -1,0 +1,19 @@
+{{ define "content" }}
+<h2>Campaign Update: {{ .Campaign.Name }}</h2>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <p style="margin: 0 0 8px 0;"><strong>Campaign:</strong> {{ .Campaign.Name }}</p>
+  <p style="margin: 0 0 8px 0;"><strong>Subject:</strong> {{ .Campaign.Subject }}</p>
+  <p style="margin: 0 0 8px 0;"><strong>Status:</strong> {{ .Status }}</p>
+  {{ if .Sent }}<p style="margin: 0 0 8px 0;"><strong>Sent:</strong> {{ .Sent }}</p>{{ end }}
+  {{ if .ToSend }}<p style="margin: 0;"><strong>Total Recipients:</strong> {{ .ToSend }}</p>{{ end }}
+</div>
+
+{{ if .Reason }}
+<p style="color: #E63946;"><strong>Note:</strong> {{ .Reason }}</p>
+{{ end }}
+
+<p>
+  <a href="{{ RootURL }}/admin/campaigns/{{ .Campaign.ID }}" class="btn">View Campaign</a>
+</p>
+{{ end }}

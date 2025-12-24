@@ -1,0 +1,25 @@
+{{ define "content" }}
+<h2>Your Data Export</h2>
+
+<p>Hey{{ if .Subscriber.FirstName }} {{ .Subscriber.FirstName }}{{ end }},</p>
+
+<p>As requested, here's a copy of all the data we have associated with your email address. Missouri Young Democrats is committed to transparency and your privacy.</p>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <p style="margin: 0 0 8px 0;"><strong>Email:</strong> {{ .Subscriber.Email }}</p>
+  <p style="margin: 0 0 8px 0;"><strong>Name:</strong> {{ .Subscriber.Name }}</p>
+  <p style="margin: 0 0 8px 0;"><strong>Status:</strong> {{ .Subscriber.Status }}</p>
+  <p style="margin: 0 0 8px 0;"><strong>Subscribed since:</strong> {{ .Subscriber.CreatedAt }}</p>
+
+  {{ if .Subscriber.Lists }}
+  <p style="margin: 16px 0 8px 0;"><strong>Subscribed Lists:</strong></p>
+  <ul style="margin: 0; padding-left: 20px;">
+    {{ range .Subscriber.Lists }}
+    <li>{{ .Name }}</li>
+    {{ end }}
+  </ul>
+  {{ end }}
+</div>
+
+<p>If you have any questions about your data, please contact us at <a href="mailto:info@moyoungdemocrats.org">info@moyoungdemocrats.org</a>.</p>
+{{ end }}

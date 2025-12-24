@@ -1,0 +1,54 @@
+{{ template "header" . }}
+
+<div class="card subscription-card">
+  <h1>Manage Your Subscription</h1>
+
+  {{ if .Data.Subscriber }}
+  <p class="email-display">{{ .Data.Subscriber.Email }}</p>
+
+  <form method="post" action="{{ RootURL }}/subscription/{{ .Data.Subscriber.UUID }}">
+    <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
+
+    <h2>Your Subscriptions</h2>
+
+    {{ if .Data.Lists }}
+    <div class="list-options">
+      {{ range .Data.Lists }}
+      <label class="list-item">
+        <input type="checkbox" name="l" value="{{ .UUID }}" {{ if .Subscribed }}checked{{ end }}>
+        <span class="list-name">{{ .Name }}</span>
+        {{ if .Description }}<span class="list-desc">{{ .Description }}</span>{{ end }}
+      </label>
+      {{ end }}
+    </div>
+    {{ else }}
+    <p class="no-lists">No subscription lists available.</p>
+    {{ end }}
+
+    <div class="actions">
+      <button type="submit" name="action" value="update" class="btn btn-primary">Update Preferences</button>
+      <button type="submit" name="action" value="unsubscribe-all" class="btn btn-danger">Unsubscribe from All</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <div class="data-actions">
+    <h2>Your Data</h2>
+    <p>Missouri Young Democrats respects your privacy.</p>
+    <form method="post" action="{{ RootURL }}/subscription/{{ .Data.Subscriber.UUID }}/export">
+      <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
+      <button type="submit" class="btn btn-secondary">Export My Data</button>
+    </form>
+    <form method="post" action="{{ RootURL }}/subscription/{{ .Data.Subscriber.UUID }}/wipe"
+          onsubmit="return confirm('Are you sure? This will permanently delete all your data.');">
+      <input type="hidden" name="csrf_token" value="{{ .Data.CSRFToken }}">
+      <button type="submit" class="btn btn-danger-outline">Delete My Data</button>
+    </form>
+  </div>
+  {{ else }}
+  <p>Subscriber not found.</p>
+  {{ end }}
+</div>
+
+{{ template "footer" . }}

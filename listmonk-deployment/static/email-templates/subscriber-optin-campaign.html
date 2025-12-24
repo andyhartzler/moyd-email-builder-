@@ -1,0 +1,15 @@
+{{ define "content" }}
+<h2>Confirm Your Subscription</h2>
+
+<p>Hey{{ if .Subscriber.FirstName }} {{ .Subscriber.FirstName }}{{ end }},</p>
+
+<p>You're receiving this because you signed up to receive updates from Missouri Young Democrats. Please confirm your subscription to start receiving our emails.</p>
+
+<p style="text-align: center;">
+  <a href="{{ .OptinURL }}" class="btn btn-primary">Confirm Subscription</a>
+</p>
+
+<p style="font-size: 14px; color: #6c757d;">
+  If you didn't request this, you can safely ignore this email.
+</p>
+{{ end }}
