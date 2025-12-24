@@ -182,7 +182,7 @@ EOSQL
     -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
     INSERT INTO settings (key, value)
     VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
-/* Version 2.0 - Mobile Hamburger Menu Support */
+/* NAVBAR FIX: Keep navbar visible for mobile hamburger menu */
 
 /* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
 .template-header h1,
@@ -198,18 +198,72 @@ small, .help-text {
   color: #666 !important;
 }
 
-/* ===== REMOVE TOP NAVBAR ===== */
-nav.navbar.is-fixed-top {
+/* ===== NAVBAR CUSTOMIZATION ===== */
+/* Hide ONLY the listmonk logo/text (first navbar-item in navbar-brand) */
+.navbar-brand > a.navbar-item:first-child,
+.navbar-brand > .navbar-item:first-child:not(.navbar-burger):not(#moyd-navbar-buttons) {
   display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
 }
 
-body.has-navbar-fixed-top {
-  padding-top: 0 !important;
+/* Style the navbar with MOYD colors */
+nav.navbar.is-fixed-top {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  min-height: 52px !important;
 }
 
-/* ===== REMOVE PAGE FOOTER (keep modal footers) ===== */
+/* Container for our custom buttons in navbar */
+#moyd-navbar-buttons {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  height: 52px !important;
+}
+
+/* Style our navbar buttons */
+#moyd-navbar-buttons button {
+  width: 36px !important;
+  height: 36px !important;
+  background-color: #273351 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: white !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#moyd-navbar-buttons button:hover {
+  background-color: #1a2438 !important;
+}
+
+/* Hamburger menu styling */
+.navbar-burger {
+  color: #273351 !important;
+  height: 52px !important;
+  width: 52px !important;
+}
+
+.navbar-burger:hover {
+  background-color: rgba(39, 51, 81, 0.1) !important;
+}
+
+.navbar-burger span {
+  background-color: #273351 !important;
+  height: 2px !important;
+}
+
+/* User dropdown on right side */
+.navbar-end .navbar-item {
+  color: #273351 !important;
+}
+
+/* ===== REMOVE PAGE FOOTER BRANDING (but KEEP modal footers!) ===== */
 body > footer:not(.modal-card-foot),
 .app-footer:not(.modal-card-foot),
 .page-footer:not(.modal-card-foot) {
@@ -223,7 +277,7 @@ body > footer:not(.modal-card-foot),
   visibility: visible !important;
 }
 
-/* ===== MOYD NAVY BLUE THEME #273351 ===== */
+/* ===== CHANGE ALL BLUE TO #273351 ===== */
 .button.is-primary, .button.is-link,
 .button.is-info, a.button.is-primary,
 .has-background-primary, .tag.is-primary,
@@ -256,7 +310,8 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
-.input:focus, .textarea:focus, .select select:focus {
+.input:focus, .textarea:focus, .select select:focus,
+.input:active, .textarea:active, .select select:active {
   border-color: #273351 !important;
   box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
 }
@@ -278,6 +333,10 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
+.switch input[type="checkbox"]:checked + .check {
+  background-color: #273351 !important;
+}
+
 .dropdown-item.is-active, .dropdown-item:hover {
   background-color: #273351 !important;
   color: white !important;
@@ -287,58 +346,17 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
-/* ===== DESKTOP LAYOUT ===== */
-@media screen and (min-width: 769px) {
-  .sidebar, .menu, aside.menu {
-    display: block !important;
-    visibility: visible !important;
-  }
-
-  .menu {
-    margin-top: 70px !important;
-  }
-
-  #moyd-hamburger-btn {
-    display: none !important;
-  }
-
-  #moyd-mobile-menu {
-    display: none !important;
-  }
-}
-
-/* ===== MOBILE LAYOUT (<=768px) ===== */
+/* ===== MOBILE RESPONSIVE STYLES ===== */
 @media screen and (max-width: 768px) {
-  .sidebar,
-  aside.menu,
-  .menu:not(#moyd-mobile-menu-content),
-  .columns > .column.is-2,
-  .columns > .column.is-narrow {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
+  #moyd-navbar-buttons {
+    padding: 0 8px !important;
+    gap: 6px !important;
   }
 
-  .columns > .column:not(.is-2):not(.is-narrow),
-  .columns > .column.is-10,
-  .main-content,
-  .content-area,
-  section.section {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 !important;
-    margin-left: 0 !important;
-    padding: 60px 12px 12px 12px !important;
-  }
-
-  .columns {
-    margin: 0 !important;
-    width: 100% !important;
+  #moyd-navbar-buttons button {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
   }
 
   .button, button,
@@ -348,8 +366,10 @@ a, a:hover, a:active, a:focus,
   }
 
   .menu-list a {
-    padding: 14px 16px !important;
-    min-height: 48px !important;
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
   .table-container, .b-table {
@@ -358,10 +378,10 @@ a, a:hover, a:active, a:focus,
   }
 
   .modal-card {
-    width: calc(100% - 24px) !important;
+    width: calc(100% - 32px) !important;
     max-width: 100% !important;
-    margin: 12px !important;
-    max-height: calc(100vh - 24px) !important;
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
   }
 
   .modal-card-body {
@@ -369,9 +389,28 @@ a, a:hover, a:active, a:focus,
     -webkit-overflow-scrolling: touch !important;
   }
 
+  .section {
+    padding: 1.5rem 1rem !important;
+  }
+
   .box, .card {
-    padding: 12px !important;
-    margin: 8px 0 !important;
+    padding: 16px !important;
+    margin: 12px 0 !important;
+  }
+
+  .tag {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .pagination-link, .pagination-previous, .pagination-next {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .dropdown-item {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
   }
 
   .tabs {
@@ -384,34 +423,40 @@ a, a:hover, a:active, a:focus,
   }
 }
 
-/* ===== SMALL PHONES (<=480px) ===== */
 @media screen and (max-width: 480px) {
-  .columns > .column:not(.is-2):not(.is-narrow),
-  section.section {
-    padding: 55px 8px 8px 8px !important;
+  #moyd-navbar-buttons button {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 20px !important;
   }
 
-  .button, button {
+  .button, button,
+  .input, .textarea, .select select {
     min-height: 48px !important;
   }
 
-  .title.is-4, .title.is-5 {
-    font-size: 1.1rem !important;
+  .menu-list a {
+    padding: 14px 12px !important;
+    min-height: 48px !important;
   }
 
   .modal-card {
-    width: calc(100% - 16px) !important;
-    margin: 8px !important;
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+  }
+
+  .section {
+    padding: 1rem 0.75rem !important;
   }
 
   .box, .card {
-    padding: 10px !important;
+    padding: 12px !important;
   }
 }
 
-/* ===== TOUCH DEVICE STYLES ===== */
 @media (hover: none) and (pointer: coarse) {
-  .button, button, a.button {
+  .button, button, a.button,
+  #moyd-navbar-buttons button {
     min-height: 44px !important;
   }
 
@@ -419,20 +464,15 @@ a, a:hover, a:active, a:focus,
     -webkit-overflow-scrolling: touch !important;
   }
 
-  .button, .menu-list a, .dropdown-item {
+  .button, button, .menu-list a, .dropdown-item, .pagination-link {
     -webkit-user-select: none !important;
     user-select: none !important;
   }
 }
 
-/* ===== SAFE AREA (notched devices) ===== */
 @supports (padding: env(safe-area-inset-bottom)) {
   .modal-card-foot {
     padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
-  }
-
-  #moyd-mobile-menu {
-    padding-bottom: env(safe-area-inset-bottom) !important;
   }
 }
 '::text))
@@ -456,206 +496,91 @@ EOSQL
       VALUES('appearance.admin.custom_js', to_jsonb('(function() {
   "use strict";
 
-  var NAVY = "#273351";
-  var NAVY_DARK = "#1a2438";
-
-  function isMobile() {
-    return window.innerWidth <= 768;
-  }
-
-  function getNavItems() {
-    return [
-      { icon: "📊", label: "Dashboard", path: "/admin" },
-      { icon: "📋", label: "Lists", path: "/admin/lists" },
-      { icon: "👥", label: "Subscribers", path: "/admin/subscribers" },
-      { icon: "🚀", label: "Campaigns", path: "/admin/campaigns" },
-      { icon: "👤", label: "Users", path: "/admin/users" },
-      { icon: "⚙️", label: "Settings", path: "/admin/settings" }
-    ];
-  }
-
-  function isActivePath(path) {
-    var current = window.location.pathname;
-    if (path === "/admin") {
-      return current === "/admin" || current === "/admin/";
+  function init() {
+    var navbarBrand = document.querySelector(".navbar-brand");
+    if (!navbarBrand) {
+      setTimeout(init, 500);
+      return;
     }
-    return current.indexOf(path) === 0;
-  }
 
-  function navigateTo(path) {
-    window.location.href = path;
+    var existing = document.getElementById("moyd-navbar-buttons");
+    if (existing) existing.remove();
+
+    var buttonsContainer = document.createElement("div");
+    buttonsContainer.id = "moyd-navbar-buttons";
+
+    var refreshBtn = document.createElement("button");
+    refreshBtn.innerHTML = "🔄";
+    refreshBtn.title = "Refresh Page";
+    refreshBtn.setAttribute("aria-label", "Refresh Page");
+
+    refreshBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      refreshBtn.style.transform = "rotate(180deg)";
+      setTimeout(function() { location.reload(); }, 200);
+    });
+
+    var helpBtn = document.createElement("button");
+    helpBtn.innerHTML = "?";
+    helpBtn.title = "Report a Problem";
+    helpBtn.setAttribute("aria-label", "Report a Problem");
+
+    helpBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      showReportModal();
+    });
+
+    buttonsContainer.appendChild(refreshBtn);
+    buttonsContainer.appendChild(helpBtn);
+
+    navbarBrand.insertBefore(buttonsContainer, navbarBrand.firstChild);
+
+    console.log("[MOYD] Navbar buttons injected");
   }
 
   function showReportModal() {
     var existing = document.getElementById("moyd-report-modal");
     if (existing) existing.remove();
 
-    var overlay = document.createElement("div");
-    overlay.id = "moyd-report-modal";
-    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100000;padding:16px;box-sizing:border-box;";
+    var isMobile = window.innerWidth <= 768;
 
     var modal = document.createElement("div");
-    modal.style.cssText = "background:white;padding:24px;border-radius:12px;width:100%;max-width:400px;text-align:center;";
+    modal.id = "moyd-report-modal";
+    modal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;padding:" + (isMobile ? "16px" : "20px") + ";box-sizing:border-box;";
 
-    modal.innerHTML = "<h2 style=\\"margin:0 0 8px;color:" + NAVY + ";font-size:20px;\\">Report a Problem</h2>" +
-      "<p style=\\"margin:0 0 20px;color:#666;font-size:14px;\\">Contact Andrew directly</p>" +
-      "<div style=\\"display:flex;gap:12px;margin-bottom:16px;\\">" +
-      "<a href=\\"sms:+18168983612\\" style=\\"flex:1;display:flex;flex-direction:column;align-items:center;padding:16px;background:" + NAVY + ";color:white;text-decoration:none;border-radius:8px;\\">" +
-      "<span style=\\"font-size:28px;margin-bottom:8px;\\">💬</span><span style=\\"font-weight:bold;\\">Text</span><span style=\\"font-size:11px;opacity:0.9;\\">816-898-3612</span></a>" +
-      "<a href=\\"mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue\\" style=\\"flex:1;display:flex;flex-direction:column;align-items:center;padding:16px;background:" + NAVY + ";color:white;text-decoration:none;border-radius:8px;\\">" +
-      "<span style=\\"font-size:28px;margin-bottom:8px;\\">✉️</span><span style=\\"font-weight:bold;\\">Email</span><span style=\\"font-size:11px;opacity:0.9;\\">andrew@moyd.org</span></a>" +
+    var content = document.createElement("div");
+    content.style.cssText = "background:white;padding:" + (isMobile ? "20px" : "30px") + ";border-radius:12px;width:100%;max-width:" + (isMobile ? "100%" : "450px") + ";max-height:90vh;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);";
+
+    var btnStyle = "display:flex;flex-direction:column;align-items:center;padding:" + (isMobile ? "16px" : "20px") + ";background:#273351;color:white;text-decoration:none;border-radius:8px;flex:1;min-height:44px;";
+
+    content.innerHTML = "<h2 style=\\"margin:0 0 10px;color:#273351;font-size:" + (isMobile ? "20px" : "24px") + ";\\">Report a Problem</h2>" +
+      "<p style=\\"margin:0 0 20px;color:#666;font-size:14px;\\">Having an issue? Contact Andrew directly:</p>" +
+      "<div style=\\"display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;\\">" +
+        "<a href=\\"sms:+18168983612\\" style=\\"" + btnStyle + "\\">" +
+          "<span style=\\"font-size:28px;margin-bottom:8px;\\">💬</span>" +
+          "<span style=\\"font-weight:bold;\\">Text</span>" +
+          "<span style=\\"font-size:11px;opacity:0.9;\\">816-898-3612</span>" +
+        "</a>" +
+        "<a href=\\"mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue\\" style=\\"" + btnStyle + "\\">" +
+          "<span style=\\"font-size:28px;margin-bottom:8px;\\">✉️</span>" +
+          "<span style=\\"font-weight:bold;\\">Email</span>" +
+          "<span style=\\"font-size:11px;opacity:0.9;\\">andrew@moyd.org</span>" +
+        "</a>" +
       "</div>" +
-      "<button id=\\"moyd-close-report\\" style=\\"width:100%;padding:14px;background:#e0e0e0;border:none;border-radius:8px;font-size:15px;cursor:pointer;\\">Close</button>";
+      "<button id=\\"moyd-close-btn\\" style=\\"width:100%;padding:12px;background:#e0e0e0;border:none;border-radius:8px;color:#333;font-size:14px;cursor:pointer;min-height:44px;\\">Close</button>";
 
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-    document.body.style.overflow = "hidden";
+    modal.appendChild(content);
+    document.body.appendChild(modal);
 
-    document.getElementById("moyd-close-report").onclick = function() {
-      overlay.remove();
-      document.body.style.overflow = "";
-    };
-
-    overlay.onclick = function(e) {
-      if (e.target === overlay) {
-        overlay.remove();
-        document.body.style.overflow = "";
-      }
-    };
-  }
-
-  function createMobileMenu() {
-    var existing = document.getElementById("moyd-mobile-menu");
-    if (existing) existing.remove();
-
-    var menu = document.createElement("div");
-    menu.id = "moyd-mobile-menu";
-    menu.style.cssText = "position:fixed;top:0;left:-280px;width:280px;height:100%;background:white;z-index:99998;transition:left 0.3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.2);overflow-y:auto;-webkit-overflow-scrolling:touch;";
-
-    var header = document.createElement("div");
-    header.style.cssText = "padding:20px;background:" + NAVY + ";color:white;";
-    header.innerHTML = "<div style=\\"font-size:18px;font-weight:bold;\\">Missouri Young Democrats</div><div style=\\"font-size:12px;opacity:0.8;margin-top:4px;\\">Email Campaign Manager</div>";
-    menu.appendChild(header);
-
-    var actionsDiv = document.createElement("div");
-    actionsDiv.style.cssText = "padding:12px;border-bottom:1px solid #eee;display:flex;gap:10px;";
-
-    var refreshBtn = document.createElement("button");
-    refreshBtn.innerHTML = "🔄 Refresh";
-    refreshBtn.style.cssText = "flex:1;padding:12px;background:" + NAVY + ";color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;";
-    refreshBtn.onclick = function() { location.reload(); };
-
-    var reportBtn = document.createElement("button");
-    reportBtn.innerHTML = "? Help";
-    reportBtn.style.cssText = "flex:1;padding:12px;background:" + NAVY + ";color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;";
-    reportBtn.onclick = function() { closeMobileMenu(); showReportModal(); };
-
-    actionsDiv.appendChild(refreshBtn);
-    actionsDiv.appendChild(reportBtn);
-    menu.appendChild(actionsDiv);
-
-    var navDiv = document.createElement("div");
-    navDiv.style.cssText = "padding:8px 0;";
-
-    var navItems = getNavItems();
-    navItems.forEach(function(item) {
-      var link = document.createElement("a");
-      link.href = item.path;
-      var isActive = isActivePath(item.path);
-      link.style.cssText = "display:flex;align-items:center;padding:14px 20px;color:" + (isActive ? "white" : "#333") + ";text-decoration:none;font-size:15px;background:" + (isActive ? NAVY : "transparent") + ";";
-      link.innerHTML = "<span style=\\"margin-right:12px;font-size:18px;\\">" + item.icon + "</span>" + item.label;
-      link.onclick = function(e) {
-        e.preventDefault();
-        closeMobileMenu();
-        navigateTo(item.path);
-      };
-      navDiv.appendChild(link);
+    document.getElementById("moyd-close-btn").addEventListener("click", function() {
+      modal.remove();
     });
 
-    menu.appendChild(navDiv);
-    document.body.appendChild(menu);
-
-    var overlay = document.createElement("div");
-    overlay.id = "moyd-mobile-overlay";
-    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99997;opacity:0;visibility:hidden;transition:opacity 0.3s ease,visibility 0.3s ease;";
-    overlay.onclick = closeMobileMenu;
-    document.body.appendChild(overlay);
-  }
-
-  function openMobileMenu() {
-    var menu = document.getElementById("moyd-mobile-menu");
-    var overlay = document.getElementById("moyd-mobile-overlay");
-    if (menu) menu.style.left = "0";
-    if (overlay) {
-      overlay.style.opacity = "1";
-      overlay.style.visibility = "visible";
-    }
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeMobileMenu() {
-    var menu = document.getElementById("moyd-mobile-menu");
-    var overlay = document.getElementById("moyd-mobile-overlay");
-    if (menu) menu.style.left = "-280px";
-    if (overlay) {
-      overlay.style.opacity = "0";
-      overlay.style.visibility = "hidden";
-    }
-    document.body.style.overflow = "";
-  }
-
-  function createHamburgerButton() {
-    var existing = document.getElementById("moyd-hamburger-btn");
-    if (existing) existing.remove();
-
-    var btn = document.createElement("button");
-    btn.id = "moyd-hamburger-btn";
-    btn.setAttribute("aria-label", "Open menu");
-    btn.style.cssText = "position:fixed;top:10px;left:10px;width:44px;height:44px;background:" + NAVY + ";border:none;border-radius:8px;z-index:99996;cursor:pointer;display:flex;align-items:center;justify-content:center;";
-    btn.innerHTML = "<svg width=\\"24\\" height=\\"24\\" viewBox=\\"0 0 24 24\\" fill=\\"none\\" stroke=\\"white\\" stroke-width=\\"2\\"><line x1=\\"3\\" y1=\\"6\\" x2=\\"21\\" y2=\\"6\\"/><line x1=\\"3\\" y1=\\"12\\" x2=\\"21\\" y2=\\"12\\"/><line x1=\\"3\\" y1=\\"18\\" x2=\\"21\\" y2=\\"18\\"/></svg>";
-    btn.onclick = openMobileMenu;
-
-    document.body.appendChild(btn);
-  }
-
-  function createDesktopButtons() {
-    var existing = document.getElementById("moyd-desktop-buttons");
-    if (existing) existing.remove();
-
-    var container = document.createElement("div");
-    container.id = "moyd-desktop-buttons";
-    container.style.cssText = "position:fixed;top:15px;left:15px;z-index:1000;display:flex;gap:10px;";
-
-    var refreshBtn = document.createElement("button");
-    refreshBtn.innerHTML = "🔄";
-    refreshBtn.title = "Refresh";
-    refreshBtn.style.cssText = "width:40px;height:40px;background:" + NAVY + ";border:none;border-radius:8px;color:white;font-size:20px;cursor:pointer;";
-    refreshBtn.onclick = function() { location.reload(); };
-
-    var reportBtn = document.createElement("button");
-    reportBtn.innerHTML = "?";
-    reportBtn.title = "Report Problem";
-    reportBtn.style.cssText = "width:40px;height:40px;background:" + NAVY + ";border:none;border-radius:8px;color:white;font-size:22px;font-weight:bold;cursor:pointer;";
-    reportBtn.onclick = showReportModal;
-
-    container.appendChild(refreshBtn);
-    container.appendChild(reportBtn);
-    document.body.appendChild(container);
-  }
-
-  function init() {
-    if (isMobile()) {
-      createMobileMenu();
-      createHamburgerButton();
-      var desktopBtns = document.getElementById("moyd-desktop-buttons");
-      if (desktopBtns) desktopBtns.style.display = "none";
-    } else {
-      createDesktopButtons();
-      var hamburger = document.getElementById("moyd-hamburger-btn");
-      if (hamburger) hamburger.style.display = "none";
-      closeMobileMenu();
-    }
-    console.log("[MOYD] Admin UI initialized (" + (isMobile() ? "mobile" : "desktop") + ")");
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) modal.remove();
+    });
   }
 
   if (document.readyState === "loading") {
@@ -664,15 +589,19 @@ EOSQL
     init();
   }
 
-  var resizeTimeout;
-  window.addEventListener("resize", function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(init, 250);
+  var observer = new MutationObserver(function() {
+    if (!document.getElementById("moyd-navbar-buttons")) {
+      init();
+    }
   });
 
-  window.addEventListener("orientationchange", function() {
-    setTimeout(init, 100);
-  });
+  setTimeout(function() {
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  }, 1000);
+
+  setTimeout(function() { observer.disconnect(); }, 30000);
 })();'::text));
 EOSQL2
 
@@ -1016,7 +945,7 @@ EOSQL
         -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
-/* Version 2.0 - Mobile Hamburger Menu Support */
+/* NAVBAR FIX: Keep navbar visible for mobile hamburger menu */
 
 /* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
 .template-header h1,
@@ -1032,18 +961,72 @@ small, .help-text {
   color: #666 !important;
 }
 
-/* ===== REMOVE TOP NAVBAR ===== */
-nav.navbar.is-fixed-top {
+/* ===== NAVBAR CUSTOMIZATION ===== */
+/* Hide ONLY the listmonk logo/text (first navbar-item in navbar-brand) */
+.navbar-brand > a.navbar-item:first-child,
+.navbar-brand > .navbar-item:first-child:not(.navbar-burger):not(#moyd-navbar-buttons) {
   display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
 }
 
-body.has-navbar-fixed-top {
-  padding-top: 0 !important;
+/* Style the navbar with MOYD colors */
+nav.navbar.is-fixed-top {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  min-height: 52px !important;
 }
 
-/* ===== REMOVE PAGE FOOTER (keep modal footers) ===== */
+/* Container for our custom buttons in navbar */
+#moyd-navbar-buttons {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  height: 52px !important;
+}
+
+/* Style our navbar buttons */
+#moyd-navbar-buttons button {
+  width: 36px !important;
+  height: 36px !important;
+  background-color: #273351 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: white !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#moyd-navbar-buttons button:hover {
+  background-color: #1a2438 !important;
+}
+
+/* Hamburger menu styling */
+.navbar-burger {
+  color: #273351 !important;
+  height: 52px !important;
+  width: 52px !important;
+}
+
+.navbar-burger:hover {
+  background-color: rgba(39, 51, 81, 0.1) !important;
+}
+
+.navbar-burger span {
+  background-color: #273351 !important;
+  height: 2px !important;
+}
+
+/* User dropdown on right side */
+.navbar-end .navbar-item {
+  color: #273351 !important;
+}
+
+/* ===== REMOVE PAGE FOOTER BRANDING (but KEEP modal footers!) ===== */
 body > footer:not(.modal-card-foot),
 .app-footer:not(.modal-card-foot),
 .page-footer:not(.modal-card-foot) {
@@ -1057,7 +1040,7 @@ body > footer:not(.modal-card-foot),
   visibility: visible !important;
 }
 
-/* ===== MOYD NAVY BLUE THEME #273351 ===== */
+/* ===== CHANGE ALL BLUE TO #273351 ===== */
 .button.is-primary, .button.is-link,
 .button.is-info, a.button.is-primary,
 .has-background-primary, .tag.is-primary,
@@ -1090,7 +1073,8 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
-.input:focus, .textarea:focus, .select select:focus {
+.input:focus, .textarea:focus, .select select:focus,
+.input:active, .textarea:active, .select select:active {
   border-color: #273351 !important;
   box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
 }
@@ -1112,6 +1096,10 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
+.switch input[type="checkbox"]:checked + .check {
+  background-color: #273351 !important;
+}
+
 .dropdown-item.is-active, .dropdown-item:hover {
   background-color: #273351 !important;
   color: white !important;
@@ -1121,58 +1109,17 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
-/* ===== DESKTOP LAYOUT ===== */
-@media screen and (min-width: 769px) {
-  .sidebar, .menu, aside.menu {
-    display: block !important;
-    visibility: visible !important;
-  }
-
-  .menu {
-    margin-top: 70px !important;
-  }
-
-  #moyd-hamburger-btn {
-    display: none !important;
-  }
-
-  #moyd-mobile-menu {
-    display: none !important;
-  }
-}
-
-/* ===== MOBILE LAYOUT (<=768px) ===== */
+/* ===== MOBILE RESPONSIVE STYLES ===== */
 @media screen and (max-width: 768px) {
-  .sidebar,
-  aside.menu,
-  .menu:not(#moyd-mobile-menu-content),
-  .columns > .column.is-2,
-  .columns > .column.is-narrow {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
+  #moyd-navbar-buttons {
+    padding: 0 8px !important;
+    gap: 6px !important;
   }
 
-  .columns > .column:not(.is-2):not(.is-narrow),
-  .columns > .column.is-10,
-  .main-content,
-  .content-area,
-  section.section {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 !important;
-    margin-left: 0 !important;
-    padding: 60px 12px 12px 12px !important;
-  }
-
-  .columns {
-    margin: 0 !important;
-    width: 100% !important;
+  #moyd-navbar-buttons button {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
   }
 
   .button, button,
@@ -1182,8 +1129,10 @@ a, a:hover, a:active, a:focus,
   }
 
   .menu-list a {
-    padding: 14px 16px !important;
-    min-height: 48px !important;
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
   .table-container, .b-table {
@@ -1192,10 +1141,10 @@ a, a:hover, a:active, a:focus,
   }
 
   .modal-card {
-    width: calc(100% - 24px) !important;
+    width: calc(100% - 32px) !important;
     max-width: 100% !important;
-    margin: 12px !important;
-    max-height: calc(100vh - 24px) !important;
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
   }
 
   .modal-card-body {
@@ -1203,9 +1152,28 @@ a, a:hover, a:active, a:focus,
     -webkit-overflow-scrolling: touch !important;
   }
 
+  .section {
+    padding: 1.5rem 1rem !important;
+  }
+
   .box, .card {
-    padding: 12px !important;
-    margin: 8px 0 !important;
+    padding: 16px !important;
+    margin: 12px 0 !important;
+  }
+
+  .tag {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .pagination-link, .pagination-previous, .pagination-next {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .dropdown-item {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
   }
 
   .tabs {
@@ -1218,34 +1186,40 @@ a, a:hover, a:active, a:focus,
   }
 }
 
-/* ===== SMALL PHONES (<=480px) ===== */
 @media screen and (max-width: 480px) {
-  .columns > .column:not(.is-2):not(.is-narrow),
-  section.section {
-    padding: 55px 8px 8px 8px !important;
+  #moyd-navbar-buttons button {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 20px !important;
   }
 
-  .button, button {
+  .button, button,
+  .input, .textarea, .select select {
     min-height: 48px !important;
   }
 
-  .title.is-4, .title.is-5 {
-    font-size: 1.1rem !important;
+  .menu-list a {
+    padding: 14px 12px !important;
+    min-height: 48px !important;
   }
 
   .modal-card {
-    width: calc(100% - 16px) !important;
-    margin: 8px !important;
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+  }
+
+  .section {
+    padding: 1rem 0.75rem !important;
   }
 
   .box, .card {
-    padding: 10px !important;
+    padding: 12px !important;
   }
 }
 
-/* ===== TOUCH DEVICE STYLES ===== */
 @media (hover: none) and (pointer: coarse) {
-  .button, button, a.button {
+  .button, button, a.button,
+  #moyd-navbar-buttons button {
     min-height: 44px !important;
   }
 
@@ -1253,20 +1227,15 @@ a, a:hover, a:active, a:focus,
     -webkit-overflow-scrolling: touch !important;
   }
 
-  .button, .menu-list a, .dropdown-item {
+  .button, button, .menu-list a, .dropdown-item, .pagination-link {
     -webkit-user-select: none !important;
     user-select: none !important;
   }
 }
 
-/* ===== SAFE AREA (notched devices) ===== */
 @supports (padding: env(safe-area-inset-bottom)) {
   .modal-card-foot {
     padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
-  }
-
-  #moyd-mobile-menu {
-    padding-bottom: env(safe-area-inset-bottom) !important;
   }
 }
 '::text))
@@ -1276,18 +1245,91 @@ EOSQL
       if [ $? -eq 0 ]; then
         echo "✅ Custom CSS injected successfully"
 
-        # Also inject custom JavaScript for buttons
-        PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL2
-          SET search_path TO ${DB_SCHEMA:-listmonk}, extensions, public;
+        # Also inject custom JavaScript for buttons (INLINE CODE)
+        # NOTE: Using appearance.admin.custom_js (NOT custom_head!)
+        # The custom_js field expects JavaScript code, not HTML
+        echo "💻 Injecting custom JavaScript for buttons..."
+        PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL2'
+          SET search_path TO listmonk, extensions, public;
 
-          -- Add custom HTML head content to load our JavaScript (FORCE UPDATE)
+          DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
           DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
+
           INSERT INTO settings (key, value)
-          VALUES('appearance.admin.custom_head', to_jsonb('<script src="/static/custom-buttons.js"></script>'::text));
+          VALUES('appearance.admin.custom_js', to_jsonb('(function() {
+  "use strict";
+
+  function init() {
+    var navbarBrand = document.querySelector(".navbar-brand");
+    if (!navbarBrand) {
+      setTimeout(init, 500);
+      return;
+    }
+
+    var existing = document.getElementById("moyd-navbar-buttons");
+    if (existing) existing.remove();
+
+    var buttonsContainer = document.createElement("div");
+    buttonsContainer.id = "moyd-navbar-buttons";
+
+    var refreshBtn = document.createElement("button");
+    refreshBtn.innerHTML = "🔄";
+    refreshBtn.title = "Refresh Page";
+    refreshBtn.setAttribute("aria-label", "Refresh Page");
+
+    refreshBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      refreshBtn.style.transform = "rotate(180deg)";
+      setTimeout(function() { location.reload(); }, 200);
+    });
+
+    var helpBtn = document.createElement("button");
+    helpBtn.innerHTML = "?";
+    helpBtn.title = "Report a Problem";
+    helpBtn.setAttribute("aria-label", "Report a Problem");
+
+    helpBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var subject = encodeURIComponent("Email Tool Help Request");
+      var body = encodeURIComponent("Hi,\\n\\nI need help with:\\n\\n[Please describe your issue]\\n\\nPage: " + window.location.href);
+      window.open("mailto:andy@missouriyoungdems.org?subject=" + subject + "&body=" + body, "_blank");
+    });
+
+    buttonsContainer.appendChild(refreshBtn);
+    buttonsContainer.appendChild(helpBtn);
+    navbarBrand.insertBefore(buttonsContainer, navbarBrand.firstChild);
+
+    console.log("[MOYD] Navbar buttons injected");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  var observer = new MutationObserver(function() {
+    if (!document.getElementById("moyd-navbar-buttons")) {
+      init();
+    }
+  });
+
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  } else {
+    document.addEventListener("DOMContentLoaded", function() {
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  }
+
+  setTimeout(function() { observer.disconnect(); }, 30000);
+})();'::text));
 EOSQL2
 
         if [ $? -eq 0 ]; then
-          echo "✅ Custom JavaScript injection configured"
+          echo "✅ Custom JavaScript injected successfully"
 
           # Also inject public CSS for login page
           PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
