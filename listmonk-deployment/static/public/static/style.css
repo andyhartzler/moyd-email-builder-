@@ -1,0 +1,384 @@
+/* MOYD Brand Styles for Listmonk Public Pages */
+
+:root {
+  --unity-blue: #273351;
+  --momentum-blue: #32A6DE;
+  --sunrise-gold: #FDB813;
+  --action-red: #E63946;
+  --justice-purple: #6A1B9A;
+  --grassroots-green: #43A047;
+
+  --text-primary: #273351;
+  --text-secondary: #6c757d;
+  --bg-primary: #f5f5f5;
+  --bg-card: #ffffff;
+  --border-color: #e9ecef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.site-header {
+  background: var(--unity-blue);
+  padding: 20px;
+  text-align: center;
+}
+
+.site-header .logo img {
+  max-height: 50px;
+  width: auto;
+}
+
+/* Main Content */
+.content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(39, 51, 81, 0.1);
+}
+
+.card h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--unity-blue);
+}
+
+.card h2 {
+  font-size: 18px;
+  margin: 24px 0 12px 0;
+  color: var(--unity-blue);
+}
+
+.card .subtitle {
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+}
+
+/* Icons */
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 20px;
+  font-weight: bold;
+}
+
+.icon.success {
+  background: #e8f5e9;
+  color: var(--grassroots-green);
+}
+
+.icon.error {
+  background: #ffebee;
+  color: var(--action-red);
+}
+
+.icon.info {
+  background: #e3f2fd;
+  color: var(--momentum-blue);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--momentum-blue);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #2890c4;
+}
+
+.btn-secondary {
+  background: var(--unity-blue);
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background: #1e2740;
+}
+
+.btn-danger {
+  background: var(--action-red);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #c62828;
+}
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--action-red);
+  border: 2px solid var(--action-red);
+}
+
+.btn-danger-outline:hover {
+  background: var(--action-red);
+  color: #ffffff;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--unity-blue);
+}
+
+.form-group input[type="email"],
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--momentum-blue);
+}
+
+/* List Options */
+.list-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.list-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--momentum-blue);
+}
+
+.list-name {
+  font-weight: 600;
+  color: var(--unity-blue);
+}
+
+.list-desc {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Email Display */
+.email-display {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: monospace;
+  margin-bottom: 24px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Data Actions */
+.data-actions {
+  margin-top: 24px;
+}
+
+.data-actions form {
+  display: inline-block;
+  margin-right: 12px;
+  margin-top: 12px;
+}
+
+/* Archive */
+.archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.archive-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.archive-item:hover {
+  background: #e9ecef;
+}
+
+.archive-item .date {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.archive-item .subject {
+  font-weight: 600;
+}
+
+/* Privacy Note */
+.privacy-note {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 16px;
+}
+
+/* Footer */
+.site-footer {
+  background: var(--unity-blue);
+  color: #ffffff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.site-footer p {
+  margin: 0 0 8px 0;
+}
+
+.site-footer .tagline {
+  opacity: 0.8;
+}
+
+.site-footer .links {
+  margin-top: 12px;
+}
+
+.site-footer .links a {
+  color: var(--momentum-blue);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  text-decoration: underline;
+}
+
+.site-footer .legal {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 16px;
+}
+
+/* Horizontal Rule */
+hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 24px 0;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* No Content */
+.no-content, .no-lists {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+}
+
+/* CTA */
+.cta {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .card {
+    padding: 24px;
+    border-radius: 12px;
+  }
+
+  .card h1 {
+    font-size: 24px;
+  }
+
+  .archive-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

@@ -1,0 +1,45 @@
+{{ define "header" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{{ L.T "public.title" }} - Missouri Young Democrats</title>
+
+  <link rel="icon" type="image/png" href="{{ AssetPath }}/favicon.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{{ AssetPath }}/style.css">
+  <link rel="stylesheet" href="/public/custom.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <header class="site-header">
+      <a href="{{ RootURL }}" class="logo">
+        <img src="{{ AssetPath }}/logo.png" alt="Missouri Young Democrats">
+      </a>
+    </header>
+
+    <main class="content">
+{{ end }}
+
+{{ define "footer" }}
+    </main>
+
+    <footer class="site-footer">
+      <p><strong>Missouri Young Democrats</strong></p>
+      <p class="tagline">Building a Missouri that works for everyone.</p>
+      <p class="links">
+        <a href="https://moyoungdemocrats.org">Website</a> ·
+        <a href="https://instagram.com/moyoungdems">Instagram</a> ·
+        <a href="https://twitter.com/moyoungdems">Twitter</a>
+      </p>
+      <p class="legal">Paid for by Missouri Young Democrats, Dustin Bax, Treasurer</p>
+    </footer>
+  </div>
+
+  <script src="{{ AssetPath }}/script.js"></script>
+  <script src="/public/custom.js"></script>
+</body>
+</html>
+{{ end }}

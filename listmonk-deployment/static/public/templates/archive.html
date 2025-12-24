@@ -1,0 +1,32 @@
+{{ template "header" . }}
+
+<div class="card archive-card">
+  <h1>Email Archive</h1>
+  <p class="subtitle">Browse past newsletters and updates from Missouri Young Democrats.</p>
+
+  {{ if .Data.Campaigns }}
+  <div class="archive-list">
+    {{ range .Data.Campaigns }}
+    <a href="{{ RootURL }}/archive/{{ .UUID }}" class="archive-item">
+      <span class="date">{{ .CreatedAt.Format "Jan 2, 2006" }}</span>
+      <span class="subject">{{ .Subject }}</span>
+    </a>
+    {{ end }}
+  </div>
+
+  {{ if .Data.Pagination }}
+  <div class="pagination">
+    {{ if .Data.Pagination.HasPrev }}
+    <a href="?page={{ .Data.Pagination.PrevPage }}" class="btn btn-secondary">&#x2190; Previous</a>
+    {{ end }}
+    {{ if .Data.Pagination.HasNext }}
+    <a href="?page={{ .Data.Pagination.NextPage }}" class="btn btn-secondary">Next &#x2192;</a>
+    {{ end }}
+  </div>
+  {{ end }}
+  {{ else }}
+  <p class="no-content">No archived campaigns yet.</p>
+  {{ end }}
+</div>
+
+{{ template "footer" . }}

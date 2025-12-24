@@ -1,0 +1,20 @@
+{{ template "header" . }}
+
+<div class="card message-card">
+  {{ if eq .Data.Type "success" }}
+  <div class="icon success">&#x2713;</div>
+  {{ else if eq .Data.Type "error" }}
+  <div class="icon error">&#x2717;</div>
+  {{ else }}
+  <div class="icon info">i</div>
+  {{ end }}
+
+  <h1>{{ .Data.Title }}</h1>
+  <p>{{ .Data.Message }}</p>
+
+  {{ if .Data.Link }}
+  <a href="{{ .Data.Link }}" class="btn btn-primary">{{ .Data.LinkText }}</a>
+  {{ end }}
+</div>
+
+{{ template "footer" . }}

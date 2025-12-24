@@ -1,0 +1,12 @@
+{{ template "header" . }}
+
+<div class="card home-card">
+  <h1>Missouri Young Democrats</h1>
+  <p class="subtitle">Email Subscription Management</p>
+
+  {{ if .Data.EnablePublicSubscription }}
+  <a href="{{ RootURL }}/subscription/form" class="btn btn-primary">Subscribe to Our List</a>
+  {{ end }}
+</div>
+
+{{ template "footer" . }}

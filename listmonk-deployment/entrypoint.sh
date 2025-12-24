@@ -1920,9 +1920,9 @@ else
   echo "⚠️ Favicon not found at /listmonk/static/favicon.png"
 fi
 
-# Start Listmonk in background (runs on port 9001)
-echo "🎉 Starting Listmonk on port 9001..."
-./listmonk --config /listmonk/config.toml &
+# Start Listmonk in background (runs on port 9001) with custom static directory
+echo "🎉 Starting Listmonk on port 9001 with custom static directory..."
+./listmonk --config /listmonk/config.toml --static-dir=/listmonk/static &
 LISTMONK_PID=$!
 
 # Give Listmonk a moment to start
