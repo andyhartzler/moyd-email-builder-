@@ -433,19 +433,21 @@ EOSQL
   if [ $? -eq 0 ]; then
     echo "✅ Custom CSS injected successfully"
 
-    # Also inject custom JavaScript for buttons via custom_head (script tag)
-    # NOTE: Using appearance.admin.custom_head to inject <script> tag directly
-    # IMPORTANT: No single quotes in JS - quoted heredoc doesn't process shell escaping
+    # Inject custom JavaScript for navbar buttons
+    # NOTE: Using custom_js (NOT custom_head) - Listmonk serves this as /admin/custom.js
+    # NOTE: No <script> tags needed - it's served as a raw JS file
+    # NOTE: Avoiding all single quotes to prevent shell escaping issues in heredoc
     echo "💻 Injecting custom JavaScript for buttons..."
     PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL2'
       SET search_path TO listmonk, extensions, public;
 
+      -- Remove any old/broken settings
       DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
+      -- Insert navbar buttons JavaScript (NO <script> tags - served as raw JS file)
       INSERT INTO settings (key, value)
-      VALUES('appearance.admin.custom_head', to_jsonb('<script>
-(function(){
+      VALUES('appearance.admin.custom_js', to_jsonb('(function(){
   console.log("[MOYD] Loading navbar buttons...");
   var NAVY="#273351",NAVY_DARK="#1a2438";
 
@@ -551,12 +553,12 @@ EOSQL
 
   window.MOYD_showHelp=showHelp;
   console.log("[MOYD] Script loaded. Debug: window.MOYD_showHelp()");
-})();
-</script>'::text));
+})();'::text))
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL2
 
     if [ $? -eq 0 ]; then
-      echo "✅ Custom JavaScript injected successfully (via custom_head)"
+      echo "✅ Custom JavaScript injected successfully (via custom_js)"
 
       # Also inject public CSS for login page
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
@@ -1146,19 +1148,21 @@ EOSQL
       if [ $? -eq 0 ]; then
         echo "✅ Custom CSS injected successfully"
 
-        # Also inject custom JavaScript for buttons via custom_head (script tag)
-        # NOTE: Using appearance.admin.custom_head to inject <script> tag directly
-        # IMPORTANT: No single quotes in JS - quoted heredoc doesn't process shell escaping
+        # Inject custom JavaScript for navbar buttons
+        # NOTE: Using custom_js (NOT custom_head) - Listmonk serves this as /admin/custom.js
+        # NOTE: No <script> tags needed - it's served as a raw JS file
+        # NOTE: Avoiding all single quotes to prevent shell escaping issues in heredoc
         echo "💻 Injecting custom JavaScript for buttons..."
         PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL2'
           SET search_path TO listmonk, extensions, public;
 
+          -- Remove any old/broken settings
           DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
           DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
+          -- Insert navbar buttons JavaScript (NO <script> tags - served as raw JS file)
           INSERT INTO settings (key, value)
-          VALUES('appearance.admin.custom_head', to_jsonb('<script>
-(function(){
+          VALUES('appearance.admin.custom_js', to_jsonb('(function(){
   console.log("[MOYD] Loading navbar buttons...");
   var NAVY="#273351",NAVY_DARK="#1a2438";
 
@@ -1264,12 +1268,12 @@ EOSQL
 
   window.MOYD_showHelp=showHelp;
   console.log("[MOYD] Script loaded. Debug: window.MOYD_showHelp()");
-})();
-</script>'::text));
+})();'::text))
+          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL2
 
         if [ $? -eq 0 ]; then
-          echo "✅ Custom JavaScript injected successfully (via custom_head)"
+          echo "✅ Custom JavaScript injected successfully (via custom_js)"
 
           # Also inject public CSS for login page
           PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL3
