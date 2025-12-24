@@ -435,7 +435,7 @@ EOSQL
 
     # Also inject custom JavaScript for buttons via custom_head (script tag)
     # NOTE: Using appearance.admin.custom_head to inject <script> tag directly
-    # This is more reliable than custom_js which may not execute properly
+    # IMPORTANT: No single quotes in JS - quoted heredoc doesn't process shell escaping
     echo "💻 Injecting custom JavaScript for buttons..."
     PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL2'
       SET search_path TO listmonk, extensions, public;
@@ -445,105 +445,111 @@ EOSQL
 
       INSERT INTO settings (key, value)
       VALUES('appearance.admin.custom_head', to_jsonb('<script>
-(function() {
-  "use strict";
-  console.log("[MOYD] Admin buttons script loading...");
+(function(){
+  console.log("[MOYD] Loading navbar buttons...");
+  var NAVY="#273351",NAVY_DARK="#1a2438";
 
-  var NAVY = "#273351";
-  var NAVY_DARK = "#1a2438";
+  function createButtons(){
+    if(document.getElementById("moyd-btns"))return;
+    var d=document.createElement("div");
+    d.id="moyd-btns";
+    d.style.cssText="position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
 
-  function createButtons() {
-    if (document.getElementById("moyd-btns")) return true;
+    var r=document.createElement("button");
+    r.innerHTML="🔄";
+    r.title="Refresh Page";
+    r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
+    r.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
+    r.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
+    r.onclick=function(e){e.preventDefault();this.style.transform="rotate(360deg)";setTimeout(function(){location.reload()},300);};
 
-    var container = document.createElement("div");
-    container.id = "moyd-btns";
-    container.style.cssText = "position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
+    var h=document.createElement("button");
+    h.innerHTML="?";
+    h.title="Get Help";
+    h.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
+    h.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
+    h.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
+    h.onclick=function(e){e.preventDefault();showHelp();};
 
-    // Refresh button
-    var refreshBtn = document.createElement("button");
-    refreshBtn.innerHTML = "🔄";
-    refreshBtn.title = "Refresh Page";
-    refreshBtn.style.cssText = "width:40px;height:40px;background:" + NAVY + ";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    refreshBtn.onmouseover = function() { this.style.background = NAVY_DARK; this.style.transform = "scale(1.05)"; };
-    refreshBtn.onmouseout = function() { this.style.background = NAVY; this.style.transform = "scale(1)"; };
-    refreshBtn.onclick = function(e) {
-      e.preventDefault();
-      this.style.transform = "rotate(360deg)";
-      setTimeout(function() { location.reload(); }, 300);
-    };
-
-    // Help button
-    var helpBtn = document.createElement("button");
-    helpBtn.innerHTML = "?";
-    helpBtn.title = "Get Help";
-    helpBtn.style.cssText = "width:40px;height:40px;background:" + NAVY + ";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    helpBtn.onmouseover = function() { this.style.background = NAVY_DARK; this.style.transform = "scale(1.05)"; };
-    helpBtn.onmouseout = function() { this.style.background = NAVY; this.style.transform = "scale(1)"; };
-    helpBtn.onclick = function(e) {
-      e.preventDefault();
-      showHelpModal();
-    };
-
-    container.appendChild(refreshBtn);
-    container.appendChild(helpBtn);
-    document.body.appendChild(container);
+    d.appendChild(r);
+    d.appendChild(h);
+    document.body.appendChild(d);
     console.log("[MOYD] Buttons created!");
-    return true;
   }
 
-  function showHelpModal() {
-    var existing = document.getElementById("moyd-modal");
-    if (existing) existing.remove();
+  function showHelp(){
+    var existing=document.getElementById("moyd-modal");
+    if(existing)existing.remove();
 
-    var msg = "Hey Andrew! I am having a problem on the Campaigns page of the App....";
-    var smsUrl = "sms:+18168983612?body=" + encodeURIComponent(msg);
-    var emailUrl = "mailto:andrew@moyoungdemocrats.org?subject=" + encodeURIComponent("MOYD App Help") + "&body=" + encodeURIComponent(msg);
+    var msg="Hey Andrew! I am having a problem on the Campaigns page of the App....";
+    var smsUrl="sms:+18168983612?body="+encodeURIComponent(msg);
+    var emailUrl="mailto:andrew@moyoungdemocrats.org?subject="+encodeURIComponent("MOYD App Help")+"&body="+encodeURIComponent(msg);
 
-    var overlay = document.createElement("div");
-    overlay.id = "moyd-modal";
-    overlay.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
+    var overlay=document.createElement("div");
+    overlay.id="moyd-modal";
+    overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
 
-    var modal = document.createElement("div");
-    modal.style.cssText = "background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center;";
+    var modal=document.createElement("div");
+    modal.style.cssText="background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center;";
 
-    modal.innerHTML = "<h2 style=\"margin:0 0 8px;color:#273351;font-size:20px;\">Having trouble with the email campaign system?</h2>" +
-      "<p style=\"margin:0 0 24px;color:#273351;font-size:18px;font-weight:600;\">Get help now!</p>" +
-      "<div style=\"display:flex;gap:16px;margin-bottom:20px;\">" +
-        "<a href=\"" + smsUrl + "\" style=\"flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;\"><span style=\"font-size:32px;margin-bottom:8px;\">💬</span><span style=\"font-weight:bold;\">Text</span></a>" +
-        "<a href=\"" + emailUrl + "\" style=\"flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;\"><span style=\"font-size:32px;margin-bottom:8px;\">✉️</span><span style=\"font-weight:bold;\">Email</span></a>" +
-      "</div>" +
-      "<button onclick=\"document.getElementById('"'"'moyd-modal'"'"').remove()\" style=\"width:100%;padding:14px;background:#e5e5e5;border:none;border-radius:8px;font-size:16px;cursor:pointer;\">Close</button>";
+    var title=document.createElement("h2");
+    title.style.cssText="margin:0 0 8px;color:#273351;font-size:20px;";
+    title.textContent="Having trouble with the email campaign system?";
 
+    var subtitle=document.createElement("p");
+    subtitle.style.cssText="margin:0 0 24px;color:#273351;font-size:18px;font-weight:600;";
+    subtitle.textContent="Get help now!";
+
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:16px;margin-bottom:20px;";
+
+    var smsLink=document.createElement("a");
+    smsLink.href=smsUrl;
+    smsLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
+    smsLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">💬</span><span style=\"font-weight:bold;\">Text</span>";
+
+    var emailLink=document.createElement("a");
+    emailLink.href=emailUrl;
+    emailLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
+    emailLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">✉️</span><span style=\"font-weight:bold;\">Email</span>";
+
+    var closeBtn=document.createElement("button");
+    closeBtn.textContent="Close";
+    closeBtn.style.cssText="width:100%;padding:14px;background:#e5e5e5;border:none;border-radius:8px;font-size:16px;cursor:pointer;";
+    closeBtn.onclick=function(){overlay.remove();};
+
+    btnRow.appendChild(smsLink);
+    btnRow.appendChild(emailLink);
+    modal.appendChild(title);
+    modal.appendChild(subtitle);
+    modal.appendChild(btnRow);
+    modal.appendChild(closeBtn);
     overlay.appendChild(modal);
-    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    overlay.onclick=function(ev){if(ev.target===overlay)overlay.remove();};
     document.body.appendChild(overlay);
   }
 
-  // Initialize
-  function init() {
-    if (!document.body) {
-      setTimeout(init, 100);
-      return;
-    }
+  function init(){
+    if(!document.body){setTimeout(init,100);return;}
     createButtons();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",init);
+  }else{
     init();
   }
 
-  setTimeout(init, 500);
-  setTimeout(init, 1000);
-  setTimeout(init, 2000);
+  setTimeout(init,500);
+  setTimeout(init,1000);
+  setTimeout(init,2000);
 
-  // Re-create if removed (Vue navigation)
-  setInterval(function() {
-    if (!document.getElementById("moyd-btns")) createButtons();
-  }, 2000);
+  setInterval(function(){
+    if(!document.getElementById("moyd-btns"))createButtons();
+  },3000);
 
-  window.MOYD_showHelp = showHelpModal;
+  window.MOYD_showHelp=showHelp;
   console.log("[MOYD] Script loaded. Debug: window.MOYD_showHelp()");
 })();
 </script>'::text));
@@ -1142,7 +1148,7 @@ EOSQL
 
         # Also inject custom JavaScript for buttons via custom_head (script tag)
         # NOTE: Using appearance.admin.custom_head to inject <script> tag directly
-        # This is more reliable than custom_js which may not execute properly
+        # IMPORTANT: No single quotes in JS - quoted heredoc doesn't process shell escaping
         echo "💻 Injecting custom JavaScript for buttons..."
         PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL2'
           SET search_path TO listmonk, extensions, public;
@@ -1152,105 +1158,111 @@ EOSQL
 
           INSERT INTO settings (key, value)
           VALUES('appearance.admin.custom_head', to_jsonb('<script>
-(function() {
-  "use strict";
-  console.log("[MOYD] Admin buttons script loading...");
+(function(){
+  console.log("[MOYD] Loading navbar buttons...");
+  var NAVY="#273351",NAVY_DARK="#1a2438";
 
-  var NAVY = "#273351";
-  var NAVY_DARK = "#1a2438";
+  function createButtons(){
+    if(document.getElementById("moyd-btns"))return;
+    var d=document.createElement("div");
+    d.id="moyd-btns";
+    d.style.cssText="position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
 
-  function createButtons() {
-    if (document.getElementById("moyd-btns")) return true;
+    var r=document.createElement("button");
+    r.innerHTML="🔄";
+    r.title="Refresh Page";
+    r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
+    r.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
+    r.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
+    r.onclick=function(e){e.preventDefault();this.style.transform="rotate(360deg)";setTimeout(function(){location.reload()},300);};
 
-    var container = document.createElement("div");
-    container.id = "moyd-btns";
-    container.style.cssText = "position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
+    var h=document.createElement("button");
+    h.innerHTML="?";
+    h.title="Get Help";
+    h.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
+    h.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
+    h.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
+    h.onclick=function(e){e.preventDefault();showHelp();};
 
-    // Refresh button
-    var refreshBtn = document.createElement("button");
-    refreshBtn.innerHTML = "🔄";
-    refreshBtn.title = "Refresh Page";
-    refreshBtn.style.cssText = "width:40px;height:40px;background:" + NAVY + ";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    refreshBtn.onmouseover = function() { this.style.background = NAVY_DARK; this.style.transform = "scale(1.05)"; };
-    refreshBtn.onmouseout = function() { this.style.background = NAVY; this.style.transform = "scale(1)"; };
-    refreshBtn.onclick = function(e) {
-      e.preventDefault();
-      this.style.transform = "rotate(360deg)";
-      setTimeout(function() { location.reload(); }, 300);
-    };
-
-    // Help button
-    var helpBtn = document.createElement("button");
-    helpBtn.innerHTML = "?";
-    helpBtn.title = "Get Help";
-    helpBtn.style.cssText = "width:40px;height:40px;background:" + NAVY + ";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    helpBtn.onmouseover = function() { this.style.background = NAVY_DARK; this.style.transform = "scale(1.05)"; };
-    helpBtn.onmouseout = function() { this.style.background = NAVY; this.style.transform = "scale(1)"; };
-    helpBtn.onclick = function(e) {
-      e.preventDefault();
-      showHelpModal();
-    };
-
-    container.appendChild(refreshBtn);
-    container.appendChild(helpBtn);
-    document.body.appendChild(container);
+    d.appendChild(r);
+    d.appendChild(h);
+    document.body.appendChild(d);
     console.log("[MOYD] Buttons created!");
-    return true;
   }
 
-  function showHelpModal() {
-    var existing = document.getElementById("moyd-modal");
-    if (existing) existing.remove();
+  function showHelp(){
+    var existing=document.getElementById("moyd-modal");
+    if(existing)existing.remove();
 
-    var msg = "Hey Andrew! I am having a problem on the Campaigns page of the App....";
-    var smsUrl = "sms:+18168983612?body=" + encodeURIComponent(msg);
-    var emailUrl = "mailto:andrew@moyoungdemocrats.org?subject=" + encodeURIComponent("MOYD App Help") + "&body=" + encodeURIComponent(msg);
+    var msg="Hey Andrew! I am having a problem on the Campaigns page of the App....";
+    var smsUrl="sms:+18168983612?body="+encodeURIComponent(msg);
+    var emailUrl="mailto:andrew@moyoungdemocrats.org?subject="+encodeURIComponent("MOYD App Help")+"&body="+encodeURIComponent(msg);
 
-    var overlay = document.createElement("div");
-    overlay.id = "moyd-modal";
-    overlay.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
+    var overlay=document.createElement("div");
+    overlay.id="moyd-modal";
+    overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
 
-    var modal = document.createElement("div");
-    modal.style.cssText = "background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center;";
+    var modal=document.createElement("div");
+    modal.style.cssText="background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center;";
 
-    modal.innerHTML = "<h2 style=\"margin:0 0 8px;color:#273351;font-size:20px;\">Having trouble with the email campaign system?</h2>" +
-      "<p style=\"margin:0 0 24px;color:#273351;font-size:18px;font-weight:600;\">Get help now!</p>" +
-      "<div style=\"display:flex;gap:16px;margin-bottom:20px;\">" +
-        "<a href=\"" + smsUrl + "\" style=\"flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;\"><span style=\"font-size:32px;margin-bottom:8px;\">💬</span><span style=\"font-weight:bold;\">Text</span></a>" +
-        "<a href=\"" + emailUrl + "\" style=\"flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;\"><span style=\"font-size:32px;margin-bottom:8px;\">✉️</span><span style=\"font-weight:bold;\">Email</span></a>" +
-      "</div>" +
-      "<button onclick=\"document.getElementById('"'"'moyd-modal'"'"').remove()\" style=\"width:100%;padding:14px;background:#e5e5e5;border:none;border-radius:8px;font-size:16px;cursor:pointer;\">Close</button>";
+    var title=document.createElement("h2");
+    title.style.cssText="margin:0 0 8px;color:#273351;font-size:20px;";
+    title.textContent="Having trouble with the email campaign system?";
 
+    var subtitle=document.createElement("p");
+    subtitle.style.cssText="margin:0 0 24px;color:#273351;font-size:18px;font-weight:600;";
+    subtitle.textContent="Get help now!";
+
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:16px;margin-bottom:20px;";
+
+    var smsLink=document.createElement("a");
+    smsLink.href=smsUrl;
+    smsLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
+    smsLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">💬</span><span style=\"font-weight:bold;\">Text</span>";
+
+    var emailLink=document.createElement("a");
+    emailLink.href=emailUrl;
+    emailLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
+    emailLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">✉️</span><span style=\"font-weight:bold;\">Email</span>";
+
+    var closeBtn=document.createElement("button");
+    closeBtn.textContent="Close";
+    closeBtn.style.cssText="width:100%;padding:14px;background:#e5e5e5;border:none;border-radius:8px;font-size:16px;cursor:pointer;";
+    closeBtn.onclick=function(){overlay.remove();};
+
+    btnRow.appendChild(smsLink);
+    btnRow.appendChild(emailLink);
+    modal.appendChild(title);
+    modal.appendChild(subtitle);
+    modal.appendChild(btnRow);
+    modal.appendChild(closeBtn);
     overlay.appendChild(modal);
-    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    overlay.onclick=function(ev){if(ev.target===overlay)overlay.remove();};
     document.body.appendChild(overlay);
   }
 
-  // Initialize
-  function init() {
-    if (!document.body) {
-      setTimeout(init, 100);
-      return;
-    }
+  function init(){
+    if(!document.body){setTimeout(init,100);return;}
     createButtons();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",init);
+  }else{
     init();
   }
 
-  setTimeout(init, 500);
-  setTimeout(init, 1000);
-  setTimeout(init, 2000);
+  setTimeout(init,500);
+  setTimeout(init,1000);
+  setTimeout(init,2000);
 
-  // Re-create if removed (Vue navigation)
-  setInterval(function() {
-    if (!document.getElementById("moyd-btns")) createButtons();
-  }, 2000);
+  setInterval(function(){
+    if(!document.getElementById("moyd-btns"))createButtons();
+  },3000);
 
-  window.MOYD_showHelp = showHelpModal;
+  window.MOYD_showHelp=showHelp;
   console.log("[MOYD] Script loaded. Debug: window.MOYD_showHelp()");
 })();
 </script>'::text));
