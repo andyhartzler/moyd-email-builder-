@@ -25,6 +25,10 @@ COPY listmonk-deployment/custom-buttons.js /listmonk/static/custom-buttons.js
 # Copy MOYD logo to uploads directory for login page
 COPY MOYD01.png /listmonk/uploads/MOYD01.png
 
+# Copy MOYD logo as favicon
+COPY MOYD01.png /listmonk/static/favicon.png
+COPY MOYD01.png /listmonk/uploads/favicon.png
+
 # Expose port
 EXPOSE 9000
 
