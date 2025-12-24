@@ -2,9 +2,9 @@
 
 <div class="card message-card">
   {{ if eq .Data.Type "success" }}
-  <div class="icon success">&#x2713;</div>
+  <div class="icon success">✓</div>
   {{ else if eq .Data.Type "error" }}
-  <div class="icon error">&#x2717;</div>
+  <div class="icon error">✕</div>
   {{ else }}
   <div class="icon info">i</div>
   {{ end }}

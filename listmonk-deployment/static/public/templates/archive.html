@@ -17,10 +17,10 @@
   {{ if .Data.Pagination }}
   <div class="pagination">
     {{ if .Data.Pagination.HasPrev }}
-    <a href="?page={{ .Data.Pagination.PrevPage }}" class="btn btn-secondary">&#x2190; Previous</a>
+    <a href="?page={{ .Data.Pagination.PrevPage }}" class="btn btn-secondary">← Previous</a>
     {{ end }}
     {{ if .Data.Pagination.HasNext }}
-    <a href="?page={{ .Data.Pagination.NextPage }}" class="btn btn-secondary">Next &#x2192;</a>
+    <a href="?page={{ .Data.Pagination.NextPage }}" class="btn btn-secondary">Next →</a>
     {{ end }}
   </div>
   {{ end }}
