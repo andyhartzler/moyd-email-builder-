@@ -1355,7 +1355,7 @@ fi
 
 echo "📝 Setting up SSO authentication handler..."
 
-# Create the SSO handler script
+# Create the SSO handler script (uses socat for proper bidirectional I/O)
 cat > /tmp/sso-handler.sh << 'SSOHANDLER'
 #!/bin/sh
 
@@ -1372,12 +1372,26 @@ DB_SCHEMA="${DB_SCHEMA:-listmonk}"
 DB_SSL_MODE="${DB_SSL_MODE:-require}"
 ADMIN_USER="${LISTMONK_ADMIN_USERNAME:-admin}"
 
+echo "SSO Handler starting on port $SSO_PORT..."
+
+# Create the request handler script that will be spawned for each connection
+cat > /tmp/handle-sso-request.sh << 'HANDLER'
+#!/bin/sh
+
+JWT_SECRET="${LISTMONK_JWT_SECRET:-}"
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-5432}"
+DB_USER="${DB_USER:-postgres}"
+DB_PASSWORD="${DB_PASSWORD:-}"
+DB_NAME="${DB_NAME:-postgres}"
+DB_SCHEMA="${DB_SCHEMA:-listmonk}"
+DB_SSL_MODE="${DB_SSL_MODE:-require}"
+ADMIN_USER="${LISTMONK_ADMIN_USERNAME:-admin}"
+
 # Function to decode base64url
 base64url_decode() {
     local input="$1"
-    # Replace URL-safe characters with standard base64
     local padded=$(echo -n "$input" | tr '_-' '/+')
-    # Add padding if needed
     local mod=$((${#padded} % 4))
     if [ $mod -eq 2 ]; then
         padded="${padded}=="
@@ -1392,12 +1406,10 @@ verify_jwt() {
     local token="$1"
     local secret="$2"
 
-    # Split token into parts
     local header=$(echo "$token" | cut -d'.' -f1)
     local payload=$(echo "$token" | cut -d'.' -f2)
     local signature=$(echo "$token" | cut -d'.' -f3)
 
-    # Decode payload
     local decoded_payload=$(base64url_decode "$payload")
 
     # Check expiration
@@ -1434,12 +1446,9 @@ create_session() {
     local session_id="$1"
     local user_id="$2"
 
-    # Session data - simplesessions format with proper JSON structure
-    # Listmonk expects: {"user_id": <numeric_id>}
     local session_data="{\"user_id\":${user_id}}"
 
-    # Insert or update session in Listmonk's sessions table
-    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q << EOSQL
+    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q 2>/dev/null << EOSQL
 SET search_path TO ${DB_SCHEMA}, extensions, public;
 INSERT INTO sessions (id, data, created_at, updated_at)
 VALUES ('${session_id}', '${session_data}'::bytea, NOW(), NOW())
@@ -1449,7 +1458,7 @@ EOSQL
 
 # Function to get admin user ID
 get_admin_user_id() {
-    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q << EOSQL
+    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q 2>/dev/null << EOSQL
 SET search_path TO ${DB_SCHEMA}, extensions, public;
 SELECT id FROM users WHERE username = '${ADMIN_USER}' LIMIT 1;
 EOSQL
@@ -1462,7 +1471,7 @@ mark_token_used() {
     local email="$3"
     local exp="$4"
 
-    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q << EOSQL
+    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q 2>/dev/null << EOSQL
 SET search_path TO ${DB_SCHEMA}, extensions, public;
 INSERT INTO used_sso_tokens (token_hash, user_id, email, expires_at)
 VALUES ('${token_hash}', '${user_id}'::uuid, '${email}', to_timestamp(${exp}))
@@ -1473,12 +1482,12 @@ EOSQL
 # Function to check if token was used
 is_token_used() {
     local token_hash="$1"
-    local result=$(PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q << EOSQL
+    local result=$(PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q 2>/dev/null << EOSQL
 SET search_path TO ${DB_SCHEMA}, extensions, public;
 SELECT COUNT(*) FROM used_sso_tokens WHERE token_hash = '${token_hash}';
 EOSQL
 )
-    echo "$result" | tr -d ' '
+    echo "$result" | tr -d ' \n\t'
 }
 
 # Generate session ID
@@ -1491,106 +1500,136 @@ hash_token() {
     echo -n "$1" | sha256sum | cut -d' ' -f1
 }
 
-# URL decode function
-urldecode() {
-    local encoded="$1"
-    # Replace + with space, then decode percent-encoded chars
-    echo -n "$encoded" | sed 's/+/ /g; s/%\([0-9A-Fa-f][0-9A-Fa-f]\)/\\x\1/g' | xargs -0 printf '%b'
+# Send HTTP response
+send_response() {
+    local status="$1"
+    local content_type="$2"
+    local body="$3"
+    local extra_headers="$4"
+
+    printf "HTTP/1.1 %s\r\n" "$status"
+    printf "Content-Type: %s\r\n" "$content_type"
+    printf "Connection: close\r\n"
+    if [ -n "$extra_headers" ]; then
+        printf "%s\r\n" "$extra_headers"
+    fi
+    printf "Content-Length: %d\r\n" "${#body}"
+    printf "\r\n"
+    printf "%s" "$body"
 }
 
-echo "SSO Handler starting on port $SSO_PORT..."
+# Send redirect response
+send_redirect() {
+    local location="$1"
+    local cookie="$2"
 
-# Simple HTTP server using netcat
-while true; do
-    # Listen for connections using netcat
-    {
-        read -r request_line
+    printf "HTTP/1.1 302 Found\r\n"
+    printf "Location: %s\r\n" "$location"
+    if [ -n "$cookie" ]; then
+        printf "Set-Cookie: %s\r\n" "$cookie"
+    fi
+    printf "Connection: close\r\n"
+    printf "Content-Length: 0\r\n"
+    printf "\r\n"
+}
 
-        # Read headers (we need to consume them)
-        while read -r header; do
-            # Empty line signals end of headers
-            [ -z "$header" ] || [ "$header" = $'\r' ] && break
+# Read the HTTP request
+read -r request_line
+
+# Parse method and path
+request_method=$(echo "$request_line" | cut -d' ' -f1)
+request_path=$(echo "$request_line" | cut -d' ' -f2)
+
+# Read and discard headers
+while read -r header; do
+    header=$(echo "$header" | tr -d '\r')
+    [ -z "$header" ] && break
+done
+
+# Route the request
+case "$request_path" in
+    /api/sso-health*)
+        send_response "200 OK" "application/json" '{"status":"ok","service":"sso-handler"}'
+        ;;
+    /api/crm-auth*)
+        # Extract token from query string
+        query_string=$(echo "$request_path" | grep -o '?.*' | cut -c2-)
+        token=""
+
+        # Parse query parameters
+        OLD_IFS="$IFS"
+        IFS='&'
+        for param in $query_string; do
+            key=$(echo "$param" | cut -d'=' -f1)
+            value=$(echo "$param" | cut -d'=' -f2-)
+            if [ "$key" = "token" ]; then
+                token=$(echo "$value" | sed 's/%2B/+/g; s/%2F/\//g; s/%3D/=/g; s/%2b/+/g; s/%2f/\//g; s/%3d/=/g')
+            fi
         done
+        IFS="$OLD_IFS"
 
-        # Parse the request
-        request_path=$(echo "$request_line" | cut -d' ' -f2)
+        if [ -z "$token" ]; then
+            send_redirect "/admin/login"
+        elif [ -z "$JWT_SECRET" ]; then
+            send_response "500 Internal Server Error" "text/plain" "SSO not configured"
+        else
+            # Hash token for replay check
+            token_hash=$(hash_token "$token")
 
-        if echo "$request_path" | grep -q "^/api/crm-auth"; then
-            # Extract token from query string
-            query_string=$(echo "$request_path" | grep -o '\?.*' | cut -c2-)
-            token=""
-
-            # Parse query parameters
-            IFS='&'
-            for param in $query_string; do
-                key=$(echo "$param" | cut -d'=' -f1)
-                value=$(echo "$param" | cut -d'=' -f2-)
-                if [ "$key" = "token" ]; then
-                    # URL decode the token
-                    token=$(echo "$value" | sed 's/%2B/+/g; s/%2F/\//g; s/%3D/=/g; s/%2b/+/g; s/%2f/\//g; s/%3d/=/g')
-                fi
-            done
-            unset IFS
-
-            if [ -z "$token" ]; then
-                # No token - redirect to login
-                printf "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nConnection: close\r\n\r\n"
-            elif [ -z "$JWT_SECRET" ]; then
-                # No secret configured
-                printf "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nSSO not configured"
+            # Check if already used
+            used_count=$(is_token_used "$token_hash")
+            if [ -n "$used_count" ] && [ "$used_count" -gt 0 ] 2>/dev/null; then
+                send_response "403 Forbidden" "text/plain" "Token already used"
             else
-                # Verify token
-                token_hash=$(hash_token "$token")
+                # Verify JWT
+                payload=$(verify_jwt "$token" "$JWT_SECRET")
+                verify_result=$?
 
-                # Check if already used
-                used_count=$(is_token_used "$token_hash")
-                if [ "$used_count" != "" ] && [ "$used_count" -gt "0" ] 2>/dev/null; then
-                    printf "HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nToken already used"
+                if [ $verify_result -ne 0 ]; then
+                    send_response "401 Unauthorized" "text/plain" "Invalid token: $payload"
                 else
-                    # Verify JWT
-                    payload=$(verify_jwt "$token" "$JWT_SECRET")
-                    verify_result=$?
+                    # Extract claims
+                    sub=$(echo "$payload" | grep -o '"sub":"[^"]*"' | cut -d'"' -f4)
+                    email=$(echo "$payload" | grep -o '"email":"[^"]*"' | cut -d'"' -f4)
+                    exp=$(echo "$payload" | grep -o '"exp":[0-9]*' | grep -o '[0-9]*')
 
-                    if [ $verify_result -ne 0 ]; then
-                        printf "HTTP/1.1 401 Unauthorized\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nInvalid token: $payload"
+                    # Mark token as used
+                    mark_token_used "$token_hash" "$sub" "$email" "$exp"
+
+                    # Get admin user ID
+                    admin_id=$(get_admin_user_id | tr -d ' \n\t')
+
+                    if [ -z "$admin_id" ]; then
+                        send_response "500 Internal Server Error" "text/plain" "Admin user not found"
                     else
-                        # Extract claims
-                        sub=$(echo "$payload" | grep -o '"sub":"[^"]*"' | cut -d'"' -f4)
-                        email=$(echo "$payload" | grep -o '"email":"[^"]*"' | cut -d'"' -f4)
-                        exp=$(echo "$payload" | grep -o '"exp":[0-9]*' | grep -o '[0-9]*')
+                        # Generate session ID
+                        session_id=$(generate_session_id)
 
-                        # Mark token as used
-                        mark_token_used "$token_hash" "$sub" "$email" "$exp"
+                        # Create session in database
+                        create_session "$session_id" "$admin_id"
 
-                        # Get admin user ID
-                        admin_id=$(get_admin_user_id | tr -d ' \n')
+                        # Calculate cookie expiry (7 days)
+                        cookie_expiry=$(date -u -d "+7 days" "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u -v+7d "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u "+%a, %d %b %Y %H:%M:%S GMT")
 
-                        if [ -z "$admin_id" ]; then
-                            printf "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nAdmin user not found"
-                        else
-                            # Generate session ID
-                            session_id=$(generate_session_id)
-
-                            # Create session in database
-                            create_session "$session_id" "$admin_id"
-
-                            # Calculate cookie expiry (7 days from now)
-                            cookie_expiry=$(date -u -d "+7 days" "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u "+%a, %d %b %Y %H:%M:%S GMT")
-
-                            # Redirect with session cookie
-                            printf "HTTP/1.1 302 Found\r\nSet-Cookie: session=${session_id}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${cookie_expiry}\r\nLocation: /admin\r\nConnection: close\r\n\r\n"
-                        fi
+                        # Send redirect with session cookie
+                        cookie="session=${session_id}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${cookie_expiry}"
+                        send_redirect "/admin" "$cookie"
                     fi
                 fi
             fi
-        elif echo "$request_path" | grep -q "^/api/sso-health"; then
-            printf "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{\"status\":\"ok\",\"service\":\"sso-handler\"}"
-        else
-            # Not our endpoint - return 404
-            printf "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nNot Found"
         fi
-    } | nc -l -p "$SSO_PORT" -q 1 2>/dev/null || nc -l -p "$SSO_PORT" 2>/dev/null
-done
+        ;;
+    *)
+        send_response "404 Not Found" "text/plain" "Not Found"
+        ;;
+esac
+HANDLER
+
+chmod +x /tmp/handle-sso-request.sh
+
+# Start socat to handle connections
+# socat will spawn the handler script for each connection with proper bidirectional I/O
+exec socat TCP-LISTEN:${SSO_PORT},reuseaddr,fork EXEC:/tmp/handle-sso-request.sh
 SSOHANDLER
 
 chmod +x /tmp/sso-handler.sh
