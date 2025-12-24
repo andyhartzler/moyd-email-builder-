@@ -4,9 +4,10 @@ set -e
 echo "🚀 Starting Listmonk setup..."
 
 # Generate config.toml from environment variables
+# NOTE: Listmonk runs on port 9001 internally; nginx proxies from port 9000
 cat > /listmonk/config.toml <<EOF
 [app]
-address = "0.0.0.0:9000"
+address = "0.0.0.0:9001"
 root_url = "${LISTMONK_ROOT_URL:-http://localhost:9000}"
 
 # NOTE: admin_username and admin_password removed - v4.0+ stores credentials in database
@@ -1316,6 +1317,327 @@ echo "   Testing if settings table is accessible without explicit search_path...
 SETTINGS_CHECK=$(PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM settings;" 2>&1 || echo "FAILED")
 echo "   Settings table accessible: ${SETTINGS_CHECK}"
 
-# Start Listmonk
-echo "🎉 Starting Listmonk..."
-exec ./listmonk --config /listmonk/config.toml
+# ========================================
+# SSO AUTHENTICATION SETUP
+# ========================================
+echo "🔐 Setting up SSO authentication..."
+
+# Create used_sso_tokens table for token replay prevention
+echo "📝 Creating used_sso_tokens table..."
+PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_SSO_TABLE'
+  SET search_path TO listmonk, extensions, public;
+
+  -- Create used_sso_tokens table for preventing token replay attacks
+  CREATE TABLE IF NOT EXISTS used_sso_tokens (
+    token_hash VARCHAR(64) PRIMARY KEY,
+    user_id UUID NOT NULL,
+    email VARCHAR(255),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  );
+
+  -- Create index for cleanup of expired tokens
+  CREATE INDEX IF NOT EXISTS idx_used_sso_tokens_expires_at ON used_sso_tokens(expires_at);
+
+  -- Clean up old expired tokens (older than 24 hours past expiration)
+  DELETE FROM used_sso_tokens WHERE expires_at < NOW() - INTERVAL '24 hours';
+EOSQL_SSO_TABLE
+
+if [ $? -eq 0 ]; then
+  echo "✅ used_sso_tokens table ready"
+else
+  echo "⚠️ Failed to create used_sso_tokens table, SSO may not work"
+fi
+
+# ========================================
+# SSO AUTHENTICATION HANDLER
+# ========================================
+
+echo "📝 Setting up SSO authentication handler..."
+
+# Create the SSO handler script
+cat > /tmp/sso-handler.sh << 'SSOHANDLER'
+#!/bin/sh
+
+# SSO Handler Configuration
+# SSO handler runs on port 9002; nginx proxies /api/crm-auth to it
+SSO_PORT="${SSO_PORT:-9002}"
+JWT_SECRET="${LISTMONK_JWT_SECRET:-}"
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-5432}"
+DB_USER="${DB_USER:-postgres}"
+DB_PASSWORD="${DB_PASSWORD:-}"
+DB_NAME="${DB_NAME:-postgres}"
+DB_SCHEMA="${DB_SCHEMA:-listmonk}"
+DB_SSL_MODE="${DB_SSL_MODE:-require}"
+ADMIN_USER="${LISTMONK_ADMIN_USERNAME:-admin}"
+
+# Function to decode base64url
+base64url_decode() {
+    local input="$1"
+    # Replace URL-safe characters with standard base64
+    local padded=$(echo -n "$input" | tr '_-' '/+')
+    # Add padding if needed
+    local mod=$((${#padded} % 4))
+    if [ $mod -eq 2 ]; then
+        padded="${padded}=="
+    elif [ $mod -eq 3 ]; then
+        padded="${padded}="
+    fi
+    echo -n "$padded" | base64 -d 2>/dev/null
+}
+
+# Function to verify JWT signature
+verify_jwt() {
+    local token="$1"
+    local secret="$2"
+
+    # Split token into parts
+    local header=$(echo "$token" | cut -d'.' -f1)
+    local payload=$(echo "$token" | cut -d'.' -f2)
+    local signature=$(echo "$token" | cut -d'.' -f3)
+
+    # Decode payload
+    local decoded_payload=$(base64url_decode "$payload")
+
+    # Check expiration
+    local exp=$(echo "$decoded_payload" | grep -o '"exp":[0-9]*' | grep -o '[0-9]*')
+    local now=$(date +%s)
+
+    if [ -z "$exp" ] || [ "$now" -gt "$exp" ]; then
+        echo "EXPIRED"
+        return 1
+    fi
+
+    # Check issuer
+    local iss=$(echo "$decoded_payload" | grep -o '"iss":"[^"]*"' | cut -d'"' -f4)
+    if [ "$iss" != "moyd-crm" ]; then
+        echo "INVALID_ISSUER"
+        return 1
+    fi
+
+    # Verify signature using openssl
+    local signing_input="${header}.${payload}"
+    local expected_sig=$(echo -n "$signing_input" | openssl dgst -sha256 -hmac "$secret" -binary | base64 | tr '+/' '-_' | tr -d '=')
+
+    if [ "$signature" != "$expected_sig" ]; then
+        echo "INVALID_SIGNATURE"
+        return 1
+    fi
+
+    echo "$decoded_payload"
+    return 0
+}
+
+# Function to create session in database
+create_session() {
+    local session_id="$1"
+    local user_id="$2"
+
+    # Session data - simplesessions format with proper JSON structure
+    # Listmonk expects: {"user_id": <numeric_id>}
+    local session_data="{\"user_id\":${user_id}}"
+
+    # Insert or update session in Listmonk's sessions table
+    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q << EOSQL
+SET search_path TO ${DB_SCHEMA}, extensions, public;
+INSERT INTO sessions (id, data, created_at, updated_at)
+VALUES ('${session_id}', '${session_data}'::bytea, NOW(), NOW())
+ON CONFLICT (id) DO UPDATE SET data = '${session_data}'::bytea, updated_at = NOW();
+EOSQL
+}
+
+# Function to get admin user ID
+get_admin_user_id() {
+    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q << EOSQL
+SET search_path TO ${DB_SCHEMA}, extensions, public;
+SELECT id FROM users WHERE username = '${ADMIN_USER}' LIMIT 1;
+EOSQL
+}
+
+# Function to mark token as used
+mark_token_used() {
+    local token_hash="$1"
+    local user_id="$2"
+    local email="$3"
+    local exp="$4"
+
+    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q << EOSQL
+SET search_path TO ${DB_SCHEMA}, extensions, public;
+INSERT INTO used_sso_tokens (token_hash, user_id, email, expires_at)
+VALUES ('${token_hash}', '${user_id}'::uuid, '${email}', to_timestamp(${exp}))
+ON CONFLICT (token_hash) DO NOTHING;
+EOSQL
+}
+
+# Function to check if token was used
+is_token_used() {
+    local token_hash="$1"
+    local result=$(PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q << EOSQL
+SET search_path TO ${DB_SCHEMA}, extensions, public;
+SELECT COUNT(*) FROM used_sso_tokens WHERE token_hash = '${token_hash}';
+EOSQL
+)
+    echo "$result" | tr -d ' '
+}
+
+# Generate session ID
+generate_session_id() {
+    cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1
+}
+
+# Hash token for storage
+hash_token() {
+    echo -n "$1" | sha256sum | cut -d' ' -f1
+}
+
+# URL decode function
+urldecode() {
+    local encoded="$1"
+    # Replace + with space, then decode percent-encoded chars
+    echo -n "$encoded" | sed 's/+/ /g; s/%\([0-9A-Fa-f][0-9A-Fa-f]\)/\\x\1/g' | xargs -0 printf '%b'
+}
+
+echo "SSO Handler starting on port $SSO_PORT..."
+
+# Simple HTTP server using netcat
+while true; do
+    # Listen for connections using netcat
+    {
+        read -r request_line
+
+        # Read headers (we need to consume them)
+        while read -r header; do
+            # Empty line signals end of headers
+            [ -z "$header" ] || [ "$header" = $'\r' ] && break
+        done
+
+        # Parse the request
+        request_path=$(echo "$request_line" | cut -d' ' -f2)
+
+        if echo "$request_path" | grep -q "^/api/crm-auth"; then
+            # Extract token from query string
+            query_string=$(echo "$request_path" | grep -o '\?.*' | cut -c2-)
+            token=""
+
+            # Parse query parameters
+            IFS='&'
+            for param in $query_string; do
+                key=$(echo "$param" | cut -d'=' -f1)
+                value=$(echo "$param" | cut -d'=' -f2-)
+                if [ "$key" = "token" ]; then
+                    # URL decode the token
+                    token=$(echo "$value" | sed 's/%2B/+/g; s/%2F/\//g; s/%3D/=/g; s/%2b/+/g; s/%2f/\//g; s/%3d/=/g')
+                fi
+            done
+            unset IFS
+
+            if [ -z "$token" ]; then
+                # No token - redirect to login
+                printf "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nConnection: close\r\n\r\n"
+            elif [ -z "$JWT_SECRET" ]; then
+                # No secret configured
+                printf "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nSSO not configured"
+            else
+                # Verify token
+                token_hash=$(hash_token "$token")
+
+                # Check if already used
+                used_count=$(is_token_used "$token_hash")
+                if [ "$used_count" != "" ] && [ "$used_count" -gt "0" ] 2>/dev/null; then
+                    printf "HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nToken already used"
+                else
+                    # Verify JWT
+                    payload=$(verify_jwt "$token" "$JWT_SECRET")
+                    verify_result=$?
+
+                    if [ $verify_result -ne 0 ]; then
+                        printf "HTTP/1.1 401 Unauthorized\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nInvalid token: $payload"
+                    else
+                        # Extract claims
+                        sub=$(echo "$payload" | grep -o '"sub":"[^"]*"' | cut -d'"' -f4)
+                        email=$(echo "$payload" | grep -o '"email":"[^"]*"' | cut -d'"' -f4)
+                        exp=$(echo "$payload" | grep -o '"exp":[0-9]*' | grep -o '[0-9]*')
+
+                        # Mark token as used
+                        mark_token_used "$token_hash" "$sub" "$email" "$exp"
+
+                        # Get admin user ID
+                        admin_id=$(get_admin_user_id | tr -d ' \n')
+
+                        if [ -z "$admin_id" ]; then
+                            printf "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nAdmin user not found"
+                        else
+                            # Generate session ID
+                            session_id=$(generate_session_id)
+
+                            # Create session in database
+                            create_session "$session_id" "$admin_id"
+
+                            # Calculate cookie expiry (7 days from now)
+                            cookie_expiry=$(date -u -d "+7 days" "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u "+%a, %d %b %Y %H:%M:%S GMT")
+
+                            # Redirect with session cookie
+                            printf "HTTP/1.1 302 Found\r\nSet-Cookie: session=${session_id}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${cookie_expiry}\r\nLocation: /admin\r\nConnection: close\r\n\r\n"
+                        fi
+                    fi
+                fi
+            fi
+        elif echo "$request_path" | grep -q "^/api/sso-health"; then
+            printf "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{\"status\":\"ok\",\"service\":\"sso-handler\"}"
+        else
+            # Not our endpoint - return 404
+            printf "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nNot Found"
+        fi
+    } | nc -l -p "$SSO_PORT" -q 1 2>/dev/null || nc -l -p "$SSO_PORT" 2>/dev/null
+done
+SSOHANDLER
+
+chmod +x /tmp/sso-handler.sh
+
+# Start SSO handler in background if JWT secret is configured
+if [ -n "${LISTMONK_JWT_SECRET}" ]; then
+    echo "🔐 Starting SSO authentication handler on port ${SSO_PORT:-9002}..."
+    /tmp/sso-handler.sh &
+    SSO_PID=$!
+    echo "✅ SSO handler started (PID: $SSO_PID)"
+
+    # Give it a moment to start
+    sleep 1
+
+    # Verify it's running
+    if kill -0 $SSO_PID 2>/dev/null; then
+        echo "✅ SSO handler is running"
+    else
+        echo "⚠️ SSO handler failed to start"
+    fi
+else
+    echo "⚠️ LISTMONK_JWT_SECRET not set - SSO authentication disabled"
+    echo "   To enable SSO, set the LISTMONK_JWT_SECRET environment variable"
+fi
+
+# Start Listmonk in background (runs on port 9001)
+echo "🎉 Starting Listmonk on port 9001..."
+./listmonk --config /listmonk/config.toml &
+LISTMONK_PID=$!
+
+# Give Listmonk a moment to start
+sleep 2
+
+# Verify Listmonk is running
+if kill -0 $LISTMONK_PID 2>/dev/null; then
+    echo "✅ Listmonk started (PID: $LISTMONK_PID)"
+else
+    echo "❌ Listmonk failed to start"
+    exit 1
+fi
+
+# Start nginx as the main process (runs on port 9000, proxies to Listmonk and SSO handler)
+echo "🌐 Starting nginx reverse proxy on port 9000..."
+echo "   - Proxying / to Listmonk (port 9001)"
+if [ -n "${LISTMONK_JWT_SECRET}" ]; then
+    echo "   - Proxying /api/crm-auth to SSO handler (port 9002)"
+fi
+
+# Run nginx in foreground (it's the main process)
+exec nginx -c /etc/nginx/nginx.conf
