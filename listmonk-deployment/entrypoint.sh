@@ -211,6 +211,23 @@ a.navbar-item[href="/admin/"] {
 }
 
 /* ===== HIDE PROFILE DROPDOWN AND LOGOUT ===== */
+.navbar-end {
+  position: relative !important;
+}
+
+/* White overlay to cover any logout elements */
+.navbar-end::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 200px !important;
+  background: white !important;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -226,16 +243,27 @@ a.navbar-item[href="/admin/"] {
 .navbar-item.profile-dropdown,
 .navbar-end > .navbar-item:last-child {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Hide Logout from mobile menu */
+/* Hide Logout from mobile menu - comprehensive */
 a[href="/admin/logout"],
 a[href*="logout"],
 .navbar-item[href="/admin/logout"],
 .navbar-item[href*="logout"],
 .navbar-menu a[href*="logout"],
-.navbar-end a[href*="logout"] {
+.navbar-end a[href*="logout"],
+.navbar-dropdown a[href*="logout"],
+[class*="logout"],
+[id*="logout"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 /* ===== NAVBAR STYLING ===== */
@@ -467,6 +495,8 @@ EOSQL
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",createButtons)}else{createButtons()}
   setTimeout(createButtons,500);setTimeout(createButtons,1000);
   setInterval(function(){if(!document.getElementById("moyd-btns"))createButtons()},3000);
+  function fixTitle(){var t=document.title;if(t.indexOf("listmonk")===0){document.title=t.replace("listmonk","MOYD")}}
+  setInterval(fixTitle,1000);
   window.MOYD_showHelp=showHelp;
 })();'::text))
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
@@ -482,189 +512,25 @@ EOSQL2
         -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
         DELETE FROM settings WHERE key = 'appearance.public.custom_css';
         INSERT INTO settings (key, value)
-        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Public Pages - Missouri Young Democrats */
+        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page - Simplified */
 
-/* ===== GLOBAL RESET FOR LOGIN PAGES ===== */
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-}
+/* Center login page */
+body.login { display:flex; min-height:100vh; justify-content:center; align-items:center; background:#f5f5f5; padding:20px; }
+.login .wrap { max-width:380px; width:100%; }
 
-/* ===== LOGIN PAGE LAYOUT ===== */
-body, .login, body.login {
-  min-height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
-  background: #f5f5f5 !important;
-  padding: 20px !important;
-  box-sizing: border-box !important;
-}
+/* Logo centered */
+.login .logo { display:flex; justify-content:center; margin-bottom:20px; }
+.login .logo img { max-width:200px; height:auto; }
 
-/* ===== MAIN WRAPPER ===== */
-.wrap, .login .wrap, main.wrap {
-  width: 100% !important;
-  max-width: 380px !important;
-  margin: 0 auto !important;
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-}
+/* Login box */
+.login .box { background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); padding:24px; }
 
-/* ===== LOGO - CENTERED ===== */
-.logo, .wrap .logo, .login .logo {
-  width: 100% !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  margin-bottom: 24px !important;
-  padding: 0 !important;
-  min-height: auto !important;
-  height: auto !important;
-}
+/* Navy blue button */
+.login .button, .login button { background:#273351 !important; border:none !important; color:white !important; width:100%; height:44px; border-radius:8px; font-weight:600; cursor:pointer; }
+.login .button:hover, .login button:hover { background:#1a2438 !important; }
 
-/* Center the logo link and image */
-.logo a, .wrap .logo a {
-  display: flex !important;
-  justify-content: center !important;
-  width: 100% !important;
-}
-
-.logo img, .logo a img, .wrap .logo img {
-  max-width: 200px !important;
-  height: auto !important;
-  margin: 0 auto !important;
-}
-
-/* ===== LOGIN BOX - COMPACT ===== */
-.box, .wrap .box, .login .box {
-  width: 100% !important;
-  max-width: 380px !important;
-  background: white !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  padding: 24px !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  min-height: auto !important;
-  height: auto !important;
-}
-
-/* Remove extra spacing in box */
-.box > *:first-child {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-.box > *:last-child {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-/* ===== LOGIN TITLE ===== */
-.box h1, .box h2, .box .title {
-  font-size: 20px !important;
-  margin: 0 0 20px 0 !important;
-  padding: 0 !important;
-  text-align: center !important;
-  color: #273351 !important;
-}
-
-/* ===== FORM FIELDS ===== */
-.field, .control {
-  margin-bottom: 16px !important;
-}
-
-label, .label {
-  font-size: 14px !important;
-  margin-bottom: 6px !important;
-  display: block !important;
-  color: #333 !important;
-}
-
-/* ===== FORM INPUTS ===== */
-input, .input, input[type="text"], input[type="password"], input[type="email"] {
-  width: 100% !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
-  padding: 10px 14px !important;
-  font-size: 16px !important;
-  border: 1px solid #ddd !important;
-  border-radius: 8px !important;
-  box-sizing: border-box !important;
-  outline: none !important;
-}
-
-input:focus, .input:focus {
-  border-color: #273351 !important;
-  box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
-}
-
-/* ===== LOGIN BUTTON - NAVY BLUE ===== */
-button, .button, input[type="submit"], button[type="submit"], .btn, .button.is-primary,
-form button, form .button, .box button, .box .button {
-  width: 100% !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  background-color: #273351 !important;
-  background: #273351 !important;
-  border: none !important;
-  border-color: #273351 !important;
-  border-radius: 8px !important;
-  color: white !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  margin-top: 8px !important;
-  transition: background-color 0.2s ease !important;
-}
-
-button:hover, .button:hover, input[type="submit"]:hover {
-  background-color: #1a2438 !important;
-  background: #1a2438 !important;
-}
-
-/* ===== HIDE FOOTER/BRANDING ===== */
-footer, .footer, .powered-by, [class*="powered"], .wrap > hr, hr {
-  display: none !important;
-}
-
-/* Hide anything outside logo and box */
-.wrap > *:not(.logo):not(.box):not(form) {
-  display: none !important;
-}
-
-/* ===== LINKS ===== */
-a {
-  color: #273351 !important;
-}
-
-a:hover {
-  color: #1a2438 !important;
-}
-
-/* ===== MOBILE ===== */
-@media screen and (max-width: 480px) {
-  body, .login {
-    padding: 16px !important;
-  }
-
-  .wrap {
-    max-width: 100% !important;
-  }
-
-  .logo::before {
-    width: 160px !important;
-    height: 64px !important;
-  }
-
-  .box {
-    padding: 20px !important;
-  }
-}
+/* Hide footer */
+footer, .footer, .powered-by { display:none !important; }
 '::text));
 EOSQL3
 
@@ -889,6 +755,23 @@ a.navbar-item[href="/admin/"] {
 }
 
 /* ===== HIDE PROFILE DROPDOWN AND LOGOUT ===== */
+.navbar-end {
+  position: relative !important;
+}
+
+/* White overlay to cover any logout elements */
+.navbar-end::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 200px !important;
+  background: white !important;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -904,16 +787,27 @@ a.navbar-item[href="/admin/"] {
 .navbar-item.profile-dropdown,
 .navbar-end > .navbar-item:last-child {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Hide Logout from mobile menu */
+/* Hide Logout from mobile menu - comprehensive */
 a[href="/admin/logout"],
 a[href*="logout"],
 .navbar-item[href="/admin/logout"],
 .navbar-item[href*="logout"],
 .navbar-menu a[href*="logout"],
-.navbar-end a[href*="logout"] {
+.navbar-end a[href*="logout"],
+.navbar-dropdown a[href*="logout"],
+[class*="logout"],
+[id*="logout"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 /* ===== NAVBAR STYLING ===== */
@@ -1145,6 +1039,8 @@ EOSQL
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",createButtons)}else{createButtons()}
   setTimeout(createButtons,500);setTimeout(createButtons,1000);
   setInterval(function(){if(!document.getElementById("moyd-btns"))createButtons()},3000);
+  function fixTitle(){var t=document.title;if(t.indexOf("listmonk")===0){document.title=t.replace("listmonk","MOYD")}}
+  setInterval(fixTitle,1000);
   window.MOYD_showHelp=showHelp;
 })();'::text))
           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
@@ -1160,192 +1056,25 @@ EOSQL2
             -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
             DELETE FROM settings WHERE key = 'appearance.public.custom_css';
             INSERT INTO settings (key, value)
-            VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page - Missouri Young Democrats */
+            VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page - Simplified */
 
-/* ===== CENTER EVERYTHING ===== */
-body.login, .login {
-  display: flex !important;
-  flex-direction: column !important;
-  min-height: 100vh !important;
-  justify-content: center !important;
-  align-items: center !important;
-  background: #f5f5f5 !important;
-}
+/* Center login page */
+body.login { display:flex; min-height:100vh; justify-content:center; align-items:center; background:#f5f5f5; padding:20px; }
+.login .wrap { max-width:380px; width:100%; }
 
-.login .wrap {
-  width: 100% !important;
-  max-width: 400px !important;
-  padding: 20px !important;
-  box-sizing: border-box !important;
-}
+/* Logo centered */
+.login .logo { display:flex; justify-content:center; margin-bottom:20px; }
+.login .logo img { max-width:200px; height:auto; }
 
-/* ===== LOGO CONTAINER ===== */
-.login .wrap .logo,
-.login .logo {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  margin-bottom: 20px !important;
-  min-height: 80px !important;
-  height: auto !important;
-}
+/* Login box */
+.login .box { background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); padding:24px; }
 
-/* Hide default logo */
-.login .wrap .logo img,
-.login .logo img,
-.login .wrap .logo svg,
-.login .logo svg {
-  display: none !important;
-}
+/* Navy blue button */
+.login .button, .login button { background:#273351 !important; border:none !important; color:white !important; width:100%; height:44px; border-radius:8px; font-weight:600; cursor:pointer; }
+.login .button:hover, .login button:hover { background:#1a2438 !important; }
 
-/* Custom MOYD logo */
-.login .wrap .logo::before,
-.login .logo::before {
-  content: "" !important;
-  display: block !important;
-  width: 180px !important;
-  height: 70px !important;
-  background-image: url("/uploads/MOYD01.png") !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-}
-
-/* ===== LOGIN BOX - COMPACT HEIGHT ===== */
-.login .box,
-.login .wrap .box {
-  background: white !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  padding: 24px !important;
-  min-height: auto !important;
-  height: auto !important;
-}
-
-/* Remove any extra spacing inside box */
-.login .box > *:first-child {
-  margin-top: 0 !important;
-}
-
-.login .box > *:last-child {
-  margin-bottom: 0 !important;
-}
-
-/* ===== FORM INPUTS ===== */
-.login .input,
-.login input[type="text"],
-.login input[type="password"] {
-  border-radius: 8px !important;
-  border: 1px solid #ddd !important;
-  padding: 12px 14px !important;
-  font-size: 16px !important;
-  min-height: 44px !important;
-  height: 44px !important;
-  margin-bottom: 12px !important;
-}
-
-.login .input:focus,
-.login input:focus {
-  border-color: #273351 !important;
-  box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
-  outline: none !important;
-}
-
-/* ===== FIELD LABELS ===== */
-.login .field,
-.login .control {
-  margin-bottom: 12px !important;
-}
-
-.login label {
-  margin-bottom: 4px !important;
-  font-size: 14px !important;
-}
-
-/* ===== LOGIN BUTTON - NAVY BLUE ===== */
-.login .button,
-.login button,
-.login button[type="submit"],
-.login .button.is-primary,
-.login input[type="submit"],
-.wrap .box .button,
-.wrap .box button,
-form button,
-form .button {
-  background-color: #273351 !important;
-  border-color: #273351 !important;
-  color: white !important;
-  font-weight: 600 !important;
-  font-size: 16px !important;
-  padding: 12px 20px !important;
-  min-height: 44px !important;
-  height: 44px !important;
-  border-radius: 8px !important;
-  width: 100% !important;
-  cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
-  margin-top: 8px !important;
-}
-
-.login .button:hover,
-.login button:hover,
-.login button[type="submit"]:hover,
-.wrap .box .button:hover,
-.wrap .box button:hover,
-form button:hover {
-  background-color: #1a2438 !important;
-  border-color: #1a2438 !important;
-}
-
-/* ===== HIDE "POWERED BY LISTMONK" ===== */
-.login footer,
-.login .footer,
-footer.footer,
-.login + footer,
-body.login > footer,
-footer,
-.powered-by,
-[class*="powered"],
-.login ~ footer {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-}
-
-/* Hide any extra elements outside the box */
-.login .wrap > *:not(.logo):not(.box) {
-  display: none !important;
-}
-
-/* ===== LINKS ===== */
-.login a {
-  color: #273351 !important;
-}
-
-.login a:hover {
-  color: #1a2438 !important;
-  text-decoration: underline !important;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media screen and (max-width: 480px) {
-  .login .wrap {
-    padding: 16px !important;
-    max-width: 100% !important;
-  }
-
-  .login .wrap .logo::before,
-  .login .logo::before {
-    width: 150px !important;
-    height: 60px !important;
-  }
-
-  .login .box {
-    padding: 20px !important;
-  }
-}
+/* Hide footer */
+footer, .footer, .powered-by { display:none !important; }
 '::text));
 EOSQL3
 
