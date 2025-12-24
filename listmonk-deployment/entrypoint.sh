@@ -1828,32 +1828,46 @@ PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HO
     }
 
     function setNativeValue(element, value) {
-      var valueSetter = Object.getOwnPropertyDescriptor(element, "value").set;
-      var prototype = Object.getPrototypeOf(element);
-      var prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value").set;
-
-      if (valueSetter && valueSetter !== prototypeValueSetter) {
-        prototypeValueSetter.call(element, value);
-      } else {
-        valueSetter.call(element, value);
+      try {
+        var prototype = Object.getPrototypeOf(element);
+        if (prototype) {
+          var prototypeDescriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+          if (prototypeDescriptor && typeof prototypeDescriptor.set === "function") {
+            prototypeDescriptor.set.call(element, value);
+          } else {
+            element.value = value;
+          }
+        } else {
+          element.value = value;
+        }
+      } catch (e) {
+        console.log("[MOYD] Using fallback value setter");
+        element.value = value;
       }
 
       element.dispatchEvent(new Event("input", { bubbles: true }));
       element.dispatchEvent(new Event("change", { bubbles: true }));
+      element.dispatchEvent(new Event("focus", { bubbles: true }));
+      element.dispatchEvent(new Event("blur", { bubbles: true }));
     }
 
     try {
+      console.log("[MOYD] Setting username field...");
       setNativeValue(usernameField, username);
+
+      console.log("[MOYD] Setting password field...");
       setNativeValue(passwordField, password);
 
       console.log("[MOYD] Credentials filled, submitting form...");
 
       setTimeout(function() {
         if (submitBtn) {
+          console.log("[MOYD] Clicking submit button...");
           submitBtn.click();
         } else {
           var form = document.querySelector("form");
           if (form) {
+            console.log("[MOYD] Submitting form directly...");
             form.submit();
           }
         }
