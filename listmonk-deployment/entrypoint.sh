@@ -341,6 +341,247 @@ input[type="radio"]:checked {
   background-color: #273351 !important;
   color: white !important;
 }
+
+/* ===== MOBILE RESPONSIVE STYLES ===== */
+
+/* Tablet and smaller (max-width: 768px) */
+@media screen and (max-width: 768px) {
+  /* Reduce menu margin on mobile */
+  .menu {
+    margin-top: 60px !important;
+    padding: 0 10px !important;
+  }
+
+  /* Make buttons and inputs touch-friendly (min 44px height) */
+  .button, button,
+  .input, .textarea, .select select {
+    min-height: 44px !important;
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Responsive sidebar */
+  .sidebar, .menu-list {
+    width: 100% !important;
+  }
+
+  .menu-list a {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Responsive tables - allow horizontal scroll */
+  .table-container, .b-table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .table {
+    min-width: 600px !important;
+  }
+
+  /* Stack form elements */
+  .field.is-horizontal .field-body {
+    flex-direction: column !important;
+  }
+
+  .field.is-horizontal .field-label {
+    margin-bottom: 8px !important;
+  }
+
+  /* Modal improvements */
+  .modal-card {
+    width: calc(100% - 32px) !important;
+    max-width: 100% !important;
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
+  }
+
+  .modal-card-body {
+    padding: 16px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .modal-card-head, .modal-card-foot {
+    padding: 12px 16px !important;
+  }
+
+  /* Responsive spacing */
+  .section {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Cards and boxes */
+  .box, .card {
+    padding: 16px !important;
+    margin: 12px 0 !important;
+  }
+
+  /* Responsive columns - stack on mobile */
+  .columns.is-mobile-stacked {
+    flex-direction: column !important;
+  }
+
+  .columns.is-mobile-stacked .column {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  /* Hide less important columns on mobile */
+  .is-hidden-mobile {
+    display: none !important;
+  }
+
+  /* Tags and badges - smaller on mobile */
+  .tag {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
+  }
+
+  /* Pagination touch-friendly */
+  .pagination-link, .pagination-previous, .pagination-next {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 8px !important;
+  }
+
+  /* Dropdown touch-friendly */
+  .dropdown-item {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+  }
+
+  /* Tabs - scrollable on mobile */
+  .tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .tabs ul {
+    flex-wrap: nowrap !important;
+  }
+
+  .tabs li {
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Small phones (max-width: 480px) */
+@media screen and (max-width: 480px) {
+  /* Even smaller menu margin */
+  .menu {
+    margin-top: 55px !important;
+  }
+
+  /* Larger touch targets */
+  .button, button,
+  .input, .textarea, .select select {
+    min-height: 48px !important;
+  }
+
+  .menu-list a {
+    padding: 14px 12px !important;
+    min-height: 48px !important;
+  }
+
+  /* Smaller fonts for very small screens */
+  .title.is-4, .title.is-5 {
+    font-size: 1.1rem !important;
+  }
+
+  .subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  /* Full-width buttons on small screens */
+  .buttons .button {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  .buttons {
+    flex-direction: column !important;
+  }
+
+  /* Modal - almost full screen */
+  .modal-card {
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    max-height: calc(100vh - 20px) !important;
+  }
+
+  /* Smaller section padding */
+  .section {
+    padding: 1rem 0.75rem !important;
+  }
+
+  /* Cards even smaller padding */
+  .box, .card {
+    padding: 12px !important;
+  }
+
+  /* Pagination - compact */
+  .pagination-link, .pagination-previous, .pagination-next {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Touch device specific styles */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase tap targets for touch devices */
+  .button, button, a.button {
+    min-height: 44px !important;
+  }
+
+  /* Remove hover effects that cause issues on touch */
+  .button:hover, button:hover {
+    transform: none !important;
+  }
+
+  /* Better touch scrolling */
+  .table-container, .modal-card-body, .menu {
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Prevent text selection on interactive elements */
+  .button, button, .menu-list a, .dropdown-item, .pagination-link {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+}
+
+/* Landscape mobile orientation */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .menu {
+    margin-top: 50px !important;
+  }
+
+  .modal-card {
+    max-height: 90vh !important;
+  }
+
+  .modal-card-body {
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Safe area support for notched devices (iPhone X+) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .modal-card-foot {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .menu {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
 '::text))
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
@@ -362,61 +603,92 @@ EOSQL
       VALUES('appearance.admin.custom_js', to_jsonb('(function() {
   "use strict";
 
+  function isMobile() {
+    return window.innerWidth <= 768 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+  }
+
+  function getButtonSize() {
+    if (window.innerWidth <= 480) return 48;
+    if (window.innerWidth <= 768) return 44;
+    return 40;
+  }
+
   function init() {
     var menu = document.querySelector(".menu");
-    if (!menu) {
-      setTimeout(init, 500);
-      return;
-    }
+    if (!menu) { setTimeout(init, 500); return; }
 
     var existing = document.getElementById("moyd-custom-buttons");
     if (existing) existing.remove();
 
+    var buttonSize = getButtonSize();
+    var mobile = isMobile();
+
     var buttonsContainer = document.createElement("div");
     buttonsContainer.id = "moyd-custom-buttons";
-    buttonsContainer.style.cssText = "position: fixed; top: 15px; left: 15px; z-index: 1000; display: flex; gap: 10px;";
+    buttonsContainer.style.cssText = "position: fixed; top: " + (mobile ? "10px" : "15px") + "; left: " + (mobile ? "10px" : "15px") + "; z-index: 1000; display: flex; gap: " + (mobile ? "8px" : "10px") + ";";
 
     var refreshBtn = document.createElement("button");
     refreshBtn.innerHTML = "🔄";
     refreshBtn.title = "Refresh Page";
-    refreshBtn.style.cssText = "width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 20px; cursor: pointer; transition: all 0.3s ease;";
-    refreshBtn.onmouseover = function() { this.style.transform = "rotate(180deg)"; this.style.backgroundColor = "#1a2438"; };
-    refreshBtn.onmouseout = function() { this.style.transform = "rotate(0deg)"; this.style.backgroundColor = "#273351"; };
-    refreshBtn.onclick = function() { location.reload(); };
+    refreshBtn.setAttribute("aria-label", "Refresh Page");
+    refreshBtn.style.cssText = "width: " + buttonSize + "px; height: " + buttonSize + "px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: " + (mobile ? "18px" : "20px") + "; cursor: pointer; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation;";
+
+    function refreshBtnActive() { refreshBtn.style.transform = "rotate(180deg)"; refreshBtn.style.backgroundColor = "#1a2438"; }
+    function refreshBtnInactive() { refreshBtn.style.transform = "rotate(0deg)"; refreshBtn.style.backgroundColor = "#273351"; }
+    refreshBtn.addEventListener("mouseenter", refreshBtnActive);
+    refreshBtn.addEventListener("mouseleave", refreshBtnInactive);
+    refreshBtn.addEventListener("touchstart", refreshBtnActive, { passive: true });
+    refreshBtn.addEventListener("touchend", refreshBtnInactive, { passive: true });
+    refreshBtn.addEventListener("click", function(e) { e.preventDefault(); location.reload(); });
 
     var reportBtn = document.createElement("button");
     reportBtn.innerHTML = "?";
     reportBtn.title = "Report a Problem";
-    reportBtn.style.cssText = "width: 40px; height: 40px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease;";
-    reportBtn.onmouseover = function() { this.style.backgroundColor = "#1a2438"; };
-    reportBtn.onmouseout = function() { this.style.backgroundColor = "#273351"; };
-    reportBtn.onclick = showReportModal;
+    reportBtn.setAttribute("aria-label", "Report a Problem");
+    reportBtn.style.cssText = "width: " + buttonSize + "px; height: " + buttonSize + "px; background-color: #273351; border: none; border-radius: 8px; color: white; font-size: " + (mobile ? "22px" : "24px") + "; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation;";
+
+    function reportBtnActive() { reportBtn.style.backgroundColor = "#1a2438"; }
+    function reportBtnInactive() { reportBtn.style.backgroundColor = "#273351"; }
+    reportBtn.addEventListener("mouseenter", reportBtnActive);
+    reportBtn.addEventListener("mouseleave", reportBtnInactive);
+    reportBtn.addEventListener("touchstart", reportBtnActive, { passive: true });
+    reportBtn.addEventListener("touchend", reportBtnInactive, { passive: true });
+    reportBtn.addEventListener("click", function(e) { e.preventDefault(); showReportModal(); });
 
     buttonsContainer.appendChild(refreshBtn);
     buttonsContainer.appendChild(reportBtn);
     document.body.appendChild(buttonsContainer);
-    menu.style.marginTop = "20px";
-    console.log("[MOYD] Admin buttons loaded");
+    menu.style.marginTop = mobile ? "15px" : "20px";
+    console.log("[MOYD] Admin buttons loaded (mobile-optimized)");
   }
 
   function showReportModal() {
     var existing = document.getElementById("moyd-report-modal");
     if (existing) existing.remove();
 
+    var mobile = isMobile();
+    var smallPhone = window.innerWidth <= 480;
+
     var modal = document.createElement("div");
     modal.id = "moyd-report-modal";
-    modal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;";
+    modal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: " + (mobile ? "16px" : "20px") + "; box-sizing: border-box;";
 
     var modalContent = document.createElement("div");
-    modalContent.style.cssText = "background: white; padding: 30px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);";
-    modalContent.innerHTML = "<h2 style=\"margin: 0 0 10px 0; color: #273351; font-size: 24px;\">Report a Problem</h2><p style=\"margin: 0 0 25px 0; color: #666; font-size: 14px;\">Having an issue? Contact Andrew directly via text message or email.</p><div style=\"display: flex; gap: 15px; margin-bottom: 20px;\"><a href=\"sms:+18168983612\" style=\"flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px;\"><span style=\"font-size: 32px; margin-bottom: 10px;\">💬</span><span style=\"font-size: 16px; font-weight: bold;\">Send Text</span><span style=\"font-size: 12px; margin-top: 5px; opacity: 0.9;\">816-898-3612</span></a><a href=\"mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue\" style=\"flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #273351; color: white; text-decoration: none; border-radius: 8px;\"><span style=\"font-size: 32px; margin-bottom: 10px;\">✉️</span><span style=\"font-size: 16px; font-weight: bold;\">Send Email</span><span style=\"font-size: 12px; margin-top: 5px; opacity: 0.9;\">andrew@moyoungdemocrats.org</span></a></div><button onclick=\"document.getElementById(\\\"moyd-report-modal\\\").remove();\" style=\"width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 8px; color: #333; font-size: 14px; cursor: pointer;\">Close</button>";
+    modalContent.style.cssText = "background: white; padding: " + (smallPhone ? "20px" : mobile ? "25px" : "30px") + "; border-radius: 12px; width: 100%; max-width: " + (mobile ? "100%" : "500px") + "; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); -webkit-overflow-scrolling: touch;";
+
+    var contactBtnStyle = "flex: " + (smallPhone ? "1 1 100%" : "1") + "; display: flex; flex-direction: column; align-items: center; padding: " + (mobile ? "16px 12px" : "20px") + "; background: #273351; color: white; text-decoration: none; border-radius: 8px; min-height: 44px; -webkit-tap-highlight-color: transparent;";
+
+    modalContent.innerHTML = "<h2 style=\\\"margin: 0 0 10px 0; color: #273351; font-size: " + (smallPhone ? "20px" : "24px") + ";\\\">Report a Problem</h2><p style=\\\"margin: 0 0 " + (mobile ? "20px" : "25px") + " 0; color: #666; font-size: " + (smallPhone ? "13px" : "14px") + ";\\\">Having an issue? Contact Andrew directly via text message or email.</p><div style=\\\"display: flex; flex-wrap: wrap; gap: " + (mobile ? "12px" : "15px") + "; margin-bottom: " + (mobile ? "16px" : "20px") + ";\\\"><a href=\\\"sms:+18168983612\\\" id=\\\"moyd-sms-btn\\\" style=\\\"" + contactBtnStyle + "\\\"><span style=\\\"font-size: " + (smallPhone ? "28px" : "32px") + "; margin-bottom: " + (mobile ? "8px" : "10px") + ";\\\">💬</span><span style=\\\"font-size: " + (smallPhone ? "14px" : "16px") + "; font-weight: bold;\\\">Send Text</span><span style=\\\"font-size: " + (smallPhone ? "11px" : "12px") + "; margin-top: 5px; opacity: 0.9;\\\">816-898-3612</span></a><a href=\\\"mailto:andrew@moyoungdemocrats.org?subject=MOYD%20App%20Issue\\\" id=\\\"moyd-email-btn\\\" style=\\\"" + contactBtnStyle + "\\\"><span style=\\\"font-size: " + (smallPhone ? "28px" : "32px") + "; margin-bottom: " + (mobile ? "8px" : "10px") + ";\\\">✉️</span><span style=\\\"font-size: " + (smallPhone ? "14px" : "16px") + "; font-weight: bold;\\\">Send Email</span><span style=\\\"font-size: " + (smallPhone ? "11px" : "12px") + "; margin-top: 5px; opacity: 0.9;\\\">andrew@moyoungdemocrats.org</span></a></div><button id=\\\"moyd-close-modal-btn\\\" style=\\\"width: 100%; padding: " + (mobile ? "14px" : "12px") + "; background: #e0e0e0; border: none; border-radius: 8px; color: #333; font-size: " + (smallPhone ? "15px" : "14px") + "; cursor: pointer; min-height: 44px; -webkit-tap-highlight-color: transparent;\\\">Close</button>";
 
     modal.appendChild(modalContent);
-    modal.onclick = function(e) {
-      if (e.target === modal) modal.remove();
-    };
-
     document.body.appendChild(modal);
+
+    var closeBtn = document.getElementById("moyd-close-modal-btn");
+    closeBtn.addEventListener("click", function(e) { e.preventDefault(); modal.remove(); document.body.style.overflow = ""; });
+
+    modal.addEventListener("click", function(e) { if (e.target === modal) { modal.remove(); document.body.style.overflow = ""; } });
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
   }
 
   if (document.readyState === "loading") {
@@ -424,6 +696,10 @@ EOSQL
   } else {
     init();
   }
+
+  var resizeTimeout;
+  window.addEventListener("resize", function() { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(init, 250); });
+  window.addEventListener("orientationchange", function() { setTimeout(init, 100); });
 })();'::text));
 EOSQL2
 
@@ -525,6 +801,89 @@ footer.footer {
   color: #273351 !important;
   text-align: center;
   margin-bottom: 25px;
+}
+
+/* ===== MOBILE RESPONSIVE LOGIN ===== */
+
+/* Tablet and smaller */
+@media screen and (max-width: 768px) {
+  .login .container {
+    padding: 20px 16px !important;
+    max-width: 100% !important;
+  }
+
+  .login .container .logo {
+    min-height: 150px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .login .container .logo::before {
+    width: 140px !important;
+    height: 140px !important;
+  }
+
+  .login .box {
+    padding: 20px !important;
+  }
+
+  .login .input {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  .login .button {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  .login .title {
+    font-size: 1.5rem !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+/* Small phones */
+@media screen and (max-width: 480px) {
+  .login .container {
+    padding: 16px 12px !important;
+  }
+
+  .login .container .logo {
+    min-height: 120px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .login .container .logo::before {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .login .box {
+    padding: 16px !important;
+  }
+
+  .login .input {
+    min-height: 48px !important;
+  }
+
+  .login .button {
+    min-height: 48px !important;
+  }
+
+  .login .title {
+    font-size: 1.25rem !important;
+  }
+
+  .login .field:not(:last-child) {
+    margin-bottom: 12px !important;
+  }
+}
+
+/* Touch device specific */
+@media (hover: none) and (pointer: coarse) {
+  .login .input, .login .button {
+    min-height: 44px !important;
+  }
 }
 '::text));
 EOSQL3
@@ -858,6 +1217,247 @@ input[type="radio"]:checked {
   background-color: #273351 !important;
   color: white !important;
 }
+
+/* ===== MOBILE RESPONSIVE STYLES ===== */
+
+/* Tablet and smaller (max-width: 768px) */
+@media screen and (max-width: 768px) {
+  /* Reduce menu margin on mobile */
+  .menu {
+    margin-top: 60px !important;
+    padding: 0 10px !important;
+  }
+
+  /* Make buttons and inputs touch-friendly (min 44px height) */
+  .button, button,
+  .input, .textarea, .select select {
+    min-height: 44px !important;
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Responsive sidebar */
+  .sidebar, .menu-list {
+    width: 100% !important;
+  }
+
+  .menu-list a {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Responsive tables - allow horizontal scroll */
+  .table-container, .b-table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .table {
+    min-width: 600px !important;
+  }
+
+  /* Stack form elements */
+  .field.is-horizontal .field-body {
+    flex-direction: column !important;
+  }
+
+  .field.is-horizontal .field-label {
+    margin-bottom: 8px !important;
+  }
+
+  /* Modal improvements */
+  .modal-card {
+    width: calc(100% - 32px) !important;
+    max-width: 100% !important;
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
+  }
+
+  .modal-card-body {
+    padding: 16px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .modal-card-head, .modal-card-foot {
+    padding: 12px 16px !important;
+  }
+
+  /* Responsive spacing */
+  .section {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Cards and boxes */
+  .box, .card {
+    padding: 16px !important;
+    margin: 12px 0 !important;
+  }
+
+  /* Responsive columns - stack on mobile */
+  .columns.is-mobile-stacked {
+    flex-direction: column !important;
+  }
+
+  .columns.is-mobile-stacked .column {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  /* Hide less important columns on mobile */
+  .is-hidden-mobile {
+    display: none !important;
+  }
+
+  /* Tags and badges - smaller on mobile */
+  .tag {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
+  }
+
+  /* Pagination touch-friendly */
+  .pagination-link, .pagination-previous, .pagination-next {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 8px !important;
+  }
+
+  /* Dropdown touch-friendly */
+  .dropdown-item {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+  }
+
+  /* Tabs - scrollable on mobile */
+  .tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .tabs ul {
+    flex-wrap: nowrap !important;
+  }
+
+  .tabs li {
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Small phones (max-width: 480px) */
+@media screen and (max-width: 480px) {
+  /* Even smaller menu margin */
+  .menu {
+    margin-top: 55px !important;
+  }
+
+  /* Larger touch targets */
+  .button, button,
+  .input, .textarea, .select select {
+    min-height: 48px !important;
+  }
+
+  .menu-list a {
+    padding: 14px 12px !important;
+    min-height: 48px !important;
+  }
+
+  /* Smaller fonts for very small screens */
+  .title.is-4, .title.is-5 {
+    font-size: 1.1rem !important;
+  }
+
+  .subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  /* Full-width buttons on small screens */
+  .buttons .button {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  .buttons {
+    flex-direction: column !important;
+  }
+
+  /* Modal - almost full screen */
+  .modal-card {
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    max-height: calc(100vh - 20px) !important;
+  }
+
+  /* Smaller section padding */
+  .section {
+    padding: 1rem 0.75rem !important;
+  }
+
+  /* Cards even smaller padding */
+  .box, .card {
+    padding: 12px !important;
+  }
+
+  /* Pagination - compact */
+  .pagination-link, .pagination-previous, .pagination-next {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Touch device specific styles */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase tap targets for touch devices */
+  .button, button, a.button {
+    min-height: 44px !important;
+  }
+
+  /* Remove hover effects that cause issues on touch */
+  .button:hover, button:hover {
+    transform: none !important;
+  }
+
+  /* Better touch scrolling */
+  .table-container, .modal-card-body, .menu {
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Prevent text selection on interactive elements */
+  .button, button, .menu-list a, .dropdown-item, .pagination-link {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+}
+
+/* Landscape mobile orientation */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .menu {
+    margin-top: 50px !important;
+  }
+
+  .modal-card {
+    max-height: 90vh !important;
+  }
+
+  .modal-card-body {
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Safe area support for notched devices (iPhone X+) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .modal-card-foot {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .menu {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
 '::text))
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL
@@ -973,6 +1573,89 @@ footer.footer {
   color: #273351 !important;
   text-align: center;
   margin-bottom: 25px;
+}
+
+/* ===== MOBILE RESPONSIVE LOGIN ===== */
+
+/* Tablet and smaller */
+@media screen and (max-width: 768px) {
+  .login .container {
+    padding: 20px 16px !important;
+    max-width: 100% !important;
+  }
+
+  .login .container .logo {
+    min-height: 150px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .login .container .logo::before {
+    width: 140px !important;
+    height: 140px !important;
+  }
+
+  .login .box {
+    padding: 20px !important;
+  }
+
+  .login .input {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  .login .button {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  .login .title {
+    font-size: 1.5rem !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+/* Small phones */
+@media screen and (max-width: 480px) {
+  .login .container {
+    padding: 16px 12px !important;
+  }
+
+  .login .container .logo {
+    min-height: 120px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .login .container .logo::before {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .login .box {
+    padding: 16px !important;
+  }
+
+  .login .input {
+    min-height: 48px !important;
+  }
+
+  .login .button {
+    min-height: 48px !important;
+  }
+
+  .login .title {
+    font-size: 1.25rem !important;
+  }
+
+  .login .field:not(:last-child) {
+    margin-bottom: 12px !important;
+  }
+}
+
+/* Touch device specific */
+@media (hover: none) and (pointer: coarse) {
+  .login .input, .login .button {
+    min-height: 44px !important;
+  }
 }
 '::text));
 EOSQL3
