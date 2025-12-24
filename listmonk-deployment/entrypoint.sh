@@ -184,9 +184,18 @@ EOSQL
     DELETE FROM settings WHERE key = 'appearance.admin.custom_css';
 
     INSERT INTO settings (key, value)
-    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding - Logo hiding via JS */
+    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* Hide profile dropdown on desktop */
+/* ===== DESKTOP ONLY: Hide listmonk logo in navbar ===== */
+/* On desktop, Bulma already hides hamburger, so hiding all navbar-brand children only hides the logo */
+@media screen and (min-width: 1024px) {
+  .navbar-brand > * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+/* ===== HIDE PROFILE DROPDOWN ===== */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -196,13 +205,42 @@ EOSQL
   display: none !important;
 }
 
-/* Navbar styling */
+/* ===== NAVBAR STYLING ===== */
 nav.navbar {
   background-color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
-/* Hide footer */
+/* ===== MOBILE ONLY: Hamburger styling ===== */
+/* On mobile, hamburger is visible by default, we just style it */
+@media screen and (max-width: 1023px) {
+  .navbar-burger {
+    color: #273351 !important;
+  }
+
+  .navbar-burger span {
+    background-color: #273351 !important;
+  }
+
+  .navbar-menu {
+    background-color: #ffffff !important;
+  }
+
+  .navbar-menu.is-active {
+    display: block !important;
+  }
+
+  .navbar-menu .navbar-item {
+    color: #273351 !important;
+    padding: 12px 16px !important;
+  }
+
+  .navbar-menu .navbar-item:hover {
+    background-color: rgba(39, 51, 81, 0.1) !important;
+  }
+}
+
+/* ===== HIDE FOOTER ===== */
 footer.footer {
   display: none !important;
 }
@@ -211,7 +249,7 @@ footer.footer {
   display: flex !important;
 }
 
-/* Navy theme */
+/* ===== NAVY THEME ===== */
 .button.is-primary, .button.is-link, .button.is-info, a.button.is-primary {
   background-color: #273351 !important;
   border-color: #273351 !important;
@@ -257,21 +295,7 @@ a, .has-text-primary, .has-text-link {
   color: #2c3e50 !important;
 }
 
-/* Mobile hamburger styling */
 @media screen and (max-width: 768px) {
-  .navbar-burger {
-    display: flex !important;
-    color: #273351 !important;
-  }
-  .navbar-burger span {
-    background-color: #273351 !important;
-  }
-  .navbar-menu {
-    background-color: #ffffff !important;
-  }
-  .navbar-menu .navbar-item {
-    color: #273351 !important;
-  }
   .button, .input, .textarea, .select select {
     min-height: 44px !important;
   }
@@ -299,7 +323,10 @@ EOSQL
       DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
-      -- Admin JavaScript (buttons + title fix + logout/logo remover)
+      -- Admin JavaScript (buttons + title fix + logout remover)
+      DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
+      DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
+
       INSERT INTO settings (key, value)
       VALUES('appearance.admin.custom_js', to_jsonb('(function(){
   console.log("[MOYD] Loading customizations...");
@@ -318,29 +345,8 @@ EOSQL
       var text=(links[i].textContent||"").toLowerCase().trim();
       if(href.indexOf("logout")>-1||text==="logout"){
         links[i].style.display="none";
-        if(links[i].parentNode)links[i].parentNode.removeChild(links[i]);
+        links[i].parentNode.removeChild(links[i]);
         console.log("[MOYD] Removed logout link");
-      }
-    }
-  }
-
-  function removeListmonkLogo(){
-    var navbarBrand=document.querySelector(".navbar-brand");
-    if(navbarBrand){
-      var children=navbarBrand.children;
-      for(var i=0;i<children.length;i++){
-        var el=children[i];
-        if(el.classList.contains("navbar-burger"))continue;
-        var text=(el.textContent||"").toLowerCase().trim();
-        var href=el.getAttribute("href")||"";
-        if(text.indexOf("listmonk")>-1||href==="/admin"||href==="/admin/"){
-          el.style.display="none";
-          el.style.visibility="hidden";
-          el.style.width="0";
-          el.style.height="0";
-          el.style.overflow="hidden";
-          console.log("[MOYD] Hidden listmonk logo element");
-        }
       }
     }
   }
@@ -351,7 +357,7 @@ EOSQL
     d.id="moyd-btns";
     d.style.cssText="position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
     var r=document.createElement("button");
-    r.innerHTML="🔄";r.title="Refresh";
+    r.innerHTML="&#x1F504;";r.title="Refresh";
     r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);";
     r.onmouseover=function(){this.style.background=NAVY_DARK};
     r.onmouseout=function(){this.style.background=NAVY};
@@ -378,10 +384,10 @@ EOSQL
     var b=document.createElement("div");b.style.cssText="display:flex;gap:12px;margin-bottom:16px;";
     var s=document.createElement("a");s.href="sms:+18168983612?body="+encodeURIComponent(m);
     s.style.cssText="flex:1;padding:16px 12px;background:#273351;color:white;text-decoration:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;";
-    s.innerHTML="<span style=\"font-size:24px\">💬</span><span style=\"font-weight:bold;font-size:14px\">Text</span>";
+    s.innerHTML="<span style=\"font-size:24px\">&#x1F4AC;</span><span style=\"font-weight:bold;font-size:14px\">Text</span>";
     var em=document.createElement("a");em.href="mailto:andrew@moyoungdemocrats.org?subject=Help&body="+encodeURIComponent(m);
     em.style.cssText="flex:1;padding:16px 12px;background:#273351;color:white;text-decoration:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;";
-    em.innerHTML="<span style=\"font-size:24px\">✉️</span><span style=\"font-weight:bold;font-size:14px\">Email</span>";
+    em.innerHTML="<span style=\"font-size:24px\">&#x2709;</span><span style=\"font-weight:bold;font-size:14px\">Email</span>";
     var cl=document.createElement("button");cl.textContent="Close";
     cl.style.cssText="width:100%;padding:12px;background:#e5e5e5;border:none;border-radius:8px;cursor:pointer;font-size:14px;";
     cl.onclick=function(){o.remove()};
@@ -393,7 +399,6 @@ EOSQL
   function init(){
     fixTitle();
     removeLogout();
-    removeListmonkLogo();
     createButtons();
   }
 
@@ -403,6 +408,7 @@ EOSQL
     init();
   }
 
+  setTimeout(init,100);
   setTimeout(init,500);
   setTimeout(init,1000);
   setTimeout(init,2000);
@@ -410,7 +416,6 @@ EOSQL
   setInterval(function(){
     fixTitle();
     removeLogout();
-    removeListmonkLogo();
     if(!document.getElementById("moyd-btns"))createButtons();
   },2000);
 
@@ -742,71 +747,16 @@ EOSQL
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* ===== HIDE ONLY THE LOGO LINK, NOT HAMBURGER ===== */
-.navbar-brand > a.navbar-item,
-.navbar-brand > .navbar-item:first-child,
-a.navbar-item[href="/admin"],
-a.navbar-item[href="/admin/"],
-.navbar-brand > a[href="/admin"],
-.navbar-brand > a[href="/admin/"] {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  left: -9999px !important;
+/* ===== DESKTOP ONLY: Hide listmonk logo in navbar ===== */
+/* On desktop, Bulma already hides hamburger, so hiding all navbar-brand children only hides the logo */
+@media screen and (min-width: 1024px) {
+  .navbar-brand > * {
+    display: none !important;
+    visibility: hidden !important;
+  }
 }
 
-/* ===== ENSURE HAMBURGER MENU IS VISIBLE ===== */
-.navbar-burger,
-.navbar-brand > .navbar-burger,
-a.navbar-burger,
-button.navbar-burger {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  left: auto !important;
-  width: 52px !important;
-  height: 52px !important;
-  font-size: 1rem !important;
-  color: #273351 !important;
-  margin-left: auto !important;
-}
-
-.navbar-burger span {
-  display: block !important;
-  visibility: visible !important;
-  background-color: #273351 !important;
-  height: 2px !important;
-  width: 16px !important;
-  position: absolute !important;
-  left: calc(50% - 8px) !important;
-}
-
-/* ===== MOBILE MENU ===== */
-.navbar-menu {
-  background-color: #ffffff !important;
-}
-
-.navbar-menu.is-active {
-  display: block !important;
-  visibility: visible !important;
-}
-
-.navbar-menu .navbar-item {
-  display: block !important;
-  visibility: visible !important;
-  color: #273351 !important;
-  padding: 12px 16px !important;
-}
-
-.navbar-menu .navbar-item:hover {
-  background-color: rgba(39, 51, 81, 0.1) !important;
-}
-
-/* Hide profile dropdown */
+/* ===== HIDE PROFILE DROPDOWN ===== */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -816,34 +766,42 @@ button.navbar-burger {
   display: none !important;
 }
 
-/* Navbar */
+/* ===== NAVBAR STYLING ===== */
 nav.navbar {
   background-color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
-.navbar-burger {
-  color: #273351 !important;
+/* ===== MOBILE ONLY: Hamburger styling ===== */
+/* On mobile, hamburger is visible by default, we just style it */
+@media screen and (max-width: 1023px) {
+  .navbar-burger {
+    color: #273351 !important;
+  }
+
+  .navbar-burger span {
+    background-color: #273351 !important;
+  }
+
+  .navbar-menu {
+    background-color: #ffffff !important;
+  }
+
+  .navbar-menu.is-active {
+    display: block !important;
+  }
+
+  .navbar-menu .navbar-item {
+    color: #273351 !important;
+    padding: 12px 16px !important;
+  }
+
+  .navbar-menu .navbar-item:hover {
+    background-color: rgba(39, 51, 81, 0.1) !important;
+  }
 }
 
-.navbar-burger span {
-  background-color: #273351 !important;
-}
-
-/* Mobile menu */
-.navbar-menu {
-  background-color: #ffffff !important;
-}
-
-.navbar-menu .navbar-item {
-  color: #273351 !important;
-}
-
-.navbar-menu .navbar-item:hover {
-  background-color: rgba(39, 51, 81, 0.1) !important;
-}
-
-/* Hide footer */
+/* ===== HIDE FOOTER ===== */
 footer.footer {
   display: none !important;
 }
@@ -852,7 +810,7 @@ footer.footer {
   display: flex !important;
 }
 
-/* Navy theme */
+/* ===== NAVY THEME ===== */
 .button.is-primary, .button.is-link, .button.is-info, a.button.is-primary {
   background-color: #273351 !important;
   border-color: #273351 !important;
