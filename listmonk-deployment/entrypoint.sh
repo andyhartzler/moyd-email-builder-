@@ -2038,38 +2038,64 @@ fi
 
 echo "📝 Setting up SSO authentication handler..."
 
+# Create the SSO environment file FIRST (outside heredoc so variables expand now)
+cat > /tmp/sso-env.sh << SSOENV
+#!/bin/sh
+export SSO_JWT_SECRET="${LISTMONK_JWT_SECRET:-}"
+export SSO_DB_HOST="${DB_HOST:-localhost}"
+export SSO_DB_PORT="${DB_PORT:-5432}"
+export SSO_DB_USER="${DB_USER:-postgres}"
+export SSO_DB_PASSWORD="${DB_PASSWORD:-}"
+export SSO_DB_NAME="${DB_NAME:-postgres}"
+export SSO_DB_SCHEMA="${DB_SCHEMA:-listmonk}"
+export SSO_DB_SSL_MODE="${DB_SSL_MODE:-require}"
+export SSO_ADMIN_USER="${LISTMONK_ADMIN_USERNAME:-admin}"
+SSOENV
+
+chmod +x /tmp/sso-env.sh
+echo "✅ SSO environment file created"
+
 # Create the SSO handler script (uses socat for proper bidirectional I/O)
 cat > /tmp/sso-handler.sh << 'SSOHANDLER'
 #!/bin/sh
 
-# SSO Handler Configuration
-# SSO handler runs on port 9002; nginx proxies /api/crm-auth to it
 SSO_PORT="${SSO_PORT:-9002}"
-JWT_SECRET="${LISTMONK_JWT_SECRET:-}"
-DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-5432}"
-DB_USER="${DB_USER:-postgres}"
-DB_PASSWORD="${DB_PASSWORD:-}"
-DB_NAME="${DB_NAME:-postgres}"
-DB_SCHEMA="${DB_SCHEMA:-listmonk}"
-DB_SSL_MODE="${DB_SSL_MODE:-require}"
-ADMIN_USER="${LISTMONK_ADMIN_USERNAME:-admin}"
 
-echo "SSO Handler starting on port $SSO_PORT..."
+log() {
+    echo "[SSO] $1" >&2
+}
+
+log "SSO Handler starting on port $SSO_PORT..."
 
 # Create the request handler script that will be spawned for each connection
 cat > /tmp/handle-sso-request.sh << 'HANDLER'
 #!/bin/sh
 
-JWT_SECRET="${LISTMONK_JWT_SECRET:-}"
-DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-5432}"
-DB_USER="${DB_USER:-postgres}"
-DB_PASSWORD="${DB_PASSWORD:-}"
-DB_NAME="${DB_NAME:-postgres}"
-DB_SCHEMA="${DB_SCHEMA:-listmonk}"
-DB_SSL_MODE="${DB_SSL_MODE:-require}"
-ADMIN_USER="${LISTMONK_ADMIN_USERNAME:-admin}"
+log() {
+    echo "[SSO-REQ] $1" >&2
+}
+
+# Source environment variables
+if [ -f /tmp/sso-env.sh ]; then
+    . /tmp/sso-env.sh
+    log "Environment loaded from /tmp/sso-env.sh"
+else
+    log "ERROR: /tmp/sso-env.sh not found!"
+fi
+
+# Use the SSO_ prefixed variables
+JWT_SECRET="$SSO_JWT_SECRET"
+DB_HOST="$SSO_DB_HOST"
+DB_PORT="$SSO_DB_PORT"
+DB_USER="$SSO_DB_USER"
+DB_PASSWORD="$SSO_DB_PASSWORD"
+DB_NAME="$SSO_DB_NAME"
+DB_SCHEMA="$SSO_DB_SCHEMA"
+DB_SSL_MODE="$SSO_DB_SSL_MODE"
+ADMIN_USER="$SSO_ADMIN_USER"
+
+log "DB_HOST=$DB_HOST"
+log "JWT_SECRET length=${#JWT_SECRET}"
 
 # Function to decode base64url
 base64url_decode() {
@@ -2124,27 +2150,25 @@ verify_jwt() {
     return 0
 }
 
-# Function to create session in database
-create_session() {
-    local session_id="$1"
-    local user_id="$2"
-
-    local session_data="{\"user_id\":${user_id}}"
-
-    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q 2>/dev/null << EOSQL
-SET search_path TO ${DB_SCHEMA}, extensions, public;
-INSERT INTO sessions (id, data, created_at, updated_at)
-VALUES ('${session_id}', '${session_data}'::bytea, NOW(), NOW())
-ON CONFLICT (id) DO UPDATE SET data = '${session_data}'::bytea, updated_at = NOW();
-EOSQL
+# Run psql with timeout
+run_psql() {
+    local query="$1"
+    timeout 10 sh -c "PGPASSWORD=\"$DB_PASSWORD\" PGSSLMODE=\"$DB_SSL_MODE\" psql -h \"$DB_HOST\" -p \"$DB_PORT\" -U \"$DB_USER\" -d \"$DB_NAME\" -t -q -c \"SET search_path TO ${DB_SCHEMA}, extensions, public; $query\"" 2>/dev/null
 }
 
 # Function to get admin user ID
 get_admin_user_id() {
-    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q 2>/dev/null << EOSQL
-SET search_path TO ${DB_SCHEMA}, extensions, public;
-SELECT id FROM users WHERE username = '${ADMIN_USER}' LIMIT 1;
-EOSQL
+    log "Getting admin user ID for: $ADMIN_USER"
+    run_psql "SELECT id FROM users WHERE username = '${ADMIN_USER}' LIMIT 1;"
+}
+
+# Function to create session in database
+create_session() {
+    local session_id="$1"
+    local user_id="$2"
+    log "Creating session: $session_id for user: $user_id"
+    local session_data="{\"user_id\":${user_id}}"
+    run_psql "INSERT INTO sessions (id, data, created_at, updated_at) VALUES ('${session_id}', '${session_data}'::bytea, NOW(), NOW()) ON CONFLICT (id) DO UPDATE SET data = '${session_data}'::bytea, updated_at = NOW();"
 }
 
 # Function to mark token as used
@@ -2153,23 +2177,14 @@ mark_token_used() {
     local user_id="$2"
     local email="$3"
     local exp="$4"
-
-    PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q 2>/dev/null << EOSQL
-SET search_path TO ${DB_SCHEMA}, extensions, public;
-INSERT INTO used_sso_tokens (token_hash, user_id, email, expires_at)
-VALUES ('${token_hash}', '${user_id}'::uuid, '${email}', to_timestamp(${exp}))
-ON CONFLICT (token_hash) DO NOTHING;
-EOSQL
+    log "Marking token as used: ${token_hash:0:16}..."
+    run_psql "INSERT INTO used_sso_tokens (token_hash, user_id, email, expires_at) VALUES ('${token_hash}', '${user_id}'::uuid, '${email}', to_timestamp(${exp})) ON CONFLICT (token_hash) DO NOTHING;"
 }
 
 # Function to check if token was used
 is_token_used() {
     local token_hash="$1"
-    local result=$(PGPASSWORD="$DB_PASSWORD" PGSSLMODE="$DB_SSL_MODE" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -q 2>/dev/null << EOSQL
-SET search_path TO ${DB_SCHEMA}, extensions, public;
-SELECT COUNT(*) FROM used_sso_tokens WHERE token_hash = '${token_hash}';
-EOSQL
-)
+    local result=$(run_psql "SELECT COUNT(*) FROM used_sso_tokens WHERE token_hash = '${token_hash}';")
     echo "$result" | tr -d ' \n\t'
 }
 
@@ -2180,7 +2195,7 @@ generate_session_id() {
 
 # Hash token for storage
 hash_token() {
-    echo -n "$1" | sha256sum | cut -d' ' -f1
+    echo -n "$1" | openssl dgst -sha256 | sed 's/^.* //'
 }
 
 # Send HTTP response
@@ -2188,14 +2203,10 @@ send_response() {
     local status="$1"
     local content_type="$2"
     local body="$3"
-    local extra_headers="$4"
 
     printf "HTTP/1.1 %s\r\n" "$status"
     printf "Content-Type: %s\r\n" "$content_type"
     printf "Connection: close\r\n"
-    if [ -n "$extra_headers" ]; then
-        printf "%s\r\n" "$extra_headers"
-    fi
     printf "Content-Length: %d\r\n" "${#body}"
     printf "\r\n"
     printf "%s" "$body"
@@ -2216,15 +2227,25 @@ send_redirect() {
     printf "\r\n"
 }
 
-# Read the HTTP request
-read -r request_line
+log "Handler started, reading request..."
+
+# Read the HTTP request with timeout
+if ! read -t 5 -r request_line; then
+    log "ERROR: Request read timeout"
+    send_response "408 Request Timeout" "text/plain" "Request timeout"
+    exit 0
+fi
+
+log "Request line: $request_line"
 
 # Parse method and path
 request_method=$(echo "$request_line" | cut -d' ' -f1)
 request_path=$(echo "$request_line" | cut -d' ' -f2)
 
-# Read and discard headers
-while read -r header; do
+log "Method: $request_method, Path: $request_path"
+
+# Read and discard headers (with timeout)
+while read -t 2 -r header; do
     header=$(echo "$header" | tr -d '\r')
     [ -z "$header" ] && break
 done
@@ -2232,9 +2253,19 @@ done
 # Route the request
 case "$request_path" in
     /api/sso-health*)
-        send_response "200 OK" "application/json" '{"status":"ok","service":"sso-handler"}'
+        log "Health check"
+        send_response "200 OK" "application/json" '{"status":"ok","service":"sso-handler","env":"loaded"}'
         ;;
     /api/crm-auth*)
+        log "Auth request received"
+
+        # Check if environment is loaded
+        if [ -z "$DB_HOST" ]; then
+            log "ERROR: DB_HOST is empty"
+            send_response "500 Internal Server Error" "text/plain" "Environment not loaded"
+            exit 0
+        fi
+
         # Extract token from query string
         query_string=$(echo "$request_path" | grep -o '?.*' | cut -c2-)
         token=""
@@ -2252,66 +2283,99 @@ case "$request_path" in
         IFS="$OLD_IFS"
 
         if [ -z "$token" ]; then
+            log "No token provided, redirecting to login"
             send_redirect "/admin/login"
-        elif [ -z "$JWT_SECRET" ]; then
-            send_response "500 Internal Server Error" "text/plain" "SSO not configured"
-        else
-            # Hash token for replay check
-            token_hash=$(hash_token "$token")
-
-            # Check if already used
-            used_count=$(is_token_used "$token_hash")
-            if [ -n "$used_count" ] && [ "$used_count" -gt 0 ] 2>/dev/null; then
-                send_response "403 Forbidden" "text/plain" "Token already used"
-            else
-                # Verify JWT
-                payload=$(verify_jwt "$token" "$JWT_SECRET")
-                verify_result=$?
-
-                if [ $verify_result -ne 0 ]; then
-                    send_response "401 Unauthorized" "text/plain" "Invalid token: $payload"
-                else
-                    # Extract claims
-                    sub=$(echo "$payload" | grep -o '"sub":"[^"]*"' | cut -d'"' -f4)
-                    email=$(echo "$payload" | grep -o '"email":"[^"]*"' | cut -d'"' -f4)
-                    exp=$(echo "$payload" | grep -o '"exp":[0-9]*' | grep -o '[0-9]*')
-
-                    # Mark token as used
-                    mark_token_used "$token_hash" "$sub" "$email" "$exp"
-
-                    # Get admin user ID
-                    admin_id=$(get_admin_user_id | tr -d ' \n\t')
-
-                    if [ -z "$admin_id" ]; then
-                        send_response "500 Internal Server Error" "text/plain" "Admin user not found"
-                    else
-                        # Generate session ID
-                        session_id=$(generate_session_id)
-
-                        # Create session in database
-                        create_session "$session_id" "$admin_id"
-
-                        # Calculate cookie expiry (7 days)
-                        cookie_expiry=$(date -u -d "+7 days" "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u -v+7d "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u "+%a, %d %b %Y %H:%M:%S GMT")
-
-                        # Send redirect with session cookie
-                        cookie="session=${session_id}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${cookie_expiry}"
-                        send_redirect "/admin" "$cookie"
-                    fi
-                fi
-            fi
+            exit 0
         fi
+
+        log "Token received, length: ${#token}"
+
+        if [ -z "$JWT_SECRET" ]; then
+            log "ERROR: JWT_SECRET is empty"
+            send_response "500 Internal Server Error" "text/plain" "SSO not configured - no JWT secret"
+            exit 0
+        fi
+
+        # Verify JWT first (no database needed)
+        log "Verifying JWT..."
+        payload=$(verify_jwt "$token" "$JWT_SECRET")
+        verify_result=$?
+
+        if [ $verify_result -ne 0 ]; then
+            log "JWT verification failed: $payload"
+            send_response "401 Unauthorized" "text/plain" "Invalid token: $payload"
+            exit 0
+        fi
+
+        log "JWT verified successfully"
+
+        # Hash token for replay check
+        token_hash=$(hash_token "$token")
+        log "Token hash: ${token_hash:0:16}..."
+
+        # Check if already used
+        log "Checking if token already used..."
+        used_count=$(is_token_used "$token_hash")
+        log "Used count: '$used_count'"
+
+        if [ -n "$used_count" ] && [ "$used_count" -gt 0 ] 2>/dev/null; then
+            log "Token already used"
+            send_response "403 Forbidden" "text/plain" "Token already used"
+            exit 0
+        fi
+
+        # Extract claims
+        sub=$(echo "$payload" | grep -o '"sub":"[^"]*"' | cut -d'"' -f4)
+        email=$(echo "$payload" | grep -o '"email":"[^"]*"' | cut -d'"' -f4)
+        exp=$(echo "$payload" | grep -o '"exp":[0-9]*' | grep -o '[0-9]*')
+
+        log "Claims - sub: $sub, email: $email"
+
+        # Mark token as used
+        log "Marking token as used..."
+        mark_token_used "$token_hash" "$sub" "$email" "$exp"
+
+        # Get admin user ID
+        log "Getting admin user ID..."
+        admin_id=$(get_admin_user_id | tr -d ' \n\t')
+        log "Admin ID: '$admin_id'"
+
+        if [ -z "$admin_id" ]; then
+            log "ERROR: Admin user not found"
+            send_response "500 Internal Server Error" "text/plain" "Admin user not found"
+            exit 0
+        fi
+
+        # Generate session ID
+        session_id=$(generate_session_id)
+        log "Generated session ID: ${session_id:0:16}..."
+
+        # Create session in database
+        log "Creating session..."
+        create_session "$session_id" "$admin_id"
+
+        # Calculate cookie expiry (7 days) - Alpine compatible
+        cookie_expiry=$(date -u -d "@$(($(date +%s) + 604800))" "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u "+%a, %d %b %Y %H:%M:%S GMT")
+
+        # Send redirect with session cookie
+        cookie="session=${session_id}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${cookie_expiry}"
+        log "Sending redirect with session cookie"
+        send_redirect "/admin" "$cookie"
         ;;
     *)
+        log "Unknown path: $request_path"
         send_response "404 Not Found" "text/plain" "Not Found"
         ;;
 esac
+
+log "Request handling complete"
 HANDLER
 
 chmod +x /tmp/handle-sso-request.sh
+log "Handler script created"
 
 # Start socat to handle connections
-# socat will spawn the handler script for each connection with proper bidirectional I/O
+log "Starting socat listener..."
 exec socat TCP-LISTEN:${SSO_PORT},reuseaddr,fork EXEC:/tmp/handle-sso-request.sh
 SSOHANDLER
 
