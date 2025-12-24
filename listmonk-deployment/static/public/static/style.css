@@ -575,6 +575,70 @@ input[type="radio"] {
 }
 
 /* ----------------------------------------
+   Submit Section (Centered Button)
+   ---------------------------------------- */
+.submit-section {
+    text-align: center;
+    margin-top: var(--space-lg);
+}
+
+/* ----------------------------------------
+   Form Messages (Success/Error)
+   ---------------------------------------- */
+.form-message {
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    font-weight: 500;
+    text-align: center;
+}
+
+.form-message.success {
+    background: rgba(67, 160, 71, 0.1);
+    color: var(--grassroots-green);
+    border: 1px solid var(--grassroots-green);
+}
+
+.form-message.error {
+    background: rgba(230, 57, 70, 0.1);
+    color: var(--action-red);
+    border: 1px solid var(--action-red);
+}
+
+/* ----------------------------------------
+   Phone/Date/Zip Input Styles
+   ---------------------------------------- */
+input[type="tel"],
+input[type="date"] {
+    width: 100%;
+    padding: var(--space-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-md);
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="tel"]:focus,
+input[type="date"]:focus {
+    outline: none;
+    border-color: var(--momentum-blue);
+    box-shadow: 0 0 0 3px rgba(50, 166, 222, 0.15);
+}
+
+/* ----------------------------------------
+   Blocklist Option Styling
+   ---------------------------------------- */
+.blocklist-row {
+    padding: var(--space-md);
+    background: rgba(230, 57, 70, 0.05);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-lg);
+}
+
+/* ----------------------------------------
    Utility Classes
    ---------------------------------------- */
 .center { text-align: center; }

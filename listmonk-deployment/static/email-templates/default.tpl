@@ -204,7 +204,9 @@
         <!-- Header with Logo -->
         <div class="header">
             {{ if ne LogoURL "" }}
-                <img src="{{ LogoURL }}" alt="Missouri Young Democrats" />
+                <a href="https://www.moyoungdemocrats.org/" target="_blank">
+                    <img src="{{ LogoURL }}" alt="Missouri Young Democrats" />
+                </a>
             {{ end }}
         </div>
 
