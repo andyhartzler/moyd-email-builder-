@@ -41,3 +41,11 @@ services:
       # CORS settings for CRM auto-authentication
       - key: LISTMONK_CORS_ORIGINS
         value: "https://moyd.app,https://www.moyd.app"
+      # SSO Authentication - JWT secret for validating CRM tokens
+      # IMPORTANT: Generate a secure secret and set it in Render dashboard
+      # This should match the secret used by the Supabase Edge Function to sign JWTs
+      - key: LISTMONK_JWT_SECRET
+        sync: false  # Set this manually in Render dashboard for security
+      # SSO handler port (internal, nginx proxies to this)
+      - key: SSO_PORT
+        value: "9002"
