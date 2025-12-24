@@ -181,18 +181,44 @@ EOSQL
 
     -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
     -- Admin CSS
+    DELETE FROM settings WHERE key = 'appearance.admin.custom_css';
+
     INSERT INTO settings (key, value)
     VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* Hide Listmonk logo */
+/* ===== AGGRESSIVELY HIDE ALL LISTMONK BRANDING ===== */
+.navbar-brand > *:not(.navbar-burger),
+.navbar-brand > a,
 .navbar-brand > a:first-child,
 .navbar-brand > .navbar-item:first-child,
-.navbar-brand a.navbar-item:first-of-type,
+.navbar-brand a.navbar-item,
 .navbar-brand > a[href="/admin"],
 .navbar-brand > a[href="/admin/"],
 a.navbar-item[href="/admin"],
-a.navbar-item[href="/admin/"] {
+a.navbar-item[href="/admin/"],
+.navbar-brand .logo,
+.navbar-brand img,
+.navbar-brand svg,
+.navbar-brand span:not(.icon) {
   display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Extra: hide any text in navbar-brand */
+.navbar-brand {
+  font-size: 0 !important;
+}
+
+.navbar-burger {
+  font-size: 1rem !important;
 }
 
 /* Hide profile dropdown */
@@ -730,18 +756,44 @@ EOSQL
         SET search_path TO ${DB_SCHEMA:-listmonk};
 
         -- Admin CSS
+        DELETE FROM settings WHERE key = 'appearance.admin.custom_css';
+
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* Hide Listmonk logo */
+/* ===== AGGRESSIVELY HIDE ALL LISTMONK BRANDING ===== */
+.navbar-brand > *:not(.navbar-burger),
+.navbar-brand > a,
 .navbar-brand > a:first-child,
 .navbar-brand > .navbar-item:first-child,
-.navbar-brand a.navbar-item:first-of-type,
+.navbar-brand a.navbar-item,
 .navbar-brand > a[href="/admin"],
 .navbar-brand > a[href="/admin/"],
 a.navbar-item[href="/admin"],
-a.navbar-item[href="/admin/"] {
+a.navbar-item[href="/admin/"],
+.navbar-brand .logo,
+.navbar-brand img,
+.navbar-brand svg,
+.navbar-brand span:not(.icon) {
   display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Extra: hide any text in navbar-brand */
+.navbar-brand {
+  font-size: 0 !important;
+}
+
+.navbar-burger {
+  font-size: 1rem !important;
 }
 
 /* Hide profile dropdown */
