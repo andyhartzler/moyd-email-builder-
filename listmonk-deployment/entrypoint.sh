@@ -182,9 +182,8 @@ EOSQL
     -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
     INSERT INTO settings (key, value)
     VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
-/* NAVBAR FIX v2: More aggressive logo hiding */
 
-/* ===== HIDE LISTMONK LOGO - MULTIPLE SELECTORS ===== */
+/* ===== HIDE LISTMONK LOGO ===== */
 .navbar-brand > a:first-child,
 .navbar-brand > .navbar-item:first-child,
 .navbar-brand a.navbar-item:first-of-type,
@@ -211,6 +210,22 @@ a.navbar-item[href="/admin/"] {
   display: none !important;
 }
 
+/* ===== HIDE PROFILE DROPDOWN (top right) ===== */
+.navbar-end,
+.navbar-item.has-dropdown,
+.navbar-item .dropdown,
+nav.navbar .navbar-end,
+.navbar .navbar-menu .navbar-end,
+.navbar-item.is-hoverable,
+.navbar-link[aria-expanded],
+.navbar-dropdown {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
 /* ===== NAVBAR STYLING ===== */
 nav.navbar.is-fixed-top,
 nav.navbar {
@@ -222,42 +237,6 @@ nav.navbar {
 .navbar-brand {
   display: flex !important;
   align-items: center !important;
-}
-
-/* ===== OUR CUSTOM BUTTONS CONTAINER ===== */
-#moyd-navbar-buttons {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 0 16px !important;
-  height: 52px !important;
-  order: -1 !important;
-}
-
-#moyd-navbar-buttons button {
-  width: 38px !important;
-  height: 38px !important;
-  background-color: #273351 !important;
-  border: none !important;
-  border-radius: 8px !important;
-  color: white !important;
-  font-size: 18px !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.2s ease !important;
-  -webkit-tap-highlight-color: transparent !important;
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
-}
-
-#moyd-navbar-buttons button:hover {
-  background-color: #1a2438 !important;
-  transform: scale(1.05) !important;
-}
-
-#moyd-navbar-buttons button:active {
-  transform: scale(0.95) !important;
 }
 
 .navbar-burger {
@@ -274,24 +253,6 @@ nav.navbar {
 .navbar-burger span {
   background-color: #273351 !important;
   height: 2px !important;
-}
-
-.navbar-end .navbar-item {
-  color: #273351 !important;
-}
-
-/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
-.template-header h1,
-.template-header .tag,
-.template-header small,
-.content h1, .content h2, .content h3,
-.title, .subtitle {
-  color: #2c3e50 !important;
-}
-
-.template-header .tag.is-light,
-small, .help-text {
-  color: #666 !important;
 }
 
 /* ===== HIDE FOOTER BRANDING ===== */
@@ -372,19 +333,22 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
+/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
+.template-header h1,
+.template-header .tag,
+.template-header small,
+.content h1, .content h2, .content h3,
+.title, .subtitle {
+  color: #2c3e50 !important;
+}
+
+.template-header .tag.is-light,
+small, .help-text {
+  color: #666 !important;
+}
+
 /* ===== MOBILE RESPONSIVE ===== */
 @media screen and (max-width: 768px) {
-  #moyd-navbar-buttons {
-    padding: 0 10px !important;
-    gap: 8px !important;
-  }
-
-  #moyd-navbar-buttons button {
-    width: 42px !important;
-    height: 42px !important;
-    font-size: 20px !important;
-  }
-
   .button, button,
   .input, .textarea, .select select {
     min-height: 44px !important;
@@ -400,30 +364,6 @@ a, a:hover, a:active, a:focus,
     width: calc(100% - 32px) !important;
     margin: 16px !important;
     max-height: calc(100vh - 32px) !important;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  #moyd-navbar-buttons button {
-    width: 46px !important;
-    height: 46px !important;
-    font-size: 22px !important;
-  }
-
-  .button, button {
-    min-height: 48px !important;
-  }
-
-  .modal-card {
-    width: calc(100% - 20px) !important;
-    margin: 10px !important;
-  }
-}
-
-@media (hover: none) and (pointer: coarse) {
-  #moyd-navbar-buttons button {
-    min-height: 44px !important;
-    min-width: 44px !important;
   }
 }
 '::text))
@@ -445,114 +385,58 @@ EOSQL
       DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
-      -- Insert navbar buttons JavaScript (NO <script> tags - served as raw JS file)
+      -- Insert navbar buttons JavaScript
       INSERT INTO settings (key, value)
       VALUES('appearance.admin.custom_js', to_jsonb('(function(){
   console.log("[MOYD] Loading navbar buttons...");
   var NAVY="#273351",NAVY_DARK="#1a2438";
-
   function createButtons(){
     if(document.getElementById("moyd-btns"))return;
     var d=document.createElement("div");
     d.id="moyd-btns";
     d.style.cssText="position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
-
     var r=document.createElement("button");
-    r.innerHTML="🔄";
-    r.title="Refresh Page";
-    r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    r.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
-    r.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
-    r.onclick=function(e){e.preventDefault();this.style.transform="rotate(360deg)";setTimeout(function(){location.reload()},300);};
-
+    r.innerHTML="🔄";r.title="Refresh";
+    r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);";
+    r.onmouseover=function(){this.style.background=NAVY_DARK};
+    r.onmouseout=function(){this.style.background=NAVY};
+    r.onclick=function(){this.style.transform="rotate(360deg)";setTimeout(function(){location.reload()},300)};
     var h=document.createElement("button");
-    h.innerHTML="?";
-    h.title="Get Help";
-    h.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    h.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
-    h.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
-    h.onclick=function(e){e.preventDefault();showHelp();};
-
-    d.appendChild(r);
-    d.appendChild(h);
-    document.body.appendChild(d);
+    h.innerHTML="?";h.title="Help";
+    h.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);";
+    h.onmouseover=function(){this.style.background=NAVY_DARK};
+    h.onmouseout=function(){this.style.background=NAVY};
+    h.onclick=function(){showHelp()};
+    d.appendChild(r);d.appendChild(h);document.body.appendChild(d);
     console.log("[MOYD] Buttons created!");
   }
-
   function showHelp(){
-    var existing=document.getElementById("moyd-modal");
-    if(existing)existing.remove();
-
-    var msg="Hey Andrew! I am having a problem on the Campaigns page of the App....";
-    var smsUrl="sms:+18168983612?body="+encodeURIComponent(msg);
-    var emailUrl="mailto:andrew@moyoungdemocrats.org?subject="+encodeURIComponent("MOYD App Help")+"&body="+encodeURIComponent(msg);
-
-    var overlay=document.createElement("div");
-    overlay.id="moyd-modal";
-    overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
-
-    var modal=document.createElement("div");
-    modal.style.cssText="background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center;";
-
-    var title=document.createElement("h2");
-    title.style.cssText="margin:0 0 8px;color:#273351;font-size:20px;";
-    title.textContent="Having trouble with the email campaign system?";
-
-    var subtitle=document.createElement("p");
-    subtitle.style.cssText="margin:0 0 24px;color:#273351;font-size:18px;font-weight:600;";
-    subtitle.textContent="Get help now!";
-
-    var btnRow=document.createElement("div");
-    btnRow.style.cssText="display:flex;gap:16px;margin-bottom:20px;";
-
-    var smsLink=document.createElement("a");
-    smsLink.href=smsUrl;
-    smsLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
-    smsLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">💬</span><span style=\"font-weight:bold;\">Text</span>";
-
-    var emailLink=document.createElement("a");
-    emailLink.href=emailUrl;
-    emailLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
-    emailLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">✉️</span><span style=\"font-weight:bold;\">Email</span>";
-
-    var closeBtn=document.createElement("button");
-    closeBtn.textContent="Close";
-    closeBtn.style.cssText="width:100%;padding:14px;background:#e5e5e5;border:none;border-radius:8px;font-size:16px;cursor:pointer;";
-    closeBtn.onclick=function(){overlay.remove();};
-
-    btnRow.appendChild(smsLink);
-    btnRow.appendChild(emailLink);
-    modal.appendChild(title);
-    modal.appendChild(subtitle);
-    modal.appendChild(btnRow);
-    modal.appendChild(closeBtn);
-    overlay.appendChild(modal);
-
-    overlay.onclick=function(ev){if(ev.target===overlay)overlay.remove();};
-    document.body.appendChild(overlay);
+    var e=document.getElementById("moyd-modal");if(e)e.remove();
+    var m="Hey Andrew! I need help with the Campaigns page...";
+    var o=document.createElement("div");o.id="moyd-modal";
+    o.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
+    var c=document.createElement("div");
+    c.style.cssText="background:white;border-radius:16px;padding:24px;max-width:340px;width:100%;text-align:center;";
+    var t=document.createElement("h2");t.style.cssText="margin:0 0 6px;color:#273351;font-size:18px;";t.textContent="Having trouble with the email campaign system?";
+    var sub=document.createElement("p");sub.style.cssText="margin:0 0 20px;color:#273351;font-size:16px;font-weight:600;";sub.textContent="Get help now!";
+    var b=document.createElement("div");b.style.cssText="display:flex;gap:12px;margin-bottom:16px;";
+    var s=document.createElement("a");s.href="sms:+18168983612?body="+encodeURIComponent(m);
+    s.style.cssText="flex:1;padding:16px 12px;background:#273351;color:white;text-decoration:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;";
+    s.innerHTML="<span style=\"font-size:24px\">💬</span><span style=\"font-weight:bold;font-size:14px\">Text</span>";
+    var em=document.createElement("a");em.href="mailto:andrew@moyoungdemocrats.org?subject=Help&body="+encodeURIComponent(m);
+    em.style.cssText="flex:1;padding:16px 12px;background:#273351;color:white;text-decoration:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;";
+    em.innerHTML="<span style=\"font-size:24px\">✉️</span><span style=\"font-weight:bold;font-size:14px\">Email</span>";
+    var cl=document.createElement("button");cl.textContent="Close";
+    cl.style.cssText="width:100%;padding:12px;background:#e5e5e5;border:none;border-radius:8px;cursor:pointer;font-size:14px;";
+    cl.onclick=function(){o.remove()};
+    b.appendChild(s);b.appendChild(em);c.appendChild(t);c.appendChild(sub);c.appendChild(b);c.appendChild(cl);o.appendChild(c);
+    o.onclick=function(ev){if(ev.target===o)o.remove()};
+    document.body.appendChild(o);
   }
-
-  function init(){
-    if(!document.body){setTimeout(init,100);return;}
-    createButtons();
-  }
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",init);
-  }else{
-    init();
-  }
-
-  setTimeout(init,500);
-  setTimeout(init,1000);
-  setTimeout(init,2000);
-
-  setInterval(function(){
-    if(!document.getElementById("moyd-btns"))createButtons();
-  },3000);
-
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",createButtons)}else{createButtons()}
+  setTimeout(createButtons,500);setTimeout(createButtons,1000);
+  setInterval(function(){if(!document.getElementById("moyd-btns"))createButtons()},3000);
   window.MOYD_showHelp=showHelp;
-  console.log("[MOYD] Script loaded. Debug: window.MOYD_showHelp()");
 })();'::text))
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL2
@@ -581,7 +465,7 @@ body.login, .login {
 
 .login .wrap {
   width: 100% !important;
-  max-width: 450px !important;
+  max-width: 400px !important;
   padding: 20px !important;
   box-sizing: border-box !important;
 }
@@ -592,8 +476,9 @@ body.login, .login {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  margin-bottom: 30px !important;
-  min-height: 120px !important;
+  margin-bottom: 20px !important;
+  min-height: 80px !important;
+  height: auto !important;
 }
 
 /* Hide default logo */
@@ -604,62 +489,101 @@ body.login, .login {
   display: none !important;
 }
 
-/* Custom MOYD logo - CENTERED */
+/* Custom MOYD logo */
 .login .wrap .logo::before,
 .login .logo::before {
   content: "" !important;
   display: block !important;
-  width: 200px !important;
-  height: 80px !important;
+  width: 180px !important;
+  height: 70px !important;
   background-image: url("/uploads/MOYD01.png") !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
 }
 
-/* ===== LOGIN BOX ===== */
+/* ===== LOGIN BOX - COMPACT HEIGHT ===== */
 .login .box,
 .login .wrap .box {
   background: white !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  padding: 30px !important;
+  padding: 24px !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* Remove any extra spacing inside box */
+.login .box > *:first-child {
+  margin-top: 0 !important;
+}
+
+.login .box > *:last-child {
+  margin-bottom: 0 !important;
 }
 
 /* ===== FORM INPUTS ===== */
-.login .input {
+.login .input,
+.login input[type="text"],
+.login input[type="password"] {
   border-radius: 8px !important;
   border: 1px solid #ddd !important;
-  padding: 12px 16px !important;
+  padding: 12px 14px !important;
   font-size: 16px !important;
-  min-height: 48px !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  margin-bottom: 12px !important;
 }
 
-.login .input:focus {
+.login .input:focus,
+.login input:focus {
   border-color: #273351 !important;
   box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
   outline: none !important;
 }
 
+/* ===== FIELD LABELS ===== */
+.login .field,
+.login .control {
+  margin-bottom: 12px !important;
+}
+
+.login label {
+  margin-bottom: 4px !important;
+  font-size: 14px !important;
+}
+
 /* ===== LOGIN BUTTON - NAVY BLUE ===== */
 .login .button,
+.login button,
 .login button[type="submit"],
-.login .button.is-primary {
+.login .button.is-primary,
+.login input[type="submit"],
+.wrap .box .button,
+.wrap .box button,
+form button,
+form .button {
   background-color: #273351 !important;
   border-color: #273351 !important;
   color: white !important;
   font-weight: 600 !important;
   font-size: 16px !important;
-  padding: 14px 24px !important;
-  min-height: 50px !important;
+  padding: 12px 20px !important;
+  min-height: 44px !important;
+  height: 44px !important;
   border-radius: 8px !important;
   width: 100% !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease !important;
+  margin-top: 8px !important;
 }
 
 .login .button:hover,
-.login button[type="submit"]:hover {
+.login button:hover,
+.login button[type="submit"]:hover,
+.wrap .box .button:hover,
+.wrap .box button:hover,
+form button:hover {
   background-color: #1a2438 !important;
   border-color: #1a2438 !important;
 }
@@ -681,7 +605,7 @@ footer,
   opacity: 0 !important;
 }
 
-/* Hide any text containing "listmonk" outside the box */
+/* Hide any extra elements outside the box */
 .login .wrap > *:not(.logo):not(.box) {
   display: none !important;
 }
@@ -700,28 +624,17 @@ footer,
 @media screen and (max-width: 480px) {
   .login .wrap {
     padding: 16px !important;
+    max-width: 100% !important;
   }
 
   .login .wrap .logo::before,
   .login .logo::before {
-    width: 160px !important;
-    height: 64px !important;
+    width: 150px !important;
+    height: 60px !important;
   }
 
   .login .box {
     padding: 20px !important;
-  }
-
-  .login .button {
-    min-height: 52px !important;
-  }
-}
-
-/* ===== TOUCH DEVICES ===== */
-@media (hover: none) and (pointer: coarse) {
-  .login .input,
-  .login .button {
-    min-height: 48px !important;
   }
 }
 '::text));
@@ -897,9 +810,8 @@ EOSQL
         -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
         INSERT INTO settings (key, value)
         VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
-/* NAVBAR FIX v2: More aggressive logo hiding */
 
-/* ===== HIDE LISTMONK LOGO - MULTIPLE SELECTORS ===== */
+/* ===== HIDE LISTMONK LOGO ===== */
 .navbar-brand > a:first-child,
 .navbar-brand > .navbar-item:first-child,
 .navbar-brand a.navbar-item:first-of-type,
@@ -926,6 +838,22 @@ a.navbar-item[href="/admin/"] {
   display: none !important;
 }
 
+/* ===== HIDE PROFILE DROPDOWN (top right) ===== */
+.navbar-end,
+.navbar-item.has-dropdown,
+.navbar-item .dropdown,
+nav.navbar .navbar-end,
+.navbar .navbar-menu .navbar-end,
+.navbar-item.is-hoverable,
+.navbar-link[aria-expanded],
+.navbar-dropdown {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
 /* ===== NAVBAR STYLING ===== */
 nav.navbar.is-fixed-top,
 nav.navbar {
@@ -937,42 +865,6 @@ nav.navbar {
 .navbar-brand {
   display: flex !important;
   align-items: center !important;
-}
-
-/* ===== OUR CUSTOM BUTTONS CONTAINER ===== */
-#moyd-navbar-buttons {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 0 16px !important;
-  height: 52px !important;
-  order: -1 !important;
-}
-
-#moyd-navbar-buttons button {
-  width: 38px !important;
-  height: 38px !important;
-  background-color: #273351 !important;
-  border: none !important;
-  border-radius: 8px !important;
-  color: white !important;
-  font-size: 18px !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.2s ease !important;
-  -webkit-tap-highlight-color: transparent !important;
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
-}
-
-#moyd-navbar-buttons button:hover {
-  background-color: #1a2438 !important;
-  transform: scale(1.05) !important;
-}
-
-#moyd-navbar-buttons button:active {
-  transform: scale(0.95) !important;
 }
 
 .navbar-burger {
@@ -989,24 +881,6 @@ nav.navbar {
 .navbar-burger span {
   background-color: #273351 !important;
   height: 2px !important;
-}
-
-.navbar-end .navbar-item {
-  color: #273351 !important;
-}
-
-/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
-.template-header h1,
-.template-header .tag,
-.template-header small,
-.content h1, .content h2, .content h3,
-.title, .subtitle {
-  color: #2c3e50 !important;
-}
-
-.template-header .tag.is-light,
-small, .help-text {
-  color: #666 !important;
 }
 
 /* ===== HIDE FOOTER BRANDING ===== */
@@ -1087,19 +961,22 @@ a, a:hover, a:active, a:focus,
   background-color: #273351 !important;
 }
 
+/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
+.template-header h1,
+.template-header .tag,
+.template-header small,
+.content h1, .content h2, .content h3,
+.title, .subtitle {
+  color: #2c3e50 !important;
+}
+
+.template-header .tag.is-light,
+small, .help-text {
+  color: #666 !important;
+}
+
 /* ===== MOBILE RESPONSIVE ===== */
 @media screen and (max-width: 768px) {
-  #moyd-navbar-buttons {
-    padding: 0 10px !important;
-    gap: 8px !important;
-  }
-
-  #moyd-navbar-buttons button {
-    width: 42px !important;
-    height: 42px !important;
-    font-size: 20px !important;
-  }
-
   .button, button,
   .input, .textarea, .select select {
     min-height: 44px !important;
@@ -1115,30 +992,6 @@ a, a:hover, a:active, a:focus,
     width: calc(100% - 32px) !important;
     margin: 16px !important;
     max-height: calc(100vh - 32px) !important;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  #moyd-navbar-buttons button {
-    width: 46px !important;
-    height: 46px !important;
-    font-size: 22px !important;
-  }
-
-  .button, button {
-    min-height: 48px !important;
-  }
-
-  .modal-card {
-    width: calc(100% - 20px) !important;
-    margin: 10px !important;
-  }
-}
-
-@media (hover: none) and (pointer: coarse) {
-  #moyd-navbar-buttons button {
-    min-height: 44px !important;
-    min-width: 44px !important;
   }
 }
 '::text))
@@ -1160,114 +1013,58 @@ EOSQL
           DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
           DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
-          -- Insert navbar buttons JavaScript (NO <script> tags - served as raw JS file)
+          -- Insert navbar buttons JavaScript
           INSERT INTO settings (key, value)
           VALUES('appearance.admin.custom_js', to_jsonb('(function(){
   console.log("[MOYD] Loading navbar buttons...");
   var NAVY="#273351",NAVY_DARK="#1a2438";
-
   function createButtons(){
     if(document.getElementById("moyd-btns"))return;
     var d=document.createElement("div");
     d.id="moyd-btns";
     d.style.cssText="position:fixed;top:10px;left:10px;z-index:99999;display:flex;gap:8px;";
-
     var r=document.createElement("button");
-    r.innerHTML="🔄";
-    r.title="Refresh Page";
-    r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    r.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
-    r.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
-    r.onclick=function(e){e.preventDefault();this.style.transform="rotate(360deg)";setTimeout(function(){location.reload()},300);};
-
+    r.innerHTML="🔄";r.title="Refresh";
+    r.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);";
+    r.onmouseover=function(){this.style.background=NAVY_DARK};
+    r.onmouseout=function(){this.style.background=NAVY};
+    r.onclick=function(){this.style.transform="rotate(360deg)";setTimeout(function(){location.reload()},300)};
     var h=document.createElement("button");
-    h.innerHTML="?";
-    h.title="Get Help";
-    h.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;";
-    h.onmouseover=function(){this.style.background=NAVY_DARK;this.style.transform="scale(1.05)";};
-    h.onmouseout=function(){this.style.background=NAVY;this.style.transform="scale(1)";};
-    h.onclick=function(e){e.preventDefault();showHelp();};
-
-    d.appendChild(r);
-    d.appendChild(h);
-    document.body.appendChild(d);
+    h.innerHTML="?";h.title="Help";
+    h.style.cssText="width:40px;height:40px;background:"+NAVY+";border:none;border-radius:8px;color:white;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);";
+    h.onmouseover=function(){this.style.background=NAVY_DARK};
+    h.onmouseout=function(){this.style.background=NAVY};
+    h.onclick=function(){showHelp()};
+    d.appendChild(r);d.appendChild(h);document.body.appendChild(d);
     console.log("[MOYD] Buttons created!");
   }
-
   function showHelp(){
-    var existing=document.getElementById("moyd-modal");
-    if(existing)existing.remove();
-
-    var msg="Hey Andrew! I am having a problem on the Campaigns page of the App....";
-    var smsUrl="sms:+18168983612?body="+encodeURIComponent(msg);
-    var emailUrl="mailto:andrew@moyoungdemocrats.org?subject="+encodeURIComponent("MOYD App Help")+"&body="+encodeURIComponent(msg);
-
-    var overlay=document.createElement("div");
-    overlay.id="moyd-modal";
-    overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
-
-    var modal=document.createElement("div");
-    modal.style.cssText="background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center;";
-
-    var title=document.createElement("h2");
-    title.style.cssText="margin:0 0 8px;color:#273351;font-size:20px;";
-    title.textContent="Having trouble with the email campaign system?";
-
-    var subtitle=document.createElement("p");
-    subtitle.style.cssText="margin:0 0 24px;color:#273351;font-size:18px;font-weight:600;";
-    subtitle.textContent="Get help now!";
-
-    var btnRow=document.createElement("div");
-    btnRow.style.cssText="display:flex;gap:16px;margin-bottom:20px;";
-
-    var smsLink=document.createElement("a");
-    smsLink.href=smsUrl;
-    smsLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
-    smsLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">💬</span><span style=\"font-weight:bold;\">Text</span>";
-
-    var emailLink=document.createElement("a");
-    emailLink.href=emailUrl;
-    emailLink.style.cssText="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;background:#273351;color:white;text-decoration:none;border-radius:12px;";
-    emailLink.innerHTML="<span style=\"font-size:32px;margin-bottom:8px;\">✉️</span><span style=\"font-weight:bold;\">Email</span>";
-
-    var closeBtn=document.createElement("button");
-    closeBtn.textContent="Close";
-    closeBtn.style.cssText="width:100%;padding:14px;background:#e5e5e5;border:none;border-radius:8px;font-size:16px;cursor:pointer;";
-    closeBtn.onclick=function(){overlay.remove();};
-
-    btnRow.appendChild(smsLink);
-    btnRow.appendChild(emailLink);
-    modal.appendChild(title);
-    modal.appendChild(subtitle);
-    modal.appendChild(btnRow);
-    modal.appendChild(closeBtn);
-    overlay.appendChild(modal);
-
-    overlay.onclick=function(ev){if(ev.target===overlay)overlay.remove();};
-    document.body.appendChild(overlay);
+    var e=document.getElementById("moyd-modal");if(e)e.remove();
+    var m="Hey Andrew! I need help with the Campaigns page...";
+    var o=document.createElement("div");o.id="moyd-modal";
+    o.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;";
+    var c=document.createElement("div");
+    c.style.cssText="background:white;border-radius:16px;padding:24px;max-width:340px;width:100%;text-align:center;";
+    var t=document.createElement("h2");t.style.cssText="margin:0 0 6px;color:#273351;font-size:18px;";t.textContent="Having trouble with the email campaign system?";
+    var sub=document.createElement("p");sub.style.cssText="margin:0 0 20px;color:#273351;font-size:16px;font-weight:600;";sub.textContent="Get help now!";
+    var b=document.createElement("div");b.style.cssText="display:flex;gap:12px;margin-bottom:16px;";
+    var s=document.createElement("a");s.href="sms:+18168983612?body="+encodeURIComponent(m);
+    s.style.cssText="flex:1;padding:16px 12px;background:#273351;color:white;text-decoration:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;";
+    s.innerHTML="<span style=\"font-size:24px\">💬</span><span style=\"font-weight:bold;font-size:14px\">Text</span>";
+    var em=document.createElement("a");em.href="mailto:andrew@moyoungdemocrats.org?subject=Help&body="+encodeURIComponent(m);
+    em.style.cssText="flex:1;padding:16px 12px;background:#273351;color:white;text-decoration:none;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;";
+    em.innerHTML="<span style=\"font-size:24px\">✉️</span><span style=\"font-weight:bold;font-size:14px\">Email</span>";
+    var cl=document.createElement("button");cl.textContent="Close";
+    cl.style.cssText="width:100%;padding:12px;background:#e5e5e5;border:none;border-radius:8px;cursor:pointer;font-size:14px;";
+    cl.onclick=function(){o.remove()};
+    b.appendChild(s);b.appendChild(em);c.appendChild(t);c.appendChild(sub);c.appendChild(b);c.appendChild(cl);o.appendChild(c);
+    o.onclick=function(ev){if(ev.target===o)o.remove()};
+    document.body.appendChild(o);
   }
-
-  function init(){
-    if(!document.body){setTimeout(init,100);return;}
-    createButtons();
-  }
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",init);
-  }else{
-    init();
-  }
-
-  setTimeout(init,500);
-  setTimeout(init,1000);
-  setTimeout(init,2000);
-
-  setInterval(function(){
-    if(!document.getElementById("moyd-btns"))createButtons();
-  },3000);
-
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",createButtons)}else{createButtons()}
+  setTimeout(createButtons,500);setTimeout(createButtons,1000);
+  setInterval(function(){if(!document.getElementById("moyd-btns"))createButtons()},3000);
   window.MOYD_showHelp=showHelp;
-  console.log("[MOYD] Script loaded. Debug: window.MOYD_showHelp()");
 })();'::text))
           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 EOSQL2
@@ -1296,7 +1093,7 @@ body.login, .login {
 
 .login .wrap {
   width: 100% !important;
-  max-width: 450px !important;
+  max-width: 400px !important;
   padding: 20px !important;
   box-sizing: border-box !important;
 }
@@ -1307,8 +1104,9 @@ body.login, .login {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  margin-bottom: 30px !important;
-  min-height: 120px !important;
+  margin-bottom: 20px !important;
+  min-height: 80px !important;
+  height: auto !important;
 }
 
 /* Hide default logo */
@@ -1319,62 +1117,101 @@ body.login, .login {
   display: none !important;
 }
 
-/* Custom MOYD logo - CENTERED */
+/* Custom MOYD logo */
 .login .wrap .logo::before,
 .login .logo::before {
   content: "" !important;
   display: block !important;
-  width: 200px !important;
-  height: 80px !important;
+  width: 180px !important;
+  height: 70px !important;
   background-image: url("/uploads/MOYD01.png") !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
 }
 
-/* ===== LOGIN BOX ===== */
+/* ===== LOGIN BOX - COMPACT HEIGHT ===== */
 .login .box,
 .login .wrap .box {
   background: white !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  padding: 30px !important;
+  padding: 24px !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* Remove any extra spacing inside box */
+.login .box > *:first-child {
+  margin-top: 0 !important;
+}
+
+.login .box > *:last-child {
+  margin-bottom: 0 !important;
 }
 
 /* ===== FORM INPUTS ===== */
-.login .input {
+.login .input,
+.login input[type="text"],
+.login input[type="password"] {
   border-radius: 8px !important;
   border: 1px solid #ddd !important;
-  padding: 12px 16px !important;
+  padding: 12px 14px !important;
   font-size: 16px !important;
-  min-height: 48px !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  margin-bottom: 12px !important;
 }
 
-.login .input:focus {
+.login .input:focus,
+.login input:focus {
   border-color: #273351 !important;
   box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
   outline: none !important;
 }
 
+/* ===== FIELD LABELS ===== */
+.login .field,
+.login .control {
+  margin-bottom: 12px !important;
+}
+
+.login label {
+  margin-bottom: 4px !important;
+  font-size: 14px !important;
+}
+
 /* ===== LOGIN BUTTON - NAVY BLUE ===== */
 .login .button,
+.login button,
 .login button[type="submit"],
-.login .button.is-primary {
+.login .button.is-primary,
+.login input[type="submit"],
+.wrap .box .button,
+.wrap .box button,
+form button,
+form .button {
   background-color: #273351 !important;
   border-color: #273351 !important;
   color: white !important;
   font-weight: 600 !important;
   font-size: 16px !important;
-  padding: 14px 24px !important;
-  min-height: 50px !important;
+  padding: 12px 20px !important;
+  min-height: 44px !important;
+  height: 44px !important;
   border-radius: 8px !important;
   width: 100% !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease !important;
+  margin-top: 8px !important;
 }
 
 .login .button:hover,
-.login button[type="submit"]:hover {
+.login button:hover,
+.login button[type="submit"]:hover,
+.wrap .box .button:hover,
+.wrap .box button:hover,
+form button:hover {
   background-color: #1a2438 !important;
   border-color: #1a2438 !important;
 }
@@ -1396,7 +1233,7 @@ footer,
   opacity: 0 !important;
 }
 
-/* Hide any text containing "listmonk" outside the box */
+/* Hide any extra elements outside the box */
 .login .wrap > *:not(.logo):not(.box) {
   display: none !important;
 }
@@ -1415,28 +1252,17 @@ footer,
 @media screen and (max-width: 480px) {
   .login .wrap {
     padding: 16px !important;
+    max-width: 100% !important;
   }
 
   .login .wrap .logo::before,
   .login .logo::before {
-    width: 160px !important;
-    height: 64px !important;
+    width: 150px !important;
+    height: 60px !important;
   }
 
   .login .box {
     padding: 20px !important;
-  }
-
-  .login .button {
-    min-height: 52px !important;
-  }
-}
-
-/* ===== TOUCH DEVICES ===== */
-@media (hover: none) and (pointer: coarse) {
-  .login .input,
-  .login .button {
-    min-height: 48px !important;
   }
 }
 '::text));
