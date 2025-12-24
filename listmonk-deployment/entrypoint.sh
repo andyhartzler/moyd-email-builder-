@@ -184,73 +184,9 @@ EOSQL
     DELETE FROM settings WHERE key = 'appearance.admin.custom_css';
 
     INSERT INTO settings (key, value)
-    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
+    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding - Logo hiding via JS */
 
-/* ===== HIDE ONLY THE LOGO LINK, NOT HAMBURGER ===== */
-.navbar-brand > a.navbar-item,
-.navbar-brand > .navbar-item:first-child,
-a.navbar-item[href="/admin"],
-a.navbar-item[href="/admin/"],
-.navbar-brand > a[href="/admin"],
-.navbar-brand > a[href="/admin/"] {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  left: -9999px !important;
-}
-
-/* ===== ENSURE HAMBURGER MENU IS VISIBLE ===== */
-.navbar-burger,
-.navbar-brand > .navbar-burger,
-a.navbar-burger,
-button.navbar-burger {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  left: auto !important;
-  width: 52px !important;
-  height: 52px !important;
-  font-size: 1rem !important;
-  color: #273351 !important;
-  margin-left: auto !important;
-}
-
-.navbar-burger span {
-  display: block !important;
-  visibility: visible !important;
-  background-color: #273351 !important;
-  height: 2px !important;
-  width: 16px !important;
-  position: absolute !important;
-  left: calc(50% - 8px) !important;
-}
-
-/* ===== MOBILE MENU ===== */
-.navbar-menu {
-  background-color: #ffffff !important;
-}
-
-.navbar-menu.is-active {
-  display: block !important;
-  visibility: visible !important;
-}
-
-.navbar-menu .navbar-item {
-  display: block !important;
-  visibility: visible !important;
-  color: #273351 !important;
-  padding: 12px 16px !important;
-}
-
-.navbar-menu .navbar-item:hover {
-  background-color: rgba(39, 51, 81, 0.1) !important;
-}
-
-/* Hide profile dropdown */
+/* Hide profile dropdown on desktop */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
@@ -260,31 +196,10 @@ button.navbar-burger {
   display: none !important;
 }
 
-/* Navbar */
+/* Navbar styling */
 nav.navbar {
   background-color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-}
-
-.navbar-burger {
-  color: #273351 !important;
-}
-
-.navbar-burger span {
-  background-color: #273351 !important;
-}
-
-/* Mobile menu */
-.navbar-menu {
-  background-color: #ffffff !important;
-}
-
-.navbar-menu .navbar-item {
-  color: #273351 !important;
-}
-
-.navbar-menu .navbar-item:hover {
-  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 /* Hide footer */
@@ -342,7 +257,21 @@ a, .has-text-primary, .has-text-link {
   color: #2c3e50 !important;
 }
 
+/* Mobile hamburger styling */
 @media screen and (max-width: 768px) {
+  .navbar-burger {
+    display: flex !important;
+    color: #273351 !important;
+  }
+  .navbar-burger span {
+    background-color: #273351 !important;
+  }
+  .navbar-menu {
+    background-color: #ffffff !important;
+  }
+  .navbar-menu .navbar-item {
+    color: #273351 !important;
+  }
   .button, .input, .textarea, .select select {
     min-height: 44px !important;
   }
@@ -370,7 +299,7 @@ EOSQL
       DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
-      -- Admin JavaScript (buttons + title fix + logout remover)
+      -- Admin JavaScript (buttons + title fix + logout/logo remover)
       INSERT INTO settings (key, value)
       VALUES('appearance.admin.custom_js', to_jsonb('(function(){
   console.log("[MOYD] Loading customizations...");
@@ -389,8 +318,29 @@ EOSQL
       var text=(links[i].textContent||"").toLowerCase().trim();
       if(href.indexOf("logout")>-1||text==="logout"){
         links[i].style.display="none";
-        links[i].parentNode.removeChild(links[i]);
+        if(links[i].parentNode)links[i].parentNode.removeChild(links[i]);
         console.log("[MOYD] Removed logout link");
+      }
+    }
+  }
+
+  function removeListmonkLogo(){
+    var navbarBrand=document.querySelector(".navbar-brand");
+    if(navbarBrand){
+      var children=navbarBrand.children;
+      for(var i=0;i<children.length;i++){
+        var el=children[i];
+        if(el.classList.contains("navbar-burger"))continue;
+        var text=(el.textContent||"").toLowerCase().trim();
+        var href=el.getAttribute("href")||"";
+        if(text.indexOf("listmonk")>-1||href==="/admin"||href==="/admin/"){
+          el.style.display="none";
+          el.style.visibility="hidden";
+          el.style.width="0";
+          el.style.height="0";
+          el.style.overflow="hidden";
+          console.log("[MOYD] Hidden listmonk logo element");
+        }
       }
     }
   }
@@ -443,6 +393,7 @@ EOSQL
   function init(){
     fixTitle();
     removeLogout();
+    removeListmonkLogo();
     createButtons();
   }
 
@@ -459,6 +410,7 @@ EOSQL
   setInterval(function(){
     fixTitle();
     removeLogout();
+    removeListmonkLogo();
     if(!document.getElementById("moyd-btns"))createButtons();
   },2000);
 
