@@ -2188,9 +2188,9 @@ is_token_used() {
     echo "$result" | tr -d ' \n\t'
 }
 
-# Generate session ID
+# Generate session ID (use openssl to avoid /dev/urandom pipeline hang in Alpine)
 generate_session_id() {
-    cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1
+    openssl rand -hex 32
 }
 
 # Hash token for storage
