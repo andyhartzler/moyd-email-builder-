@@ -1,7 +1,7 @@
 FROM listmonk/listmonk:v5.1.0
 
-# Install wget for healthcheck, postgresql-client for schema creation, netcat/openssl for SSO handler, and nginx for reverse proxy
-RUN apk add --no-cache wget ca-certificates postgresql-client curl netcat-openbsd openssl nginx
+# Install wget for healthcheck, postgresql-client for schema creation, socat/openssl for SSO handler, and nginx for reverse proxy
+RUN apk add --no-cache wget ca-certificates postgresql-client curl netcat-openbsd openssl nginx socat
 
 # Download Listmonk schema.sql for manual installation (use v5.1.0 tag to match Docker image version)
 RUN wget -O /listmonk/schema.sql https://raw.githubusercontent.com/knadh/listmonk/v5.1.0/schema.sql
