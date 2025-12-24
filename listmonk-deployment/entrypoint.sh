@@ -210,20 +210,25 @@ a.navbar-item[href="/admin/"] {
   display: none !important;
 }
 
-/* ===== HIDE PROFILE DROPDOWN (top right) ===== */
-.navbar-end,
-.navbar-item.has-dropdown,
-.navbar-item .dropdown,
-nav.navbar .navbar-end,
-.navbar .navbar-menu .navbar-end,
-.navbar-item.is-hoverable,
-.navbar-link[aria-expanded],
-.navbar-dropdown {
+/* ===== HIDE PROFILE DROPDOWN ONLY (not entire navbar-end) ===== */
+/* Target the profile/user dropdown specifically */
+.navbar-end > .navbar-item.has-dropdown,
+.navbar-end > .navbar-item > .navbar-link,
+.navbar-end > .navbar-item > .navbar-dropdown,
+.navbar-item.has-dropdown.is-hoverable,
+.navbar-end .navbar-link.is-arrowless,
+.navbar-end .navbar-link[aria-expanded],
+.navbar-end .dropdown,
+.navbar-end .navbar-item .dropdown-trigger,
+.navbar-end .navbar-item .dropdown-menu,
+/* Hide user avatar/icon */
+.navbar-end .navbar-item > figure,
+.navbar-end .navbar-item > .image,
+.navbar-end .navbar-item img.is-rounded,
+/* Hide the actual profile dropdown container */
+.navbar-item.profile-dropdown,
+.navbar-end > .navbar-item:last-child {
   display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
 }
 
 /* ===== NAVBAR STYLING ===== */
@@ -253,6 +258,25 @@ nav.navbar {
 .navbar-burger span {
   background-color: #273351 !important;
   height: 2px !important;
+}
+
+/* ===== MOBILE MENU STYLING ===== */
+.navbar-menu {
+  background-color: #ffffff !important;
+}
+
+.navbar-menu.is-active {
+  display: block !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.navbar-menu .navbar-item {
+  color: #273351 !important;
+  padding: 12px 16px !important;
+}
+
+.navbar-menu .navbar-item:hover {
+  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 /* ===== HIDE FOOTER BRANDING ===== */
@@ -838,20 +862,25 @@ a.navbar-item[href="/admin/"] {
   display: none !important;
 }
 
-/* ===== HIDE PROFILE DROPDOWN (top right) ===== */
-.navbar-end,
-.navbar-item.has-dropdown,
-.navbar-item .dropdown,
-nav.navbar .navbar-end,
-.navbar .navbar-menu .navbar-end,
-.navbar-item.is-hoverable,
-.navbar-link[aria-expanded],
-.navbar-dropdown {
+/* ===== HIDE PROFILE DROPDOWN ONLY (not entire navbar-end) ===== */
+/* Target the profile/user dropdown specifically */
+.navbar-end > .navbar-item.has-dropdown,
+.navbar-end > .navbar-item > .navbar-link,
+.navbar-end > .navbar-item > .navbar-dropdown,
+.navbar-item.has-dropdown.is-hoverable,
+.navbar-end .navbar-link.is-arrowless,
+.navbar-end .navbar-link[aria-expanded],
+.navbar-end .dropdown,
+.navbar-end .navbar-item .dropdown-trigger,
+.navbar-end .navbar-item .dropdown-menu,
+/* Hide user avatar/icon */
+.navbar-end .navbar-item > figure,
+.navbar-end .navbar-item > .image,
+.navbar-end .navbar-item img.is-rounded,
+/* Hide the actual profile dropdown container */
+.navbar-item.profile-dropdown,
+.navbar-end > .navbar-item:last-child {
   display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
 }
 
 /* ===== NAVBAR STYLING ===== */
@@ -881,6 +910,25 @@ nav.navbar {
 .navbar-burger span {
   background-color: #273351 !important;
   height: 2px !important;
+}
+
+/* ===== MOBILE MENU STYLING ===== */
+.navbar-menu {
+  background-color: #ffffff !important;
+}
+
+.navbar-menu.is-active {
+  display: block !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.navbar-menu .navbar-item {
+  color: #273351 !important;
+  padding: 12px 16px !important;
+}
+
+.navbar-menu .navbar-item:hover {
+  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 /* ===== HIDE FOOTER BRANDING ===== */
