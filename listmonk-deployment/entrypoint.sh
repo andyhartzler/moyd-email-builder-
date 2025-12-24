@@ -1675,7 +1675,8 @@ case "$request_path" in
         cookie_expiry=$(date -u -d "@$(($(date +%s) + 604800))" "+%a, %d %b %Y %H:%M:%S GMT" 2>/dev/null || date -u "+%a, %d %b %Y %H:%M:%S GMT")
 
         # Send redirect with session cookie
-        cookie="session=${session_id}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${cookie_expiry}"
+        # Cookie name must be exactly "listmonk_sso" - nginx map looks for this
+        cookie="listmonk_sso=${session_id}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=86400"
         log "Sending redirect with session cookie"
         send_redirect "/admin" "$cookie"
         ;;
@@ -1735,11 +1736,162 @@ else
     exit 1
 fi
 
+# ===== NGINX CONFIGURATION WITH BASICAUTH INJECTION =====
+echo "🌐 Configuring nginx with SSO BasicAuth injection..."
+
+# Calculate BasicAuth base64 value from admin credentials
+# This will be injected when listmonk_sso cookie is present
+LISTMONK_ADMIN_PASSWORD="${LISTMONK_ADMIN_PASSWORD:-fucktrump67}"
+BASIC_AUTH_B64=$(echo -n "admin:${LISTMONK_ADMIN_PASSWORD}" | base64 | tr -d '\n')
+echo "   BasicAuth configured for user: admin"
+
+# Generate nginx config with cookie→BasicAuth map
+cat > /etc/nginx/nginx.conf << NGINXCONF
+# Nginx configuration for Listmonk SSO proxy
+# Routes /api/crm-auth to SSO handler, injects BasicAuth when SSO cookie present
+
+daemon off;
+worker_processes 1;
+error_log /dev/stderr warn;
+pid /run/nginx/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    access_log /dev/stdout;
+
+    sendfile on;
+    keepalive_timeout 65;
+
+    # Upstream for Listmonk (running on port 9001)
+    upstream listmonk {
+        server 127.0.0.1:9001;
+    }
+
+    # Upstream for SSO handler (running on port 9002)
+    upstream sso_handler {
+        server 127.0.0.1:9002;
+    }
+
+    # Map: if listmonk_sso cookie exists, inject BasicAuth header
+    # This allows SSO-authenticated users to access Listmonk admin
+    map \$cookie_listmonk_sso \$listmonk_auth {
+        ""      "";
+        default "Basic ${BASIC_AUTH_B64}";
+    }
+
+    server {
+        listen 9000;
+        server_name _;
+
+        # Health check endpoint - proxy to Listmonk (no auth needed)
+        location = /api/health {
+            proxy_pass http://listmonk;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+        }
+
+        # SSO authentication endpoint - proxy to SSO handler
+        location = /api/crm-auth {
+            proxy_pass http://sso_handler;
+            proxy_http_version 1.0;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_read_timeout 120s;
+        }
+
+        # SSO health check endpoint
+        location = /api/sso-health {
+            proxy_pass http://sso_handler;
+            proxy_http_version 1.0;
+        }
+
+        # Admin routes - inject BasicAuth if SSO cookie present
+        location /admin {
+            proxy_pass http://listmonk;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+            proxy_set_header Authorization \$listmonk_auth;
+
+            # Timeouts
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+
+        # API routes - inject BasicAuth if SSO cookie present
+        location /api/ {
+            proxy_pass http://listmonk;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+            proxy_set_header Authorization \$listmonk_auth;
+        }
+
+        # Public routes - no auth injection needed
+        location /public/ {
+            proxy_pass http://listmonk;
+            proxy_set_header Host \$host;
+        }
+
+        location /subscription/ {
+            proxy_pass http://listmonk;
+            proxy_set_header Host \$host;
+        }
+
+        # Static files
+        location /uploads {
+            alias /listmonk/uploads;
+            expires 30d;
+            add_header Cache-Control "public, immutable";
+        }
+
+        location /static {
+            alias /listmonk/static;
+            expires 30d;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # All other requests go to Listmonk
+        location / {
+            proxy_pass http://listmonk;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+
+            # WebSocket support (if needed)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade \$http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            # Timeouts
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+    }
+}
+NGINXCONF
+
+echo "✅ Nginx configured with SSO BasicAuth injection"
+
 # Start nginx as the main process (runs on port 9000, proxies to Listmonk and SSO handler)
 echo "🌐 Starting nginx reverse proxy on port 9000..."
 echo "   - Proxying / to Listmonk (port 9001)"
 if [ -n "${LISTMONK_JWT_SECRET}" ]; then
     echo "   - Proxying /api/crm-auth to SSO handler (port 9002)"
+    echo "   - Injecting BasicAuth when listmonk_sso cookie present"
 fi
 
 # Run nginx in foreground (it's the main process)
