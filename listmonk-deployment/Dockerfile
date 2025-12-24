@@ -22,12 +22,8 @@ COPY listmonk-deployment/nginx.conf /etc/nginx/nginx.conf
 # Copy custom JavaScript for buttons
 COPY listmonk-deployment/custom-buttons.js /listmonk/static/custom-buttons.js
 
-# Copy MOYD logo to uploads directory for login page
-COPY MOYD01.png /listmonk/uploads/MOYD01.png
-
-# Copy MOYD logo as favicon
-COPY MOYD01.png /listmonk/static/favicon.png
-COPY MOYD01.png /listmonk/uploads/favicon.png
+# Copy MOYD custom favicon
+COPY listmonk-deployment/favicon.png /listmonk/static/favicon.png
 
 # Expose port
 EXPOSE 9000

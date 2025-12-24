@@ -180,179 +180,87 @@ EOSQL
     SET search_path TO ${DB_SCHEMA:-listmonk};
 
     -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
+    -- Admin CSS
     INSERT INTO settings (key, value)
-    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
+    VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* ===== HIDE LISTMONK LOGO ===== */
+/* Hide Listmonk logo */
 .navbar-brand > a:first-child,
 .navbar-brand > .navbar-item:first-child,
 .navbar-brand a.navbar-item:first-of-type,
 .navbar-brand > a[href="/admin"],
 .navbar-brand > a[href="/admin/"],
-.navbar .logo,
-.navbar-brand .logo,
-nav.navbar a:has(svg),
-nav.navbar a:has(img),
-.navbar-brand a svg,
-.navbar-brand a img,
 a.navbar-item[href="/admin"],
 a.navbar-item[href="/admin/"] {
   display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
-.navbar-brand a:not(#moyd-navbar-buttons):not(.navbar-burger) {
-  display: none !important;
-}
-
-/* ===== HIDE PROFILE DROPDOWN AND LOGOUT ===== */
-.navbar-end {
-  position: relative !important;
-}
-
-/* White overlay to cover any logout elements */
-.navbar-end::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 200px !important;
-  background: white !important;
-  z-index: 1000 !important;
-  pointer-events: none !important;
-}
-
+/* Hide profile dropdown */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
 .navbar-item.has-dropdown.is-hoverable,
-.navbar-end .navbar-link.is-arrowless,
-.navbar-end .navbar-link[aria-expanded],
 .navbar-end .dropdown,
-.navbar-end .navbar-item .dropdown-trigger,
-.navbar-end .navbar-item .dropdown-menu,
-.navbar-end .navbar-item > figure,
-.navbar-end .navbar-item > .image,
-.navbar-end .navbar-item img.is-rounded,
-.navbar-item.profile-dropdown,
 .navbar-end > .navbar-item:last-child {
   display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
-/* Hide Logout from mobile menu - comprehensive */
-a[href="/admin/logout"],
-a[href*="logout"],
-.navbar-item[href="/admin/logout"],
-.navbar-item[href*="logout"],
-.navbar-menu a[href*="logout"],
-.navbar-end a[href*="logout"],
-.navbar-dropdown a[href*="logout"],
-[class*="logout"],
-[id*="logout"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-}
-
-/* ===== NAVBAR STYLING ===== */
-nav.navbar.is-fixed-top,
+/* Navbar */
 nav.navbar {
   background-color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-  min-height: 52px !important;
-}
-
-.navbar-brand {
-  display: flex !important;
-  align-items: center !important;
 }
 
 .navbar-burger {
   color: #273351 !important;
-  height: 52px !important;
-  width: 52px !important;
-  margin-left: auto !important;
-}
-
-.navbar-burger:hover {
-  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 .navbar-burger span {
   background-color: #273351 !important;
-  height: 2px !important;
 }
 
-/* ===== MOBILE MENU STYLING ===== */
+/* Mobile menu */
 .navbar-menu {
   background-color: #ffffff !important;
 }
 
-.navbar-menu.is-active {
-  display: block !important;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-}
-
 .navbar-menu .navbar-item {
   color: #273351 !important;
-  padding: 12px 16px !important;
 }
 
 .navbar-menu .navbar-item:hover {
   background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
-/* ===== HIDE FOOTER BRANDING ===== */
-body > footer:not(.modal-card-foot),
-.app-footer:not(.modal-card-foot),
-.page-footer:not(.modal-card-foot),
+/* Hide footer */
 footer.footer {
   display: none !important;
 }
 
-.modal-card-foot,
-.modal-footer,
-.modal .modal-card-foot {
+.modal-card-foot {
   display: flex !important;
-  visibility: visible !important;
 }
 
-/* ===== MOYD NAVY BLUE THEME ===== */
-.button.is-primary, .button.is-link,
-.button.is-info, a.button.is-primary,
-.has-background-primary, .tag.is-primary,
-.notification.is-primary, .message.is-primary,
-.hero.is-primary, .navbar.is-primary {
+/* Navy theme */
+.button.is-primary, .button.is-link, .button.is-info, a.button.is-primary {
   background-color: #273351 !important;
   border-color: #273351 !important;
-  color: white !important;
 }
 
-a, a:hover, a:active, a:focus,
-.has-text-primary, .has-text-link, .has-text-info {
+.has-background-primary, .tag.is-primary, .hero.is-primary {
+  background-color: #273351 !important;
+}
+
+a, .has-text-primary, .has-text-link {
   color: #273351 !important;
 }
 
-.tabs a:hover, .tabs li.is-active a {
+.tabs li.is-active a {
   border-bottom-color: #273351 !important;
   color: #273351 !important;
 }
 
-.menu-list a.is-active,
-.menu-list a:hover,
-.menu-list a.router-link-active {
+.menu-list a.is-active, .menu-list a.router-link-active {
   background-color: #273351 !important;
   color: white !important;
 }
@@ -362,67 +270,30 @@ a, a:hover, a:active, a:focus,
   box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
 }
 
-.pagination-link.is-current,
-.pagination-previous:hover, .pagination-next:hover,
-.pagination-link:hover {
+.pagination-link.is-current {
   background-color: #273351 !important;
   border-color: #273351 !important;
-  color: white !important;
-}
-
-.table tr.is-selected {
-  background-color: #273351 !important;
-  color: white !important;
-}
-
-.tag.is-info, .tag.is-link, .badge {
-  background-color: #273351 !important;
 }
 
 .switch input[type="checkbox"]:checked + .check {
   background-color: #273351 !important;
 }
 
-.dropdown-item.is-active, .dropdown-item:hover {
-  background-color: #273351 !important;
-  color: white !important;
-}
-
-.modal-card-head, .panel-heading {
+.modal-card-head {
   background-color: #273351 !important;
 }
 
-/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
-.template-header h1,
-.template-header .tag,
-.template-header small,
-.content h1, .content h2, .content h3,
 .title, .subtitle {
   color: #2c3e50 !important;
 }
 
-.template-header .tag.is-light,
-small, .help-text {
-  color: #666 !important;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
 @media screen and (max-width: 768px) {
-  .button, button,
-  .input, .textarea, .select select {
+  .button, .input, .textarea, .select select {
     min-height: 44px !important;
-    font-size: 16px !important;
   }
-
   .menu-list a {
     padding: 12px 16px !important;
     min-height: 44px !important;
-  }
-
-  .modal-card {
-    width: calc(100% - 32px) !important;
-    margin: 16px !important;
-    max-height: calc(100vh - 32px) !important;
   }
 }
 '::text))
@@ -444,11 +315,31 @@ EOSQL
       DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
       DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
-      -- Insert navbar buttons JavaScript
+      -- Admin JavaScript (buttons + title fix + logout remover)
       INSERT INTO settings (key, value)
       VALUES('appearance.admin.custom_js', to_jsonb('(function(){
-  console.log("[MOYD] Loading navbar buttons...");
+  console.log("[MOYD] Loading customizations...");
   var NAVY="#273351",NAVY_DARK="#1a2438";
+
+  function fixTitle(){
+    if(document.title.indexOf("listmonk")===0){
+      document.title=document.title.replace("listmonk","MOYD");
+    }
+  }
+
+  function removeLogout(){
+    var links=document.querySelectorAll("a");
+    for(var i=0;i<links.length;i++){
+      var href=links[i].getAttribute("href")||"";
+      var text=(links[i].textContent||"").toLowerCase().trim();
+      if(href.indexOf("logout")>-1||text==="logout"){
+        links[i].style.display="none";
+        links[i].parentNode.removeChild(links[i]);
+        console.log("[MOYD] Removed logout link");
+      }
+    }
+  }
+
   function createButtons(){
     if(document.getElementById("moyd-btns"))return;
     var d=document.createElement("div");
@@ -469,6 +360,7 @@ EOSQL
     d.appendChild(r);d.appendChild(h);document.body.appendChild(d);
     console.log("[MOYD] Buttons created!");
   }
+
   function showHelp(){
     var e=document.getElementById("moyd-modal");if(e)e.remove();
     var m="Hey Andrew! I need help with the Campaigns page...";
@@ -492,11 +384,29 @@ EOSQL
     o.onclick=function(ev){if(ev.target===o)o.remove()};
     document.body.appendChild(o);
   }
-  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",createButtons)}else{createButtons()}
-  setTimeout(createButtons,500);setTimeout(createButtons,1000);
-  setInterval(function(){if(!document.getElementById("moyd-btns"))createButtons()},3000);
-  function fixTitle(){var t=document.title;if(t.indexOf("listmonk")===0){document.title=t.replace("listmonk","MOYD")}}
-  setInterval(fixTitle,1000);
+
+  function init(){
+    fixTitle();
+    removeLogout();
+    createButtons();
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",init);
+  }else{
+    init();
+  }
+
+  setTimeout(init,500);
+  setTimeout(init,1000);
+  setTimeout(init,2000);
+
+  setInterval(function(){
+    fixTitle();
+    removeLogout();
+    if(!document.getElementById("moyd-btns"))createButtons();
+  },2000);
+
   window.MOYD_showHelp=showHelp;
 })();'::text))
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
@@ -512,25 +422,121 @@ EOSQL2
         -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
         DELETE FROM settings WHERE key = 'appearance.public.custom_css';
         INSERT INTO settings (key, value)
-        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page - Simplified */
+        -- Public CSS (login pages)
+        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Public Pages */
 
-/* Center login page */
-body.login { display:flex; min-height:100vh; justify-content:center; align-items:center; background:#f5f5f5; padding:20px; }
-.login .wrap { max-width:380px; width:100%; }
+/* Center the logo */
+.logo,
+.wrap .logo,
+div.logo {
+  text-align: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+}
 
-/* Logo centered */
-.login .logo { display:flex; justify-content:center; margin-bottom:20px; }
-.login .logo img { max-width:200px; height:auto; }
+.logo a,
+.wrap .logo a {
+  display: inline-block !important;
+  margin: 0 auto !important;
+}
 
-/* Login box */
-.login .box { background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); padding:24px; }
+.logo img,
+.wrap .logo img,
+.logo a img {
+  max-width: 200px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
 
-/* Navy blue button */
-.login .button, .login button { background:#273351 !important; border:none !important; color:white !important; width:100%; height:44px; border-radius:8px; font-weight:600; cursor:pointer; }
-.login .button:hover, .login button:hover { background:#1a2438 !important; }
+/* Login container */
+.wrap {
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+}
+
+.box {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+  padding: 24px !important;
+}
+
+/* Form inputs */
+.input,
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  border-radius: 8px !important;
+  min-height: 44px !important;
+}
+
+.input:focus,
+input:focus {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
+}
+
+/* NAVY BLUE BUTTON - MAXIMUM SPECIFICITY */
+.button,
+.button.is-primary,
+.button.is-link,
+.button.is-info,
+button,
+button.button,
+button.is-primary,
+input[type="submit"],
+input.button,
+a.button,
+a.button.is-primary,
+.box .button,
+.box button,
+.wrap .button,
+.wrap button,
+form .button,
+form button,
+form input[type="submit"],
+.field .button,
+.control .button,
+.control button {
+  background-color: #273351 !important;
+  background: #273351 !important;
+  border-color: #273351 !important;
+  border: 1px solid #273351 !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  min-height: 44px !important;
+  font-weight: 600 !important;
+}
+
+.button:hover,
+.button.is-primary:hover,
+button:hover,
+input[type="submit"]:hover,
+a.button:hover,
+.box .button:hover,
+.wrap .button:hover,
+form .button:hover,
+form button:hover {
+  background-color: #1a2438 !important;
+  background: #1a2438 !important;
+  border-color: #1a2438 !important;
+  border: 1px solid #1a2438 !important;
+  color: #ffffff !important;
+}
+
+/* Links */
+a {
+  color: #273351 !important;
+}
 
 /* Hide footer */
-footer, .footer, .powered-by { display:none !important; }
+footer.footer,
+footer,
+.footer {
+  display: none !important;
+}
 '::text));
 EOSQL3
 
@@ -723,180 +729,87 @@ EOSQL
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
         SET search_path TO ${DB_SCHEMA:-listmonk};
 
-        -- Insert custom CSS to hide header bar, logo, and branding (using to_jsonb for proper formatting)
+        -- Admin CSS
         INSERT INTO settings (key, value)
-        VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Custom Branding - Missouri Young Democrats */
+        VALUES('appearance.admin.custom_css', to_jsonb('/* MOYD Admin Branding */
 
-/* ===== HIDE LISTMONK LOGO ===== */
+/* Hide Listmonk logo */
 .navbar-brand > a:first-child,
 .navbar-brand > .navbar-item:first-child,
 .navbar-brand a.navbar-item:first-of-type,
 .navbar-brand > a[href="/admin"],
 .navbar-brand > a[href="/admin/"],
-.navbar .logo,
-.navbar-brand .logo,
-nav.navbar a:has(svg),
-nav.navbar a:has(img),
-.navbar-brand a svg,
-.navbar-brand a img,
 a.navbar-item[href="/admin"],
 a.navbar-item[href="/admin/"] {
   display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
-.navbar-brand a:not(#moyd-navbar-buttons):not(.navbar-burger) {
-  display: none !important;
-}
-
-/* ===== HIDE PROFILE DROPDOWN AND LOGOUT ===== */
-.navbar-end {
-  position: relative !important;
-}
-
-/* White overlay to cover any logout elements */
-.navbar-end::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 200px !important;
-  background: white !important;
-  z-index: 1000 !important;
-  pointer-events: none !important;
-}
-
+/* Hide profile dropdown */
 .navbar-end > .navbar-item.has-dropdown,
 .navbar-end > .navbar-item > .navbar-link,
 .navbar-end > .navbar-item > .navbar-dropdown,
 .navbar-item.has-dropdown.is-hoverable,
-.navbar-end .navbar-link.is-arrowless,
-.navbar-end .navbar-link[aria-expanded],
 .navbar-end .dropdown,
-.navbar-end .navbar-item .dropdown-trigger,
-.navbar-end .navbar-item .dropdown-menu,
-.navbar-end .navbar-item > figure,
-.navbar-end .navbar-item > .image,
-.navbar-end .navbar-item img.is-rounded,
-.navbar-item.profile-dropdown,
 .navbar-end > .navbar-item:last-child {
   display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
-/* Hide Logout from mobile menu - comprehensive */
-a[href="/admin/logout"],
-a[href*="logout"],
-.navbar-item[href="/admin/logout"],
-.navbar-item[href*="logout"],
-.navbar-menu a[href*="logout"],
-.navbar-end a[href*="logout"],
-.navbar-dropdown a[href*="logout"],
-[class*="logout"],
-[id*="logout"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-}
-
-/* ===== NAVBAR STYLING ===== */
-nav.navbar.is-fixed-top,
+/* Navbar */
 nav.navbar {
   background-color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-  min-height: 52px !important;
-}
-
-.navbar-brand {
-  display: flex !important;
-  align-items: center !important;
 }
 
 .navbar-burger {
   color: #273351 !important;
-  height: 52px !important;
-  width: 52px !important;
-  margin-left: auto !important;
-}
-
-.navbar-burger:hover {
-  background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
 .navbar-burger span {
   background-color: #273351 !important;
-  height: 2px !important;
 }
 
-/* ===== MOBILE MENU STYLING ===== */
+/* Mobile menu */
 .navbar-menu {
   background-color: #ffffff !important;
 }
 
-.navbar-menu.is-active {
-  display: block !important;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-}
-
 .navbar-menu .navbar-item {
   color: #273351 !important;
-  padding: 12px 16px !important;
 }
 
 .navbar-menu .navbar-item:hover {
   background-color: rgba(39, 51, 81, 0.1) !important;
 }
 
-/* ===== HIDE FOOTER BRANDING ===== */
-body > footer:not(.modal-card-foot),
-.app-footer:not(.modal-card-foot),
-.page-footer:not(.modal-card-foot),
+/* Hide footer */
 footer.footer {
   display: none !important;
 }
 
-.modal-card-foot,
-.modal-footer,
-.modal .modal-card-foot {
+.modal-card-foot {
   display: flex !important;
-  visibility: visible !important;
 }
 
-/* ===== MOYD NAVY BLUE THEME ===== */
-.button.is-primary, .button.is-link,
-.button.is-info, a.button.is-primary,
-.has-background-primary, .tag.is-primary,
-.notification.is-primary, .message.is-primary,
-.hero.is-primary, .navbar.is-primary {
+/* Navy theme */
+.button.is-primary, .button.is-link, .button.is-info, a.button.is-primary {
   background-color: #273351 !important;
   border-color: #273351 !important;
-  color: white !important;
 }
 
-a, a:hover, a:active, a:focus,
-.has-text-primary, .has-text-link, .has-text-info {
+.has-background-primary, .tag.is-primary, .hero.is-primary {
+  background-color: #273351 !important;
+}
+
+a, .has-text-primary, .has-text-link {
   color: #273351 !important;
 }
 
-.tabs a:hover, .tabs li.is-active a {
+.tabs li.is-active a {
   border-bottom-color: #273351 !important;
   color: #273351 !important;
 }
 
-.menu-list a.is-active,
-.menu-list a:hover,
-.menu-list a.router-link-active {
+.menu-list a.is-active, .menu-list a.router-link-active {
   background-color: #273351 !important;
   color: white !important;
 }
@@ -906,67 +819,30 @@ a, a:hover, a:active, a:focus,
   box-shadow: 0 0 0 0.125em rgba(39, 51, 81, 0.25) !important;
 }
 
-.pagination-link.is-current,
-.pagination-previous:hover, .pagination-next:hover,
-.pagination-link:hover {
+.pagination-link.is-current {
   background-color: #273351 !important;
   border-color: #273351 !important;
-  color: white !important;
-}
-
-.table tr.is-selected {
-  background-color: #273351 !important;
-  color: white !important;
-}
-
-.tag.is-info, .tag.is-link, .badge {
-  background-color: #273351 !important;
 }
 
 .switch input[type="checkbox"]:checked + .check {
   background-color: #273351 !important;
 }
 
-.dropdown-item.is-active, .dropdown-item:hover {
-  background-color: #273351 !important;
-  color: white !important;
-}
-
-.modal-card-head, .panel-heading {
+.modal-card-head {
   background-color: #273351 !important;
 }
 
-/* ===== FIX DARK TEXT ON TEMPLATE PAGE ===== */
-.template-header h1,
-.template-header .tag,
-.template-header small,
-.content h1, .content h2, .content h3,
 .title, .subtitle {
   color: #2c3e50 !important;
 }
 
-.template-header .tag.is-light,
-small, .help-text {
-  color: #666 !important;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
 @media screen and (max-width: 768px) {
-  .button, button,
-  .input, .textarea, .select select {
+  .button, .input, .textarea, .select select {
     min-height: 44px !important;
-    font-size: 16px !important;
   }
-
   .menu-list a {
     padding: 12px 16px !important;
     min-height: 44px !important;
-  }
-
-  .modal-card {
-    width: calc(100% - 32px) !important;
-    margin: 16px !important;
-    max-height: calc(100vh - 32px) !important;
   }
 }
 '::text))
@@ -988,11 +864,31 @@ EOSQL
           DELETE FROM settings WHERE key = 'appearance.admin.custom_js';
           DELETE FROM settings WHERE key = 'appearance.admin.custom_head';
 
-          -- Insert navbar buttons JavaScript
+          -- Admin JavaScript (buttons + title fix + logout remover)
           INSERT INTO settings (key, value)
           VALUES('appearance.admin.custom_js', to_jsonb('(function(){
-  console.log("[MOYD] Loading navbar buttons...");
+  console.log("[MOYD] Loading customizations...");
   var NAVY="#273351",NAVY_DARK="#1a2438";
+
+  function fixTitle(){
+    if(document.title.indexOf("listmonk")===0){
+      document.title=document.title.replace("listmonk","MOYD");
+    }
+  }
+
+  function removeLogout(){
+    var links=document.querySelectorAll("a");
+    for(var i=0;i<links.length;i++){
+      var href=links[i].getAttribute("href")||"";
+      var text=(links[i].textContent||"").toLowerCase().trim();
+      if(href.indexOf("logout")>-1||text==="logout"){
+        links[i].style.display="none";
+        links[i].parentNode.removeChild(links[i]);
+        console.log("[MOYD] Removed logout link");
+      }
+    }
+  }
+
   function createButtons(){
     if(document.getElementById("moyd-btns"))return;
     var d=document.createElement("div");
@@ -1013,6 +909,7 @@ EOSQL
     d.appendChild(r);d.appendChild(h);document.body.appendChild(d);
     console.log("[MOYD] Buttons created!");
   }
+
   function showHelp(){
     var e=document.getElementById("moyd-modal");if(e)e.remove();
     var m="Hey Andrew! I need help with the Campaigns page...";
@@ -1036,11 +933,29 @@ EOSQL
     o.onclick=function(ev){if(ev.target===o)o.remove()};
     document.body.appendChild(o);
   }
-  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",createButtons)}else{createButtons()}
-  setTimeout(createButtons,500);setTimeout(createButtons,1000);
-  setInterval(function(){if(!document.getElementById("moyd-btns"))createButtons()},3000);
-  function fixTitle(){var t=document.title;if(t.indexOf("listmonk")===0){document.title=t.replace("listmonk","MOYD")}}
-  setInterval(fixTitle,1000);
+
+  function init(){
+    fixTitle();
+    removeLogout();
+    createButtons();
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",init);
+  }else{
+    init();
+  }
+
+  setTimeout(init,500);
+  setTimeout(init,1000);
+  setTimeout(init,2000);
+
+  setInterval(function(){
+    fixTitle();
+    removeLogout();
+    if(!document.getElementById("moyd-btns"))createButtons();
+  },2000);
+
   window.MOYD_showHelp=showHelp;
 })();'::text))
           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
@@ -1056,25 +971,121 @@ EOSQL2
             -- Add custom CSS for public pages (login, subscription forms, etc.) (FORCE UPDATE)
             DELETE FROM settings WHERE key = 'appearance.public.custom_css';
             INSERT INTO settings (key, value)
-            VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Login Page - Simplified */
+            -- Public CSS (login pages)
+        VALUES('appearance.public.custom_css', to_jsonb('/* MOYD Public Pages */
 
-/* Center login page */
-body.login { display:flex; min-height:100vh; justify-content:center; align-items:center; background:#f5f5f5; padding:20px; }
-.login .wrap { max-width:380px; width:100%; }
+/* Center the logo */
+.logo,
+.wrap .logo,
+div.logo {
+  text-align: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+}
 
-/* Logo centered */
-.login .logo { display:flex; justify-content:center; margin-bottom:20px; }
-.login .logo img { max-width:200px; height:auto; }
+.logo a,
+.wrap .logo a {
+  display: inline-block !important;
+  margin: 0 auto !important;
+}
 
-/* Login box */
-.login .box { background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); padding:24px; }
+.logo img,
+.wrap .logo img,
+.logo a img {
+  max-width: 200px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
 
-/* Navy blue button */
-.login .button, .login button { background:#273351 !important; border:none !important; color:white !important; width:100%; height:44px; border-radius:8px; font-weight:600; cursor:pointer; }
-.login .button:hover, .login button:hover { background:#1a2438 !important; }
+/* Login container */
+.wrap {
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+}
+
+.box {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+  padding: 24px !important;
+}
+
+/* Form inputs */
+.input,
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  border-radius: 8px !important;
+  min-height: 44px !important;
+}
+
+.input:focus,
+input:focus {
+  border-color: #273351 !important;
+  box-shadow: 0 0 0 3px rgba(39, 51, 81, 0.15) !important;
+}
+
+/* NAVY BLUE BUTTON - MAXIMUM SPECIFICITY */
+.button,
+.button.is-primary,
+.button.is-link,
+.button.is-info,
+button,
+button.button,
+button.is-primary,
+input[type="submit"],
+input.button,
+a.button,
+a.button.is-primary,
+.box .button,
+.box button,
+.wrap .button,
+.wrap button,
+form .button,
+form button,
+form input[type="submit"],
+.field .button,
+.control .button,
+.control button {
+  background-color: #273351 !important;
+  background: #273351 !important;
+  border-color: #273351 !important;
+  border: 1px solid #273351 !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  min-height: 44px !important;
+  font-weight: 600 !important;
+}
+
+.button:hover,
+.button.is-primary:hover,
+button:hover,
+input[type="submit"]:hover,
+a.button:hover,
+.box .button:hover,
+.wrap .button:hover,
+form .button:hover,
+form button:hover {
+  background-color: #1a2438 !important;
+  background: #1a2438 !important;
+  border-color: #1a2438 !important;
+  border: 1px solid #1a2438 !important;
+  color: #ffffff !important;
+}
+
+/* Links */
+a {
+  color: #273351 !important;
+}
 
 /* Hide footer */
-footer, .footer, .powered-by { display:none !important; }
+footer.footer,
+footer,
+.footer {
+  display: none !important;
+}
 '::text));
 EOSQL3
 
