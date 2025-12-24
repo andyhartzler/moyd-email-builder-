@@ -1,15 +1,23 @@
-{{ define "content" }}
-<h2>Confirm Your Subscription</h2>
+{{ define "subscriber-optin-campaign" }}
+<h2>{{ L.Ts "email.optin.confirmSubTitle" }}</h2>
 
-<p>Hey{{ if .Subscriber.FirstName }} {{ .Subscriber.FirstName }}{{ end }},</p>
+<p>{{ L.Ts "email.optin.confirmSubWelcome" }} {{ .Subscriber.FirstName }}!</p>
 
-<p>You're receiving this because you signed up to receive updates from Missouri Young Democrats. Please confirm your subscription to start receiving our emails.</p>
+<p>{{ L.Ts "email.optin.confirmSubInfo" }}</p>
 
-<p style="text-align: center;">
-  <a href="{{ .OptinURL }}" class="btn btn-primary">Confirm Subscription</a>
-</p>
+<ul>
+    {{ range $i, $l := .Lists }}
+        {{ if eq .Type "public" }}
+            <li>{{ .Name }}</li>
+        {{ else }}
+            <li>{{ L.Ts "email.optin.privateList" }}</li>
+        {{ end }}
+    {{ end }}
+</ul>
 
-<p style="font-size: 14px; color: #6c757d;">
-  If you didn't request this, you can safely ignore this email.
+<p>{{ L.Ts "email.optin.confirmSubHelp" }}</p>
+
+<p style="text-align: center; margin: 28px 0;">
+    <a href="{{ .OptinURL }}" class="button" style="background-color: #32A6DE; color: #ffffff !important; display: inline-block; border-radius: 10px; padding: 14px 32px; text-align: center; text-decoration: none; font-weight: 600;">{{ L.Ts "email.optin.confirmSub" }}</a>
 </p>
 {{ end }}

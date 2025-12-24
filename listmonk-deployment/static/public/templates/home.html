@@ -1,12 +1,23 @@
+{{ define "home" }}
 {{ template "header" . }}
 
-<div class="card home-card">
-  <h1>Missouri Young Democrats</h1>
-  <p class="subtitle">Email Subscription Management</p>
+<section class="home-section">
+    <h1>{{ .SiteName }}</h1>
+    <p class="subtitle">Email Subscription Management</p>
 
-  {{ if .Data.EnablePublicSubscription }}
-  <a href="{{ RootURL }}/subscription/form" class="btn btn-primary">Subscribe to Our List</a>
-  {{ end }}
-</div>
+    <div class="home-actions">
+        <a href="admin" class="button">{{ L.T "users.login" }}</a>
+    </div>
+
+    <nav class="home-options">
+        {{ if .EnablePublicSubPage }}
+            <a href="{{ .RootURL }}/subscription/form">{{ L.T "public.sub" }}</a>
+        {{ end }}
+        {{ if .EnablePublicArchive }}
+            <a href="{{ .RootURL }}/archive">{{ L.T "public.archiveTitle" }}</a>
+        {{ end }}
+    </nav>
+</section>
 
 {{ template "footer" . }}
+{{ end }}
