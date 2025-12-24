@@ -295,6 +295,50 @@ a, .has-text-primary, .has-text-link {
   color: #2c3e50 !important;
 }
 
+/* ===== TEXT VISIBILITY ON DARK BACKGROUNDS ===== */
+/* Tags on primary/dark backgrounds need white text */
+.tag.is-primary,
+.tag.is-info,
+.tag.is-link,
+.tag.is-dark,
+.tag.is-success,
+.tag.is-warning,
+.tag.is-danger {
+  color: #ffffff !important;
+}
+
+/* Modal headers with dark backgrounds */
+.modal-card-head .modal-card-title,
+.modal-card-head button,
+.modal-card-head .delete {
+  color: #ffffff !important;
+}
+
+/* Hero sections */
+.hero.is-primary .title,
+.hero.is-primary .subtitle,
+.hero.is-info .title,
+.hero.is-info .subtitle,
+.hero.is-link .title,
+.hero.is-link .subtitle {
+  color: #ffffff !important;
+}
+
+/* Notification on dark backgrounds */
+.notification.is-primary,
+.notification.is-info,
+.notification.is-link,
+.notification.is-dark {
+  color: #ffffff !important;
+}
+
+/* Buttons with icons */
+.button.is-primary .icon,
+.button.is-info .icon,
+.button.is-link .icon {
+  color: #ffffff !important;
+}
+
 @media screen and (max-width: 768px) {
   .button, .input, .textarea, .select select {
     min-height: 44px !important;
@@ -854,6 +898,50 @@ a, .has-text-primary, .has-text-link {
 
 .title, .subtitle {
   color: #2c3e50 !important;
+}
+
+/* ===== TEXT VISIBILITY ON DARK BACKGROUNDS ===== */
+/* Tags on primary/dark backgrounds need white text */
+.tag.is-primary,
+.tag.is-info,
+.tag.is-link,
+.tag.is-dark,
+.tag.is-success,
+.tag.is-warning,
+.tag.is-danger {
+  color: #ffffff !important;
+}
+
+/* Modal headers with dark backgrounds */
+.modal-card-head .modal-card-title,
+.modal-card-head button,
+.modal-card-head .delete {
+  color: #ffffff !important;
+}
+
+/* Hero sections */
+.hero.is-primary .title,
+.hero.is-primary .subtitle,
+.hero.is-info .title,
+.hero.is-info .subtitle,
+.hero.is-link .title,
+.hero.is-link .subtitle {
+  color: #ffffff !important;
+}
+
+/* Notification on dark backgrounds */
+.notification.is-primary,
+.notification.is-info,
+.notification.is-link,
+.notification.is-dark {
+  color: #ffffff !important;
+}
+
+/* Buttons with icons */
+.button.is-primary .icon,
+.button.is-info .icon,
+.button.is-link .icon {
+  color: #ffffff !important;
 }
 
 @media screen and (max-width: 768px) {
