@@ -718,6 +718,75 @@ EOSQL_BRANDING
 
       if [ $? -eq 0 ]; then
         echo "✅ Site name and favicon configured"
+
+        # ========================================
+        # S3 STORAGE CONFIGURATION (Supabase)
+        # ========================================
+        echo "☁️ Configuring S3 storage for Supabase..."
+        PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_S3'
+          SET search_path TO listmonk, extensions, public;
+
+          -- S3 Storage Provider
+          INSERT INTO settings (key, value)
+          VALUES ('upload.provider', '"s3"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"s3"'::jsonb;
+
+          -- S3 Bucket Name
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.bucket', '"listmonk-media"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"listmonk-media"'::jsonb;
+
+          -- S3 Bucket Path
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.bucket_path', '"/"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"/"'::jsonb;
+
+          -- S3 Bucket Type (public)
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.bucket_type', '"public"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"public"'::jsonb;
+
+          -- S3 Access Key ID
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.aws_access_key_id', '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb;
+
+          -- S3 Secret Access Key
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.aws_secret_access_key', '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb;
+
+          -- S3 Region
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.aws_default_region', '"us-east-1"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"us-east-1"'::jsonb;
+
+          -- S3 Endpoint (Supabase S3)
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.endpoint', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb;
+
+          -- S3 Public URL
+          INSERT INTO settings (key, value)
+          VALUES ('upload.s3.url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb;
+
+          -- Logo URL from Supabase storage
+          INSERT INTO settings (key, value)
+          VALUES ('app.logo_url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/moyd-logo.png"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/moyd-logo.png"'::jsonb;
+
+          -- Favicon URL from Supabase storage
+          INSERT INTO settings (key, value)
+          VALUES ('app.favicon_url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/favicon.png"'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/favicon.png"'::jsonb;
+EOSQL_S3
+
+        if [ $? -eq 0 ]; then
+          echo "✅ S3 storage configured for Supabase"
+        else
+          echo "⚠️ Failed to configure S3 storage"
+        fi
       else
         echo "⚠️ Failed to set site name/favicon"
       fi
@@ -1319,6 +1388,75 @@ EOSQL_BRANDING2
 
           if [ $? -eq 0 ]; then
             echo "✅ Site name and favicon configured"
+
+            # ========================================
+            # S3 STORAGE CONFIGURATION (Supabase)
+            # ========================================
+            echo "☁️ Configuring S3 storage for Supabase..."
+            PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_S3_2'
+              SET search_path TO listmonk, extensions, public;
+
+              -- S3 Storage Provider
+              INSERT INTO settings (key, value)
+              VALUES ('upload.provider', '"s3"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"s3"'::jsonb;
+
+              -- S3 Bucket Name
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.bucket', '"listmonk-media"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"listmonk-media"'::jsonb;
+
+              -- S3 Bucket Path
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.bucket_path', '"/"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"/"'::jsonb;
+
+              -- S3 Bucket Type (public)
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.bucket_type', '"public"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"public"'::jsonb;
+
+              -- S3 Access Key ID
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.aws_access_key_id', '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb;
+
+              -- S3 Secret Access Key
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.aws_secret_access_key', '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb;
+
+              -- S3 Region
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.aws_default_region', '"us-east-1"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"us-east-1"'::jsonb;
+
+              -- S3 Endpoint (Supabase S3)
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.endpoint', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb;
+
+              -- S3 Public URL
+              INSERT INTO settings (key, value)
+              VALUES ('upload.s3.url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb;
+
+              -- Logo URL from Supabase storage
+              INSERT INTO settings (key, value)
+              VALUES ('app.logo_url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/moyd-logo.png"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/moyd-logo.png"'::jsonb;
+
+              -- Favicon URL from Supabase storage
+              INSERT INTO settings (key, value)
+              VALUES ('app.favicon_url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/favicon.png"'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media/favicon.png"'::jsonb;
+EOSQL_S3_2
+
+            if [ $? -eq 0 ]; then
+              echo "✅ S3 storage configured for Supabase"
+            else
+              echo "⚠️ Failed to configure S3 storage"
+            fi
           else
             echo "⚠️ Failed to set site name/favicon"
           fi
