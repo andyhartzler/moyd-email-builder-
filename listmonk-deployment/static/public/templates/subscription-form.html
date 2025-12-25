@@ -5,11 +5,20 @@
     <h2>{{ L.T "public.subTitle" }}</h2>
     <p class="subtitle">Stay informed about Missouri Young Democrats news, events, and action opportunities.</p>
 
-    <!-- Status Messages -->
-    <div id="form-message" class="form-message" style="display: none;"></div>
+    <!-- Error message (hidden by default) -->
+    <div id="error-message" class="form-message error" style="display: none;"></div>
 
-    <form id="subscribe-form" class="form" onsubmit="return handleSubscribe(event)">
+    <!-- Success message (hidden by default) -->
+    <div id="success-message" class="form-message success" style="display: none;">
+        <h3>Thank you for subscribing!</h3>
+        <p>Please check your email to confirm your subscription.</p>
+    </div>
+
+    <form id="subscribe-form" class="form">
         <div>
+            <!-- Honeypot field for spam protection -->
+            <input name="nonce" class="nonce" value="" />
+
             <!-- Full Name (Required) -->
             <div class="form-group">
                 <label for="name">Full Name <span class="required">*</span></label>
@@ -20,8 +29,6 @@
             <div class="form-group">
                 <label for="email">{{ L.T "subscribers.email" }} <span class="required">*</span></label>
                 <input id="email" name="email" type="email" placeholder="your@email.com" required />
-                <!-- Honeypot field for spam protection -->
-                <input name="nonce" class="nonce" value="" />
             </div>
 
             <!-- Phone (Optional) -->
@@ -39,7 +46,8 @@
             <!-- Zip Code (Required) -->
             <div class="form-group">
                 <label for="zip">Zip Code <span class="required">*</span></label>
-                <input id="zip" name="zip" type="text" placeholder="65201" pattern="[0-9]{5}" maxlength="5" required />
+                <input id="zip" name="zip" type="text" placeholder="63101" required
+                       pattern="[0-9]{5}(-[0-9]{4})?" maxlength="10" />
             </div>
 
             {{ if .Data.Lists }}
@@ -72,7 +80,7 @@
             {{ end }}
 
             <div class="submit-section">
-                <button type="submit" class="button" id="btn-submit">{{ L.T "public.sub" }}</button>
+                <button type="submit" class="button" id="btn-subscribe">{{ L.T "public.sub" }}</button>
             </div>
 
             {{ if .EnablePublicArchive }}
@@ -87,123 +95,179 @@
 </section>
 
 <script>
-// Supabase Edge Function endpoint for custom attribute handling
+// ============================================
+// CONFIGURATION - CORRECT SUPABASE URL
+// ============================================
 var SUBSCRIBE_ENDPOINT = 'https://faajpcarasilbfndzkmd.supabase.co/functions/v1/listmonk-subscribe';
 
-function showMessage(type, text) {
-    var msgEl = document.getElementById('form-message');
-    msgEl.className = 'form-message ' + type;
-    msgEl.textContent = text;
-    msgEl.style.display = 'block';
-    msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
 
+// Format phone to E.164
 function formatPhoneE164(phone) {
-    // Remove non-digits
-    var digits = phone.replace(/\D/g, '');
-    // Format as E.164 for US numbers
-    if (digits.length === 10) {
-        return '+1' + digits;
-    } else if (digits.length === 11 && digits.charAt(0) === '1') {
-        return '+' + digits;
+    if (!phone || phone.trim() === '') {
+        return { phone: '', phone_e164: '' };
     }
-    return '+1' + digits;
+
+    var digits = phone.replace(/\D/g, '');
+
+    if (digits.length === 0) {
+        return { phone: '', phone_e164: '' };
+    }
+
+    if (digits.length === 10) {
+        return { phone: digits, phone_e164: '+1' + digits };
+    } else if (digits.length === 11 && digits.charAt(0) === '1') {
+        return { phone: digits.substring(1), phone_e164: '+' + digits };
+    }
+
+    return { phone: digits, phone_e164: '+1' + digits };
 }
 
-function handleSubscribe(e) {
-    e.preventDefault();
+// Show error message
+function showError(message) {
+    var errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 
-    var form = document.getElementById('subscribe-form');
-    var submitBtn = document.getElementById('btn-submit');
+// Hide error message
+function hideError() {
+    document.getElementById('error-message').style.display = 'none';
+}
 
-    // Check honeypot
-    var nonce = form.querySelector('input[name="nonce"]');
-    if (nonce && nonce.value !== '') {
-        showMessage('error', 'Spam detected.');
-        return false;
-    }
+// Show success message
+function showSuccess() {
+    document.getElementById('subscribe-form').style.display = 'none';
+    var successDiv = document.getElementById('success-message');
+    successDiv.style.display = 'block';
+    successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 
-    // Collect form data
-    var name = form.querySelector('#name').value.trim();
-    var email = form.querySelector('#email').value.trim();
-    var phone = form.querySelector('#phone').value.trim();
-    var dob = form.querySelector('#dob').value;
-    var zip = form.querySelector('#zip').value.trim();
+// ============================================
+// FORM SUBMISSION HANDLER
+// ============================================
 
-    // Get selected lists
-    var lists = [];
-    form.querySelectorAll('input[name="l"]:checked').forEach(function(cb) {
-        lists.push(cb.value);
-    });
+document.getElementById('subscribe-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-    // Validate required fields
-    if (!name || !email || !dob || !zip) {
-        showMessage('error', 'Please fill in all required fields.');
-        return false;
-    }
+    var submitBtn = document.getElementById('btn-subscribe');
 
-    // Validate zip code
-    if (!/^\d{5}$/.test(zip)) {
-        showMessage('error', 'Please enter a valid 5-digit zip code.');
-        return false;
-    }
-
-    // Disable submit button
+    hideError();
     submitBtn.disabled = true;
     submitBtn.textContent = 'Subscribing...';
 
-    // Build request payload with correct attribute names for Edge Function
+    // Gather form data
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var dob = document.getElementById('dob').value;
+    var zip = document.getElementById('zip').value.trim();
+
+    // Check honeypot
+    var nonce = document.querySelector('input[name="nonce"]');
+    if (nonce && nonce.value !== '') {
+        showError('Spam detected.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        return;
+    }
+
+    // Get selected lists as array
+    var listCheckboxes = document.querySelectorAll('input[name="l"]:checked');
+    var lists = [];
+    listCheckboxes.forEach(function(cb) {
+        lists.push(cb.value);
+    });
+
+    console.log('[Subscribe] Data:', { name: name, email: email, phone: phone, dob: dob, zip: zip, lists: lists });
+
+    // Validation
+    if (!name) {
+        showError('Please enter your full name.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        return;
+    }
+    if (!email) {
+        showError('Please enter your email address.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        return;
+    }
+    if (!dob) {
+        showError('Please enter your date of birth.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        return;
+    }
+    if (!zip) {
+        showError('Please enter your zip code.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        return;
+    }
+    if (lists.length === 0) {
+        showError('Please select at least one list.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        return;
+    }
+
+    // Format phone
+    var phoneData = formatPhoneE164(phone);
+
+    // Build payload
     var payload = {
         name: name,
         email: email,
         lists: lists,
         attribs: {
             source: 'Subscribe Form',
-            date_of_birth: dob,
-            zip_code: zip
+            phone: phoneData.phone,
+            phone_e164: phoneData.phone_e164,
+            zip_code: zip,
+            date_of_birth: dob
         }
     };
 
-    // Add phone if provided (both raw and E.164 format)
-    if (phone) {
-        var digits = phone.replace(/\D/g, '');
-        payload.attribs.phone = digits;
-        payload.attribs.phone_e164 = formatPhoneE164(phone);
-    }
+    console.log('[Subscribe] Payload:', JSON.stringify(payload, null, 2));
 
-    // Submit to Supabase Edge Function
+    // Submit
     fetch(SUBSCRIBE_ENDPOINT, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
     .then(function(response) {
         return response.json().then(function(data) {
-            return { ok: response.ok, data: data };
+            console.log('[Subscribe] Response:', response.status, data);
+            if (!response.ok) {
+                throw new Error(data.error || 'Subscription failed. Please try again.');
+            }
+            return data;
         });
     })
     .then(function(result) {
-        if (result.ok) {
-            showMessage('success', 'Thank you for subscribing! Please check your email to confirm.');
-            form.reset();
+        showSuccess();
+    })
+    .catch(function(error) {
+        console.error('[Subscribe] Error:', error);
+
+        if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+            showError('Network error. Please check your connection and try again.');
         } else {
-            var errorMsg = result.data.error || 'Subscription failed. Please try again.';
-            showMessage('error', errorMsg);
+            showError(error.message || 'An error occurred. Please try again.');
         }
-    })
-    .catch(function(err) {
-        console.error('Subscribe error:', err);
-        showMessage('error', 'Network error. Please try again.');
-    })
-    .finally(function() {
+
         submitBtn.disabled = false;
         submitBtn.textContent = 'Subscribe';
     });
+});
 
-    return false;
-}
+console.log('[Subscribe] Form loaded. Endpoint:', SUBSCRIBE_ENDPOINT);
 </script>
 
 {{ template "footer" . }}
