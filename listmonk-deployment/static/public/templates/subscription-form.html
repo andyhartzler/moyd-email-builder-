@@ -88,7 +88,7 @@
 
 <script>
 // Supabase Edge Function endpoint for custom attribute handling
-var SUBSCRIBE_ENDPOINT = 'https://ixfyreolqilplctqzpfq.supabase.co/functions/v1/listmonk-subscribe';
+var SUBSCRIBE_ENDPOINT = 'https://faajpcarasilbfndzkmd.supabase.co/functions/v1/listmonk-subscribe';
 
 function showMessage(type, text) {
     var msgEl = document.getElementById('form-message');
@@ -98,7 +98,7 @@ function showMessage(type, text) {
     msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-function formatPhone(phone) {
+function formatPhoneE164(phone) {
     // Remove non-digits
     var digits = phone.replace(/\D/g, '');
     // Format as E.164 for US numbers
@@ -107,7 +107,7 @@ function formatPhone(phone) {
     } else if (digits.length === 11 && digits.charAt(0) === '1') {
         return '+' + digits;
     }
-    return phone;
+    return '+1' + digits;
 }
 
 function handleSubscribe(e) {
@@ -152,20 +152,23 @@ function handleSubscribe(e) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Subscribing...';
 
-    // Build request payload
+    // Build request payload with correct attribute names for Edge Function
     var payload = {
         name: name,
         email: email,
         lists: lists,
         attribs: {
-            dob: dob,
-            zip: zip
+            source: 'Subscribe Form',
+            date_of_birth: dob,
+            zip_code: zip
         }
     };
 
-    // Add phone if provided
+    // Add phone if provided (both raw and E.164 format)
     if (phone) {
-        payload.attribs.phone = formatPhone(phone);
+        var digits = phone.replace(/\D/g, '');
+        payload.attribs.phone = digits;
+        payload.attribs.phone_e164 = formatPhoneE164(phone);
     }
 
     // Submit to Supabase Edge Function
