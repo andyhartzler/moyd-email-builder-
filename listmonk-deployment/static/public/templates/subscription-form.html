@@ -56,7 +56,7 @@
                 <ul class="lists">
                     {{ range $i, $l := .Data.Lists }}
                         <li>
-                            <input checked="true" id="l-{{ $l.UUID }}" type="checkbox" name="l" value="{{ $l.UUID }}" />
+                            <input checked="true" id="l-{{ $l.UUID }}" type="checkbox" name="l" value="{{ $l.UUID }}" data-optin="{{ $l.Optin }}" />
                             <label for="l-{{ $l.UUID }}">{{ $l.Name }}</label>
                             {{ if ne $l.Description "" }}
                                 <p class="description">{{ $l.Description }}</p>
@@ -138,10 +138,34 @@ function hideError() {
     document.getElementById('error-message').style.display = 'none';
 }
 
-// Show success message
+// Check if any selected list uses double opt-in
+function hasDoubleOptinList() {
+    var checked = document.querySelectorAll('input[name="l"]:checked');
+    for (var i = 0; i < checked.length; i++) {
+        if (checked[i].getAttribute('data-optin') === 'double') {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Show success message (dynamic based on optin type)
 function showSuccess() {
     document.getElementById('subscribe-form').style.display = 'none';
     var successDiv = document.getElementById('success-message');
+
+    // Update message based on whether double opt-in is required
+    var heading = successDiv.querySelector('h3');
+    var paragraph = successDiv.querySelector('p');
+
+    if (hasDoubleOptinList()) {
+        heading.textContent = 'Thank you for subscribing!';
+        paragraph.textContent = 'Please check your email to confirm your subscription.';
+    } else {
+        heading.textContent = 'You have been subscribed successfully!';
+        paragraph.textContent = 'You will now receive updates from Missouri Young Democrats.';
+    }
+
     successDiv.style.display = 'block';
     successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }

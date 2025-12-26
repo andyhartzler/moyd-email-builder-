@@ -175,6 +175,7 @@ EOSQL
   fi
 
   # Inject custom CSS to hide header and branding for embedded Flutter app
+  # UPDATED: Added comprehensive text visibility fixes for dark headers
   echo "🎨 Injecting custom CSS to hide header and branding..."
   PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
     SET search_path TO ${DB_SCHEMA:-listmonk};
@@ -295,22 +296,135 @@ a, .has-text-primary, .has-text-link {
   color: #2c3e50 !important;
 }
 
-/* ===== TEXT VISIBILITY ON DARK BACKGROUNDS ===== */
-/* Tags on primary/dark backgrounds need white text */
-.tag.is-primary,
-.tag.is-info,
-.tag.is-link,
-.tag.is-dark,
-.tag.is-success,
-.tag.is-warning,
-.tag.is-danger {
+/* ============================================
+   TEXT VISIBILITY FIXES - MODAL HEADERS
+   ============================================ */
+
+/* Force white text on ALL modal headers */
+.modal-card-head,
+.modal-card-head *,
+.modal-card-head .modal-card-title,
+.modal-card-head h1,
+.modal-card-head h2,
+.modal-card-head h3,
+.modal-card-head h4,
+.modal-card-head p,
+.modal-card-head span,
+.modal-card-head label,
+.modal-card-head a,
+.modal-card-head button,
+.modal-card-head .delete,
+.modal-card-head .tag,
+.modal-card-head .tags .tag {
   color: #ffffff !important;
 }
 
-/* Modal headers with dark backgrounds */
-.modal-card-head .modal-card-title,
-.modal-card-head button,
-.modal-card-head .delete {
+/* ============================================
+   BOX HEADERS (Subscriber, List, User details)
+   ============================================ */
+
+/* The box headers with dark background - force white text */
+.box .media-content,
+.box .media-content *,
+.box .media-content .title,
+.box .media-content .subtitle,
+.box .media-content p,
+.box .media-content span,
+.box .media-content a,
+.box .media-content label,
+.box .media .media-content,
+.box .media .media-content * {
+  color: #ffffff !important;
+}
+
+/* First box in a view (usually the header box) */
+.box:first-child .media-content,
+.box:first-child .media-content * {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   TAGS IN DARK SECTIONS
+   ============================================ */
+
+/* Tags inside modals and boxes - white text, semi-transparent background */
+.modal .tag,
+.modal .tags .tag,
+.box .tag,
+.box .tags .tag,
+.media-content .tag,
+.media-content .tags .tag {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ID and UUID specific styling */
+.modal-card-head code,
+.modal-card-head .mono,
+.box .media-content code,
+.box .media-content .mono {
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.15) !important;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ============================================
+   LINKS IN DARK SECTIONS
+   ============================================ */
+
+.box .media-content a,
+.modal-card-head a {
+  color: #7DD3FC !important;
+  text-decoration: underline;
+}
+
+.box .media-content a:hover,
+.modal-card-head a:hover {
+  color: #BAE6FD !important;
+}
+
+/* ============================================
+   STATUS BADGES - Ensure visibility
+   ============================================ */
+
+.tag.is-success { 
+  background-color: #10B981 !important; 
+  color: #ffffff !important; 
+}
+.tag.is-warning { 
+  background-color: #F59E0B !important; 
+  color: #ffffff !important; 
+}
+.tag.is-danger { 
+  background-color: #EF4444 !important; 
+  color: #ffffff !important; 
+}
+.tag.is-info { 
+  background-color: #3B82F6 !important; 
+  color: #ffffff !important; 
+}
+.tag.is-primary {
+  background-color: #6366F1 !important;
+  color: #ffffff !important;
+}
+.tag.is-light {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #273351 !important;
+}
+.tag.is-link,
+.tag.is-dark {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   BUTTONS IN DARK SECTIONS
+   ============================================ */
+
+.box a.button,
+.media-content a.button,
+.modal-card-head .button {
   color: #ffffff !important;
 }
 
@@ -338,6 +452,28 @@ a, .has-text-primary, .has-text-link {
 .button.is-link .icon {
   color: #ffffff !important;
 }
+
+/* Preview button in headers */
+.box .level-right a,
+.box .level-right .button {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   FORM LABELS IN MODALS (keep dark for readability)
+   ============================================ */
+
+.modal-card-body label {
+  color: #374151 !important;
+}
+
+.modal-card-body .field label {
+  color: #374151 !important;
+}
+
+/* ============================================
+   MOBILE TOUCH TARGETS
+   ============================================ */
 
 @media screen and (max-width: 768px) {
   .button, .input, .textarea, .select select {
@@ -736,10 +872,10 @@ EOSQL_BRANDING
           VALUES ('upload.s3.bucket', '"listmonk-media"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"listmonk-media"'::jsonb;
 
-          -- S3 Bucket Path
+          -- S3 Bucket Path (empty to avoid path duplication)
           INSERT INTO settings (key, value)
-          VALUES ('upload.s3.bucket_path', '"/"'::jsonb)
-          ON CONFLICT (key) DO UPDATE SET value = '"/"'::jsonb;
+          VALUES ('upload.s3.bucket_path', '""'::jsonb)
+          ON CONFLICT (key) DO UPDATE SET value = '""'::jsonb;
 
           -- S3 Bucket Type (public)
           INSERT INTO settings (key, value)
@@ -761,7 +897,7 @@ EOSQL_BRANDING
           VALUES ('upload.s3.aws_default_region', '"us-east-1"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"us-east-1"'::jsonb;
 
-          -- S3 Endpoint (Supabase S3)
+          -- S3 Endpoint (Supabase S3 - NOTE: uses .storage. subdomain)
           INSERT INTO settings (key, value)
           VALUES ('upload.s3.endpoint', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb;
@@ -850,6 +986,7 @@ EOSQL
       fi
 
       # Inject custom CSS to hide header and branding for embedded Flutter app
+      # UPDATED: Added comprehensive text visibility fixes for dark headers
       echo "🎨 Injecting custom CSS to hide header and branding..."
       PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" -v ON_ERROR_STOP=1 <<-EOSQL
         SET search_path TO ${DB_SCHEMA:-listmonk};
@@ -969,22 +1106,135 @@ a, .has-text-primary, .has-text-link {
   color: #2c3e50 !important;
 }
 
-/* ===== TEXT VISIBILITY ON DARK BACKGROUNDS ===== */
-/* Tags on primary/dark backgrounds need white text */
-.tag.is-primary,
-.tag.is-info,
-.tag.is-link,
-.tag.is-dark,
-.tag.is-success,
-.tag.is-warning,
-.tag.is-danger {
+/* ============================================
+   TEXT VISIBILITY FIXES - MODAL HEADERS
+   ============================================ */
+
+/* Force white text on ALL modal headers */
+.modal-card-head,
+.modal-card-head *,
+.modal-card-head .modal-card-title,
+.modal-card-head h1,
+.modal-card-head h2,
+.modal-card-head h3,
+.modal-card-head h4,
+.modal-card-head p,
+.modal-card-head span,
+.modal-card-head label,
+.modal-card-head a,
+.modal-card-head button,
+.modal-card-head .delete,
+.modal-card-head .tag,
+.modal-card-head .tags .tag {
   color: #ffffff !important;
 }
 
-/* Modal headers with dark backgrounds */
-.modal-card-head .modal-card-title,
-.modal-card-head button,
-.modal-card-head .delete {
+/* ============================================
+   BOX HEADERS (Subscriber, List, User details)
+   ============================================ */
+
+/* The box headers with dark background - force white text */
+.box .media-content,
+.box .media-content *,
+.box .media-content .title,
+.box .media-content .subtitle,
+.box .media-content p,
+.box .media-content span,
+.box .media-content a,
+.box .media-content label,
+.box .media .media-content,
+.box .media .media-content * {
+  color: #ffffff !important;
+}
+
+/* First box in a view (usually the header box) */
+.box:first-child .media-content,
+.box:first-child .media-content * {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   TAGS IN DARK SECTIONS
+   ============================================ */
+
+/* Tags inside modals and boxes - white text, semi-transparent background */
+.modal .tag,
+.modal .tags .tag,
+.box .tag,
+.box .tags .tag,
+.media-content .tag,
+.media-content .tags .tag {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ID and UUID specific styling */
+.modal-card-head code,
+.modal-card-head .mono,
+.box .media-content code,
+.box .media-content .mono {
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.15) !important;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ============================================
+   LINKS IN DARK SECTIONS
+   ============================================ */
+
+.box .media-content a,
+.modal-card-head a {
+  color: #7DD3FC !important;
+  text-decoration: underline;
+}
+
+.box .media-content a:hover,
+.modal-card-head a:hover {
+  color: #BAE6FD !important;
+}
+
+/* ============================================
+   STATUS BADGES - Ensure visibility
+   ============================================ */
+
+.tag.is-success { 
+  background-color: #10B981 !important; 
+  color: #ffffff !important; 
+}
+.tag.is-warning { 
+  background-color: #F59E0B !important; 
+  color: #ffffff !important; 
+}
+.tag.is-danger { 
+  background-color: #EF4444 !important; 
+  color: #ffffff !important; 
+}
+.tag.is-info { 
+  background-color: #3B82F6 !important; 
+  color: #ffffff !important; 
+}
+.tag.is-primary {
+  background-color: #6366F1 !important;
+  color: #ffffff !important;
+}
+.tag.is-light {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #273351 !important;
+}
+.tag.is-link,
+.tag.is-dark {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   BUTTONS IN DARK SECTIONS
+   ============================================ */
+
+.box a.button,
+.media-content a.button,
+.modal-card-head .button {
   color: #ffffff !important;
 }
 
@@ -1012,6 +1262,28 @@ a, .has-text-primary, .has-text-link {
 .button.is-link .icon {
   color: #ffffff !important;
 }
+
+/* Preview button in headers */
+.box .level-right a,
+.box .level-right .button {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   FORM LABELS IN MODALS (keep dark for readability)
+   ============================================ */
+
+.modal-card-body label {
+  color: #374151 !important;
+}
+
+.modal-card-body .field label {
+  color: #374151 !important;
+}
+
+/* ============================================
+   MOBILE TOUCH TARGETS
+   ============================================ */
 
 @media screen and (max-width: 768px) {
   .button, .input, .textarea, .select select {
@@ -1406,10 +1678,10 @@ EOSQL_BRANDING2
               VALUES ('upload.s3.bucket', '"listmonk-media"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"listmonk-media"'::jsonb;
 
-              -- S3 Bucket Path
+              -- S3 Bucket Path (empty to avoid path duplication)
               INSERT INTO settings (key, value)
-              VALUES ('upload.s3.bucket_path', '"/"'::jsonb)
-              ON CONFLICT (key) DO UPDATE SET value = '"/"'::jsonb;
+              VALUES ('upload.s3.bucket_path', '""'::jsonb)
+              ON CONFLICT (key) DO UPDATE SET value = '""'::jsonb;
 
               -- S3 Bucket Type (public)
               INSERT INTO settings (key, value)
@@ -1431,7 +1703,7 @@ EOSQL_BRANDING2
               VALUES ('upload.s3.aws_default_region', '"us-east-1"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"us-east-1"'::jsonb;
 
-              -- S3 Endpoint (Supabase S3)
+              -- S3 Endpoint (Supabase S3 - NOTE: uses .storage. subdomain)
               INSERT INTO settings (key, value)
               VALUES ('upload.s3.endpoint', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb;
