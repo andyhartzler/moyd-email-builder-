@@ -858,6 +858,8 @@ EOSQL_BRANDING
         # ========================================
         # S3 STORAGE CONFIGURATION (Supabase)
         # ========================================
+        # IMPORTANT: upload.s3.url is the S3 API endpoint (where to send S3 requests)
+        # upload.s3.public_url is where files are served from (for public buckets)
         echo "☁️ Configuring S3 storage for Supabase..."
         PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_S3'
           SET search_path TO listmonk, extensions, public;
@@ -872,7 +874,7 @@ EOSQL_BRANDING
           VALUES ('upload.s3.bucket', '"listmonk-media"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"listmonk-media"'::jsonb;
 
-          -- S3 Bucket Path (empty to avoid path duplication)
+          -- S3 Bucket Path - MUST be empty to avoid path duplication
           INSERT INTO settings (key, value)
           VALUES ('upload.s3.bucket_path', '""'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '""'::jsonb;
@@ -882,12 +884,12 @@ EOSQL_BRANDING
           VALUES ('upload.s3.bucket_type', '"public"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"public"'::jsonb;
 
-          -- S3 Access Key ID
+          -- S3 Access Key ID (from Supabase Storage S3 settings)
           INSERT INTO settings (key, value)
           VALUES ('upload.s3.aws_access_key_id', '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb;
 
-          -- S3 Secret Access Key
+          -- S3 Secret Access Key (from Supabase Storage S3 settings)
           INSERT INTO settings (key, value)
           VALUES ('upload.s3.aws_secret_access_key', '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb;
@@ -897,14 +899,16 @@ EOSQL_BRANDING
           VALUES ('upload.s3.aws_default_region', '"us-east-1"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"us-east-1"'::jsonb;
 
-          -- S3 Endpoint (Supabase S3 - NOTE: uses .storage. subdomain)
+          -- S3 Backend URL - THIS IS THE S3 API ENDPOINT (NOT the public serving URL!)
+          -- Must use .storage. subdomain and end with /s3
+          -- This is where Listmonk sends S3 API requests (PutObject, etc.)
           INSERT INTO settings (key, value)
-          VALUES ('upload.s3.endpoint', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
+          VALUES ('upload.s3.url', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb;
 
-          -- S3 Public URL
+          -- S3 Public URL - Where uploaded files are served from (for embedding in emails)
           INSERT INTO settings (key, value)
-          VALUES ('upload.s3.url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb)
+          VALUES ('upload.s3.public_url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb)
           ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb;
 
           -- Logo URL from Supabase storage
@@ -1664,6 +1668,8 @@ EOSQL_BRANDING2
             # ========================================
             # S3 STORAGE CONFIGURATION (Supabase)
             # ========================================
+            # IMPORTANT: upload.s3.url is the S3 API endpoint (where to send S3 requests)
+            # upload.s3.public_url is where files are served from (for public buckets)
             echo "☁️ Configuring S3 storage for Supabase..."
             PGPASSWORD="${DB_PASSWORD}" PGSSLMODE="${DB_SSL_MODE:-require}" psql -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER}" -d "${DB_NAME}" <<-'EOSQL_S3_2'
               SET search_path TO listmonk, extensions, public;
@@ -1678,7 +1684,7 @@ EOSQL_BRANDING2
               VALUES ('upload.s3.bucket', '"listmonk-media"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"listmonk-media"'::jsonb;
 
-              -- S3 Bucket Path (empty to avoid path duplication)
+              -- S3 Bucket Path - MUST be empty to avoid path duplication
               INSERT INTO settings (key, value)
               VALUES ('upload.s3.bucket_path', '""'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '""'::jsonb;
@@ -1688,12 +1694,12 @@ EOSQL_BRANDING2
               VALUES ('upload.s3.bucket_type', '"public"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"public"'::jsonb;
 
-              -- S3 Access Key ID
+              -- S3 Access Key ID (from Supabase Storage S3 settings)
               INSERT INTO settings (key, value)
               VALUES ('upload.s3.aws_access_key_id', '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"5e472de71e10241068e2c13b76ddf2f8"'::jsonb;
 
-              -- S3 Secret Access Key
+              -- S3 Secret Access Key (from Supabase Storage S3 settings)
               INSERT INTO settings (key, value)
               VALUES ('upload.s3.aws_secret_access_key', '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"a6c023b9eec115152674a1ee2be24144919522592e3f79d6bc89ca057ca01040"'::jsonb;
@@ -1703,14 +1709,16 @@ EOSQL_BRANDING2
               VALUES ('upload.s3.aws_default_region', '"us-east-1"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"us-east-1"'::jsonb;
 
-              -- S3 Endpoint (Supabase S3 - NOTE: uses .storage. subdomain)
+              -- S3 Backend URL - THIS IS THE S3 API ENDPOINT (NOT the public serving URL!)
+              -- Must use .storage. subdomain and end with /s3
+              -- This is where Listmonk sends S3 API requests (PutObject, etc.)
               INSERT INTO settings (key, value)
-              VALUES ('upload.s3.endpoint', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
+              VALUES ('upload.s3.url', '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.storage.supabase.co/storage/v1/s3"'::jsonb;
 
-              -- S3 Public URL
+              -- S3 Public URL - Where uploaded files are served from (for embedding in emails)
               INSERT INTO settings (key, value)
-              VALUES ('upload.s3.url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb)
+              VALUES ('upload.s3.public_url', '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb)
               ON CONFLICT (key) DO UPDATE SET value = '"https://faajpcarasilbfndzkmd.supabase.co/storage/v1/object/public/listmonk-media"'::jsonb;
 
               -- Logo URL from Supabase storage
